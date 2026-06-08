@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>坂道系列 選拔名單</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#0e0818;color:#f0e6ff;min-height:100vh;}
+.top-bar{background:#090513;border-bottom:2px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;padding:0 12px;}
+.tab-wrap{display:flex;}
+.tab-btn{padding:13px 22px;font-size:.9rem;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;transition:all .22s;white-space:nowrap;}
+.tab-btn.nogi{color:#a855f7;}
+.tab-btn.nogi.active{color:#e9d5ff;border-bottom-color:#a855f7;background:rgba(168,85,247,.08);}
+.tab-btn.hinata{color:#38bdf8;}
+.tab-btn.hinata.active{color:#e0f2fe;border-bottom-color:#38bdf8;background:rgba(56,189,248,.08);}
+.tab-btn.sakura{color:#e2e8f0;}
+.tab-btn.sakura.active{color:#fff;border-bottom-color:#cbd5e1;background:rgba(203,213,225,.08);}
+.tab-btn:hover{opacity:.78;}
+.top-btns{display:flex;gap:6px;}
+.top-btn{background:rgba(148,163,184,.15);border:1px solid #475569;color:#94a3b8;padding:6px 14px;border-radius:7px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.top-btn:hover{background:rgba(148,163,184,.25);color:#e2e8f0;}
+.page{display:none;}
+.page.active{display:block;}
+.hdr{padding:18px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.hdr-nogi{background:linear-gradient(135deg,#6b21a8,#9333ea,#c026d3);}
+.hdr-hinata{background:linear-gradient(135deg,#0369a1,#0284c7,#38bdf8);}
+.hdr-sakura{background:linear-gradient(135deg,#334155,#475569,#94a3b8);}
+.hdr-keyaki{background:linear-gradient(135deg,#064e3b,#065f46,#047857);}
+.hdr h1{font-size:1.45rem;font-weight:700;letter-spacing:2px;color:#fff;}
+.ctrl{padding:12px 20px;border-bottom:1px solid #1e1e2e;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.ctrl-nogi{background:#180930;}
+.ctrl-hinata{background:#061825;}
+.ctrl-sakura{background:#0f1623;}
+.ctrl-keyaki{background:#071a12;}
+.ctrl input{flex:1;min-width:160px;padding:7px 12px;border-radius:8px;font-size:.88rem;outline:none;transition:border .2s;}
+.ctrl-nogi input{border:1px solid #4a2d7a;background:#0e0818;color:#f0e6ff;}
+.ctrl-nogi input::placeholder{color:#7c5cb0;}
+.ctrl-nogi input:focus{border-color:#a855f7;box-shadow:0 0 0 2px rgba(168,85,247,.22);}
+.ctrl-hinata input{border:1px solid #1e6ba0;background:#061825;color:#e0f2fe;}
+.ctrl-hinata input::placeholder{color:#4a90b8;}
+.ctrl-hinata input:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.2);}
+.ctrl-sakura input{border:1px solid #334155;background:#0f1623;color:#e2e8f0;}
+.ctrl-sakura input::placeholder{color:#64748b;}
+.ctrl-sakura input:focus{border-color:#94a3b8;box-shadow:0 0 0 2px rgba(148,163,184,.2);}
+.ctrl-keyaki input{border:1px solid #064e3b;background:#071a12;color:#d1fae5;}
+.ctrl-keyaki input::placeholder{color:#4a7c59;}
+.ctrl-keyaki input:focus{border-color:#059669;box-shadow:0 0 0 2px rgba(5,150,105,.2);}
+.sort-btns{display:flex;gap:5px;}
+.sort-btns button{padding:6px 13px;border-radius:8px;font-size:.8rem;cursor:pointer;transition:all .2s;background:transparent;}
+.ctrl-nogi .sort-btns button{border:1px solid #4a2d7a;color:#c084fc;}
+.ctrl-nogi .sort-btns button.active,.ctrl-nogi .sort-btns button:hover{background:#4a2d7a;color:#fff;border-color:#a855f7;}
+.ctrl-hinata .sort-btns button{border:1px solid #1e6ba0;color:#7dd3fc;}
+.ctrl-hinata .sort-btns button.active,.ctrl-hinata .sort-btns button:hover{background:#0c4a6e;color:#e0f2fe;border-color:#38bdf8;}
+.ctrl-sakura .sort-btns button{border:1px solid #334155;color:#94a3b8;}
+.ctrl-sakura .sort-btns button.active,.ctrl-sakura .sort-btns button:hover{background:#1e293b;color:#e2e8f0;border-color:#94a3b8;}
+.ctrl-keyaki .sort-btns button{border:1px solid #064e3b;color:#6ee7b7;}
+.ctrl-keyaki .sort-btns button.active,.ctrl-keyaki .sort-btns button:hover{background:#064e3b;color:#d1fae5;border-color:#059669;}
+.stats{padding:7px 20px;font-size:.79rem;border-bottom:1px solid #1e1e2e;}
+.stats-nogi{background:#180930;color:#9370c0;}
+.stats-nogi span{color:#c084fc;font-weight:700;}
+.stats-hinata{background:#061825;color:#4a90b8;}
+.stats-hinata span{color:#38bdf8;font-weight:700;}
+.stats-sakura{background:#0f1623;color:#64748b;}
+.stats-sakura span{color:#94a3b8;font-weight:700;}
+.stats-keyaki{background:#071a12;color:#4a7c59;}
+.stats-keyaki span{color:#6ee7b7;font-weight:700;}
+.fbar{display:none;padding:8px 20px;}
+.fbox{border-radius:8px;padding:7px 14px;font-size:.8rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.fbox-nogi{background:rgba(251,191,36,.08);border:1px solid #fbbf24;color:#fde68a;}
+.fbox-hinata{background:rgba(56,189,248,.08);border:1px solid #38bdf8;color:#bae6fd;}
+.fbox-sakura{background:rgba(148,163,184,.08);border:1px solid #94a3b8;color:#e2e8f0;}
+.fbox-keyaki{background:rgba(5,150,105,.08);border:1px solid #059669;color:#a7f3d0;}
+.fbox strong{color:#fff;}
+.clear-btn{border:none;border-radius:5px;padding:2px 9px;font-size:.76rem;cursor:pointer;font-weight:700;margin-left:auto;}
+.clear-nogi{background:#fbbf24;color:#0e0818;}
+.clear-hinata{background:#38bdf8;color:#061825;}
+.clear-sakura{background:#94a3b8;color:#0f1623;}
+.clear-keyaki{background:#059669;color:#071a12;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:7px 20px 5px;font-size:.75rem;}
+.ld{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle;}
+.grid{padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(305px,1fr));gap:12px;}
+.card{border-radius:12px;padding:14px;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
+.card:hover{transform:translateY(-2px);}
+.card-nogi{background:#180930;border:1px solid #2a1250;}
+.card-nogi:hover{box-shadow:0 6px 22px rgba(147,51,234,.18);}
+.card-hinata{background:#0a2540;border:1px solid #0e4070;}
+.card-hinata:hover{box-shadow:0 6px 22px rgba(56,189,248,.1);}
+.card-sakura{background:#0f1f35;border:1px solid #1e3050;}
+.card-sakura:hover{box-shadow:0 6px 22px rgba(148,163,184,.1);}
+.card-keyaki{background:#071a12;border:1px solid #064e3b;}
+.card-keyaki:hover{box-shadow:0 6px 22px rgba(5,150,105,.15);}
+.card-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;}
+.badge{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;color:#fff;}
+.badge-nogi{background:linear-gradient(135deg,#6b21a8,#9333ea);}
+.badge-hinata{background:linear-gradient(135deg,#0369a1,#0284c7);}
+.badge-sakura{background:linear-gradient(135deg,#334155,#475569);}
+.badge-keyaki{background:linear-gradient(135deg,#064e3b,#047857);}
+.card-title{font-size:.95rem;font-weight:700;line-height:1.3;}
+.card-nogi .card-title{color:#e9d5ff;}
+.card-hinata .card-title{color:#e0f2fe;}
+.card-sakura .card-title{color:#e2e8f0;}
+.card-keyaki .card-title{color:#d1fae5;}
+.card-zh{font-size:.75rem;margin-bottom:5px;}
+.card-nogi .card-zh{color:#9370c0;}
+.card-hinata .card-zh{color:#4a90b8;}
+.card-sakura .card-zh{color:#64748b;}
+.card-keyaki .card-zh{color:#4a7c59;}
+.card-meta{font-size:.74rem;margin-bottom:9px;}
+.card-nogi .card-meta{color:#9370c0;}
+.card-hinata .card-meta{color:#4a90b8;}
+.card-sakura .card-meta{color:#64748b;}
+.card-keyaki .card-meta{color:#4a7c59;}
+.row-label{font-size:.68rem;font-weight:700;letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;}
+.rl-nogi{color:#c084fc;}
+.rl-hinata{color:#38bdf8;}
+.rl-sakura{color:#94a3b8;}
+.rl-keyaki{color:#6ee7b7;}
+.members{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.tag{font-size:.76rem;padding:3px 8px;border-radius:20px;cursor:pointer;transition:opacity .15s;}
+.tag:hover{opacity:.7;}
+.nf{background:rgba(168,85,247,.18);border:1px solid #9333ea;color:#e9d5ff;}
+.nc{background:rgba(236,72,153,.3);border:2px solid #ec4899;color:#fff;font-weight:700;}
+.nb{background:rgba(99,102,241,.14);border:1px solid #6366f1;color:#c7d2fe;}
+.hcenter{background:rgba(56,189,248,.42);border:2px solid #7dd3fc;color:#fff;font-weight:700;}
+.hm{background:rgba(56,189,248,.15);border:1px solid #0284c7;color:#bae6fd;}
+.hb{background:rgba(14,116,144,.13);border:1px solid #0e7490;color:#a5f3fc;}
+.hback{background:rgba(6,78,59,.13);border:1px solid #065f46;color:#99f6e4;}
+.scenter{background:rgba(255,255,255,.25);border:2px solid #e2e8f0;color:#fff;font-weight:700;}
+.sr1{background:rgba(148,163,184,.18);border:1px solid #64748b;color:#e2e8f0;}
+.sr2{background:rgba(100,116,139,.13);border:1px solid #475569;color:#cbd5e1;}
+.sr3{background:rgba(71,85,105,.12);border:1px solid #334155;color:#94a3b8;}
+.kcenter{background:rgba(110,231,183,.4);border:2px solid #6ee7b7;color:#fff;font-weight:700;}
+.km{background:rgba(5,150,105,.18);border:1px solid #059669;color:#a7f3d0;}
+.kb{background:rgba(4,120,87,.14);border:1px solid #047857;color:#6ee7b7;}
+.kback{background:rgba(6,78,59,.12);border:1px solid #065f46;color:#34d399;}
+.tag.hl{background:rgba(251,191,36,.25)!important;border-color:#fbbf24!important;color:#fde68a!important;font-weight:700!important;}
+.card-footer{margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:flex-end;}
+.card-edit-btn{padding:5px 14px;border-radius:7px;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid;}
+.card-nogi .card-edit-btn{background:rgba(168,85,247,.12);border-color:#6b21a8;color:#c084fc;}
+.card-nogi .card-edit-btn:hover{background:rgba(168,85,247,.25);color:#e9d5ff;}
+.card-hinata .card-edit-btn{background:rgba(56,189,248,.1);border-color:#0284c7;color:#7dd3fc;}
+.card-hinata .card-edit-btn:hover{background:rgba(56,189,248,.22);color:#e0f2fe;}
+.card-sakura .card-edit-btn{background:rgba(148,163,184,.1);border-color:#475569;color:#94a3b8;}
+.card-sakura .card-edit-btn:hover{background:rgba(148,163,184,.22);color:#e2e8f0;}
+.card-keyaki .card-edit-btn{background:rgba(5,150,105,.1);border-color:#047857;color:#6ee7b7;}
+.card-keyaki .card-edit-btn:hover{background:rgba(5,150,105,.22);color:#d1fae5;}
+.no-results{text-align:center;padding:60px;color:#7c5cb0;}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;overflow-y:auto;padding:20px;}
+.modal.open{display:flex;align-items:flex-start;justify-content:center;}
+.modal-box{background:#1a1230;border:1px solid #4a2d7a;border-radius:14px;padding:24px;width:100%;max-width:680px;margin:auto;}
+.modal-box h2{font-size:1rem;font-weight:700;color:#e9d5ff;margin-bottom:4px;}
+.modal-sub{font-size:.78rem;color:#7c5cb0;margin-bottom:14px;}
+.mtabs{display:flex;border-bottom:1px solid #2a1250;margin-bottom:16px;}
+.mtab{padding:8px 18px;font-size:.82rem;cursor:pointer;border:none;background:transparent;color:#7c5cb0;border-bottom:2px solid transparent;}
+.mtab.active{color:#e9d5ff;border-bottom-color:#a855f7;}
+.mtab:hover{color:#c084fc;}
+.mtab-c{display:none;}
+.mtab-c.active{display:block;}
+.mg{border:1px solid #2a1250;border-radius:10px;padding:14px;margin-bottom:14px;}
+.mg h3{font-size:.8rem;color:#c084fc;font-weight:700;margin-bottom:10px;}
+.mr{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;}
+.mr label{font-size:.76rem;color:#9370c0;font-weight:600;}
+.mr input,.mr textarea,.mr select{background:#0e0818;border:1px solid #4a2d7a;border-radius:8px;color:#f0e6ff;padding:7px 10px;font-size:.84rem;outline:none;width:100%;}
+.mr input:focus,.mr textarea:focus{border-color:#a855f7;}
+.mr textarea{resize:vertical;min-height:58px;font-family:monospace;}
+.mhint{font-size:.71rem;color:#7c5cb0;margin-top:2px;}
+.mbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.btn-save{background:linear-gradient(135deg,#6b21a8,#9333ea);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:.85rem;cursor:pointer;font-weight:700;}
+.btn-save:hover{opacity:.85;}
+.btn-cancel{background:transparent;border:1px solid #4a2d7a;color:#c084fc;border-radius:8px;padding:8px 18px;font-size:.85rem;cursor:pointer;}
+.btn-cancel:hover{background:#2a1250;}
+.mmsg{padding:7px 11px;border-radius:7px;font-size:.79rem;margin-top:8px;display:none;}
+.mmsg.ok{background:rgba(34,197,94,.12);border:1px solid #22c55e;color:#86efac;}
+.mmsg.err{background:rgba(239,68,68,.12);border:1px solid #ef4444;color:#fca5a5;}
+.manage-list{max-height:260px;overflow-y:auto;border:1px solid #2a1250;border-radius:8px;margin-bottom:10px;}
+.manage-item{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid #1e0d3a;font-size:.8rem;}
+.manage-item:last-child{border-bottom:none;}
+.manage-item:hover{background:#1e0d3a;}
+.manage-item span{color:#c084fc;}
+.del-btn{background:rgba(239,68,68,.12);border:1px solid #ef4444;color:#fca5a5;border-radius:5px;padding:3px 10px;font-size:.76rem;cursor:pointer;}
+.del-btn:hover{background:rgba(239,68,68,.25);}
+/* 排行榜側邊面板 */
+#rank-panel{display:none;position:fixed;top:0;right:0;width:300px;height:100vh;background:#130825;border-left:2px solid #2a1250;z-index:900;flex-direction:column;box-shadow:-6px 0 24px rgba(0,0,0,.5);}
+#rank-panel.open{display:flex;}
+#rank-panel-body{overflow-y:auto;flex:1;}
+.rank-row{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);}
+.rank-row:hover{background:rgba(255,255,255,.025);}
+.rank-pos{width:32px;text-align:center;font-size:.85rem;flex-shrink:0;}
+.rank-bar{width:4px;height:28px;border-radius:2px;flex-shrink:0;margin:0 8px;}
+.rank-name{flex:1;font-size:.82rem;font-weight:700;}
+.rank-ctr{width:44px;text-align:center;font-size:.85rem;font-weight:700;}
+.rank-sel{width:44px;text-align:center;font-size:.78rem;color:#94a3b8;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="tab-wrap">
+    <button class="tab-btn nogi active" onclick="switchGroup('nogi')">🟣 乃木坂46</button>
+    <button class="tab-btn hinata" onclick="switchGroup('hinata')">🔵 日向坂46</button>
+    <button class="tab-btn sakura" onclick="switchGroup('sakura')">⬜ 櫻坂46</button>
+  </div>
+  <div class="top-btns">
+    <button class="top-btn" onclick="openAddModal()">＋ 新增單曲</button>
+    <button class="top-btn" onclick="openManageModal()">🗑 刪除</button>
+    <button class="top-btn" onclick="toggleRankPanel()">🏆 排行榜</button>
+  </div>
+</div>
+
+<!-- 乃木坂 -->
+<div class="page active" id="page-nogi">
+  <div class="hdr hdr-nogi"><h1>乃木坂46 歷屆單曲選拔名單</h1></div>
+  <div class="ctrl ctrl-nogi">
+    <input type="text" id="nogi-search" placeholder="🔍 搜尋曲名、成員名…">
+    <div class="sort-btns">
+      <button class="active" id="nd" onclick="setSort('nogi','desc')">最新優先</button>
+      <button id="na" onclick="setSort('nogi','asc')">最舊優先</button>
+    </div>
+  </div>
+  <div class="stats stats-nogi" id="stats-nogi">顯示 <span id="nc">41</span> / 41 張單曲</div>
+  <div class="fbar" id="nogi-fbar"><div class="fbox fbox-nogi">📌 篩選：<strong id="nogi-fn"></strong><span id="nogi-fc" style="font-size:.78rem;opacity:.85;"></span><button class="clear-btn clear-nogi" onclick="clearFilter('nogi')">✕ 清除</button></div></div>
+  <div class="legend" style="color:#9370c0;"><span><span class="ld" style="background:#ec4899"></span>★ Center</span><span><span class="ld" style="background:#9333ea"></span>福神</span><span><span class="ld" style="background:#6366f1"></span>後排</span></div>
+  <div class="grid" id="nogi-grid"></div>
+  <div class="no-results" id="nogi-none" style="display:none">😔 找不到符合條件的結果</div>
+</div>
+
+<!-- 日向坂 -->
+<div class="page" id="page-hinata">
+  <div class="hdr hdr-hinata"><h1>日向坂46 歷屆單曲選拔名單</h1></div>
+  <div class="ctrl ctrl-hinata">
+    <input type="text" id="hinata-search" placeholder="🔍 搜尋曲名、成員名…">
+    <div class="sort-btns">
+      <button class="active" id="hd" onclick="setSort('hinata','desc')">最新優先</button>
+      <button id="ha" onclick="setSort('hinata','asc')">最舊優先</button>
+    </div>
+  </div>
+  <div class="stats stats-hinata" id="stats-hinata">顯示 <span id="hc">17</span> / 17 張單曲</div>
+  <div class="fbar" id="hinata-fbar"><div class="fbox fbox-hinata">📌 篩選：<strong id="hinata-fn"></strong><span id="hinata-fc" style="font-size:.78rem;opacity:.85;"></span><button class="clear-btn clear-hinata" onclick="clearFilter('hinata')">✕ 清除</button></div></div>
+  <div class="legend" style="color:#4a90b8;"><span><span class="ld" style="background:#7dd3fc"></span>★ Center</span><span><span class="ld" style="background:#0284c7"></span>前排</span><span><span class="ld" style="background:#0e7490"></span>中排</span><span><span class="ld" style="background:#065f46"></span>後排</span></div>
+  <div class="grid" id="hinata-grid"></div>
+  <div class="no-results" id="hinata-none" style="display:none">😔 找不到符合條件的結果</div>
+</div>
+
+<!-- 櫻坂 -->
+<div class="page" id="page-sakura">
+  <div class="hdr hdr-sakura"><h1>櫻坂46 歷屆單曲選拔名單</h1></div>
+  <div class="ctrl ctrl-sakura">
+    <input type="text" id="sakura-search" placeholder="🔍 搜尋曲名、成員名…">
+    <div class="sort-btns">
+      <button class="active" id="sd" onclick="setSort('sakura','desc')">最新優先</button>
+      <button id="sa" onclick="setSort('sakura','asc')">最舊優先</button>
+    </div>
+  </div>
+  <div class="stats stats-sakura" id="stats-sakura">顯示 <span id="sc">15</span> / 15 張單曲</div>
+  <div class="fbar" id="sakura-fbar"><div class="fbox fbox-sakura">📌 篩選：<strong id="sakura-fn"></strong><span id="sakura-fc" style="font-size:.78rem;opacity:.85;"></span><button class="clear-btn clear-sakura" onclick="clearFilter('sakura')">✕ 清除</button></div></div>
+  <div class="legend" style="color:#64748b;"><span><span class="ld" style="background:#e2e8f0"></span>★ Center</span><span><span class="ld" style="background:#64748b"></span>前排</span><span><span class="ld" style="background:#475569"></span>中排</span><span><span class="ld" style="background:#334155"></span>後排</span></div>
+  <div class="grid" id="sakura-grid"></div>
+  <div class="no-results" id="sakura-none" style="display:none">😔 找不到符合條件的結果</div>
+  <div class="hdr hdr-keyaki" style="margin-top:24px;"><h1>欅坂46 歷屆單曲選拔名單</h1></div>
+  <div class="ctrl ctrl-keyaki">
+    <input type="text" id="keyaki-search" placeholder="🔍 搜尋曲名、成員名…">
+    <div class="sort-btns">
+      <button class="active" id="kd" onclick="setSort('keyaki','desc')">最新優先</button>
+      <button id="ka" onclick="setSort('keyaki','asc')">最舊優先</button>
+    </div>
+  </div>
+  <div class="stats stats-keyaki" id="stats-keyaki">顯示 <span id="kc">8</span> / 8 張單曲</div>
+  <div class="fbar" id="keyaki-fbar"><div class="fbox fbox-keyaki">📌 篩選：<strong id="keyaki-fn"></strong><span id="keyaki-fc" style="font-size:.78rem;opacity:.85;"></span><button class="clear-btn clear-keyaki" onclick="clearFilter('keyaki')">✕ 清除</button></div></div>
+  <div class="legend" style="color:#4a7c59;"><span><span class="ld" style="background:#6ee7b7"></span>★ Center</span><span><span class="ld" style="background:#059669"></span>前排</span><span><span class="ld" style="background:#047857"></span>中排</span><span><span class="ld" style="background:#065f46"></span>後排</span></div>
+  <div class="grid" id="keyaki-grid"></div>
+  <div class="no-results" id="keyaki-none" style="display:none">😔 找不到符合條件的結果</div>
+</div>
+
+<!-- 排行榜側邊面板 -->
+<div id="rank-panel">
+  <div style="padding:14px 16px;border-bottom:1px solid #2a1250;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div>
+      <div style="font-size:.95rem;font-weight:700;color:#e9d5ff;">🏆 Center 排行榜</div>
+      <div style="font-size:.72rem;color:#7c5cb0;margin-top:2px;">四坂合計・依 Center 次數排序</div>
+    </div>
+    <button onclick="toggleRankPanel()" style="background:transparent;border:1px solid #4a2d7a;color:#c084fc;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;">✕</button>
+  </div>
+  <div style="display:flex;padding:6px 10px;border-bottom:1px solid #2a1250;flex-shrink:0;">
+    <div style="width:32px;font-size:.68rem;color:#6b5c8a;text-align:center;"></div>
+    <div style="width:20px;"></div>
+    <div style="flex:1;font-size:.68rem;color:#6b5c8a;padding-left:4px;">成員</div>
+    <div style="width:44px;font-size:.68rem;color:#a855f7;text-align:center;">C次數</div>
+    <div style="width:44px;font-size:.68rem;color:#6b5c8a;text-align:center;">選拔</div>
+  </div>
+  <div id="rank-panel-body"></div>
+</div>
+
+<!-- 新增 Modal -->
+<div class="modal" id="addModal">
+  <div class="modal-box">
+    <h2>＋ 新增單曲</h2>
+    <div class="mg">
+      <h3>基本資訊</h3>
+      <div class="mr"><label>團體</label>
+        <select id="a-group" onchange="toggleAddSec()">
+          <option value="nogi">乃木坂46</option>
+          <option value="hinata">日向坂46</option>
+          <option value="sakura">櫻坂46</option>
+        </select>
+      </div>
+      <div class="mr"><label>單曲編號</label><input type="number" id="a-num" placeholder="例：42"></div>
+      <div class="mr"><label>曲名（日文）</label><input type="text" id="a-title"></div>
+      <div class="mr"><label>曲名（中文）</label><input type="text" id="a-zh"></div>
+      <div class="mr"><label>發行日期</label><input type="text" id="a-date" placeholder="例：2027年1月1日"></div>
+      <div class="mr"><label>Center（多人用逗號分隔）</label><input type="text" id="a-center"></div>
+    </div>
+    <div class="mg" id="a-nogi-sec">
+      <h3>乃木坂 — 選拔名單</h3>
+      <div class="mr"><label>福神成員（逗號分隔）</label><textarea id="a-fukujin"></textarea></div>
+      <div class="mr"><label>後排選拔（逗號分隔）</label><textarea id="a-back"></textarea></div>
+    </div>
+    <div class="mg" id="a-rows-sec" style="display:none">
+      <h3 id="a-rows-title">成員隊形</h3>
+      <div class="mr"><label>後排</label><textarea id="a-row0"></textarea></div>
+      <div class="mr"><label>中排</label><textarea id="a-row1"></textarea></div>
+      <div class="mr"><label>前排</label><textarea id="a-row2"></textarea></div>
+    </div>
+    <div id="a-msg" class="mmsg"></div>
+    <div class="mbtns">
+      <button class="btn-save" onclick="doAdd()">✚ 新增</button>
+      <button class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <h2 id="e-header">編輯單曲</h2>
+    <div class="modal-sub" id="e-sub"></div>
+    <div class="mtabs">
+      <button class="mtab active" onclick="switchMtab('info')">基本資訊</button>
+      <button class="mtab" onclick="switchMtab('members')">成員名單</button>
+    </div>
+    <div class="mtab-c active" id="mtab-info">
+      <div class="mg">
+        <div class="mr"><label>曲名（日文）</label><input type="text" id="e-title"></div>
+        <div class="mr"><label>曲名（中文）</label><input type="text" id="e-zh"></div>
+        <div class="mr"><label>發行日期</label><input type="text" id="e-date"></div>
+        <div class="mr"><label>Center（多人用逗號分隔）</label><input type="text" id="e-center"></div>
+      </div>
+    </div>
+    <div class="mtab-c" id="mtab-members">
+      <div class="mg" id="e-nogi-sec">
+        <h3>乃木坂 — 選拔名單</h3>
+        <div class="mr"><label>福神成員（逗號分隔）</label><textarea id="e-fukujin"></textarea><div class="mhint">★ Center 標注自動更新</div></div>
+        <div class="mr"><label>後排選拔（逗號分隔）</label><textarea id="e-back"></textarea></div>
+      </div>
+      <div class="mg" id="e-rows-sec" style="display:none">
+        <h3 id="e-rows-title">成員隊形</h3>
+        <div class="mr"><label>後排</label><textarea id="e-row0"></textarea></div>
+        <div class="mr"><label>中排</label><textarea id="e-row1"></textarea></div>
+        <div class="mr"><label>前排</label><textarea id="e-row2"></textarea></div>
+      </div>
+    </div>
+    <div id="e-msg" class="mmsg"></div>
+    <div class="mbtns">
+      <button class="btn-save" onclick="doSaveEdit()">💾 儲存</button>
+      <button class="btn-cancel" onclick="closeModal('editModal')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除 Modal -->
+<div class="modal" id="manageModal">
+  <div class="modal-box">
+    <h2>🗑 刪除自訂單曲</h2>
+    <div class="modal-sub">只有透過「新增單曲」加入的資料可在此刪除</div>
+    <div class="mr" style="margin-bottom:12px;"><label>選擇團體</label>
+      <select id="m-group" onchange="refreshManageList()">
+        <option value="nogi">乃木坂46</option>
+        <option value="hinata">日向坂46</option>
+        <option value="sakura">櫻坂46</option>
+      </select>
+    </div>
+    <div class="manage-list" id="manage-list"></div>
+    <div id="m-msg" class="mmsg"></div>
+    <div class="mbtns"><button class="btn-cancel" onclick="closeModal('manageModal')">關閉</button></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// 排行榜（最頂端宣告，HTML onclick 能找到）
+// ══════════════════════════════════════════
+let rankPanelOpen=false;
+
+function toggleRankPanel(){
+  rankPanelOpen=!rankPanelOpen;
+  const p=document.getElementById('rank-panel');
+  if(rankPanelOpen){p.classList.add('open');buildRankTable();}
+  else p.classList.remove('open');
+}
+
+function buildRankTable(){
+  const groups=['nogi','hinata','sakura','keyaki'];
+  const barColor={nogi:'#9333ea',hinata:'#0284c7',sakura:'#ffffff',keyaki:'#059669'};
+  const topColors={1:'#fbbf24',2:'#94a3b8',3:'#d97706'};
+  const medals={1:'🥇',2:'🥈',3:'🥉'};
+
+  // ── 統計 ──
+  // center 次數：只看 center 欄位
+  // 選拔次數：三排成員去重，center 不在三排裡也補入
+  const ctrMap={};  // name -> {g -> count}
+  const selMap={};  // name -> {g -> count}
+
+  groups.forEach(g=>{
+    getData(g).forEach(d=>{
+      // center
+      (d.center||[]).forEach(name=>{
+        if(!ctrMap[name])ctrMap[name]={};
+        ctrMap[name][g]=(ctrMap[name][g]||0)+1;
+      });
+      // 選拔
+      const allM=d.fukujin?[...(d.fukujin||[]),...(d.back||[])]:d.rows.flat();
+      const selSet=new Set([...allM,...(d.center||[])]);
+      selSet.forEach(name=>{
+        if(!selMap[name])selMap[name]={};
+        selMap[name][g]=(selMap[name][g]||0)+1;
+      });
+    });
+  });
+
+  // 合併成排行榜列
+  const allNames=new Set([...Object.keys(ctrMap)]);
+  const rows=[];
+  allNames.forEach(name=>{
+    const totalCtr=Object.values(ctrMap[name]||{}).reduce((a,b)=>a+b,0);
+    const totalSel=Object.values(selMap[name]||{}).reduce((a,b)=>a+b,0);
+    const mainGroup=groups.reduce((best,g)=>{
+      return (selMap[name]?.[g]||0)>=(selMap[name]?.[best]||0)?g:best;
+    },groups[0]);
+    rows.push({name,totalCtr,totalSel,mainGroup});
+  });
+  rows.sort((a,b)=>b.totalCtr-a.totalCtr||b.totalSel-a.totalSel);
+
+  // 並列名次
+  let rank=0,prevCtr=-1,prevSel=-1,i=0;
+  const body=document.getElementById('rank-panel-body');
+  body.innerHTML='';
+  rows.forEach(r=>{
+    i++;
+    if(r.totalCtr!==prevCtr||r.totalSel!==prevSel){rank=i;prevCtr=r.totalCtr;prevSel=r.totalSel;}
+    const medal=medals[rank]||(rank<=10?String(rank):'');
+    const nameColor=topColors[rank]||'#fff';
+    const ctrColor=topColors[rank]||'#c084fc';
+    const row=document.createElement('div');
+    row.className='rank-row';
+    row.innerHTML=
+      '<div class="rank-pos">'+medal+'</div>'
+      +'<div class="rank-bar" style="background:'+barColor[r.mainGroup]+'"></div>'
+      +'<div class="rank-name" style="color:'+nameColor+'">'+r.name+'</div>'
+      +'<div class="rank-ctr" style="color:'+ctrColor+'">'+r.totalCtr+'</div>'
+      +'<div class="rank-sel">'+r.totalSel+'</div>';
+    body.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════
+// 資料
+// ══════════════════════════════════════════
+const nogiBase=[
+  {num:41,title:"最後に階段を駆け上がったのはいつだ？",zh:"最後一次奔上階梯是何時？",date:"2026年4月8日",total:16,center:["池田瑛紗"],fukujin:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","中西アルノ"],fukujinLabel:["五百城茉央","池田瑛紗（初center）","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","中西アルノ"],back:["小川彩","菅原咲月","田村真佑","筒井あやめ","冨里奈央","林瑠奈","弓木奈於"]},
+  {num:40,title:"ビリヤニ",zh:"印度香飯",date:"2025年11月26日",total:16,center:["瀬戸口心月","矢田萌華"],fukujin:["池田瑛紗","一ノ瀬美空","井上和","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","瀬戸口心月","矢田萌華"],fukujinLabel:["池田瑛紗","一ノ瀬美空","井上和","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","瀬戸口心月（初W-center）","矢田萌華（初W-center）"],back:["梅澤美波","小川彩","岡本姫奈","菅原咲月","筒井あやめ","中西アルノ","弓木奈於"]},
+  {num:39,title:"Same numbers",zh:"Same numbers",date:"2025年7月30日",total:16,center:["賀喜遥香"],fukujin:["池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","中西アルノ"],fukujinLabel:["池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香（center）","川﨑桜","久保史緒里","中西アルノ"],back:["五百城茉央","小川彩","岡本姫奈","菅原咲月","筒井あやめ","冨里奈央","弓木奈於"]},
+  {num:38,title:"ネーブルオレンジ",zh:"臍橙",date:"2025年3月26日",total:19,center:["井上和","中西アルノ"],fukujin:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","中西アルノ"],fukujinLabel:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和（W-center）","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","中西アルノ（W-center）"],back:["小川彩","奥田いろは","金川沙耶","菅原咲月","田村真佑","筒井あやめ","冨里奈央","林瑠奈","弓木奈於"]},
+  {num:37,title:"歩道橋",zh:"步道橋",date:"2024年12月11日",total:19,center:["遠藤さくら"],fukujin:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","中西アルノ","与田祐希"],fukujinLabel:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","梅澤美波","遠藤さくら（center）","賀喜遥香","川﨑桜","久保史緒里","中西アルノ","与田祐希"],back:["岩本蓮加","小川彩","奥田いろは","金川沙耶","田村真佑","筒井あやめ","林瑠奈","弓木奈於"]},
+  {num:36,title:"チートデイ",zh:"放縱日",date:"2024年8月21日",total:19,center:["井上和"],fukujin:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","岩本蓮加","梅澤美波","遠藤さくら","小川彩","賀喜遥香","久保史緒里","与田祐希"],fukujinLabel:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和（center）","岩本蓮加","梅澤美波","遠藤さくら","小川彩（初福神）","賀喜遥香","久保史緒里","与田祐希"],back:["金川沙耶","川﨑桜","菅原咲月","田村真佑","筒井あやめ","冨里奈央","中西アルノ","弓木奈於"]},
+  {num:35,title:"チャンスは平等",zh:"機會平等",date:"2024年4月10日",total:20,center:["山下美月"],fukujin:["井上和","岩本蓮加","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","田村真佑","山下美月","弓木奈於","与田祐希"],fukujinLabel:["井上和","岩本蓮加","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","田村真佑","山下美月（center）","弓木奈於（初福神）","与田祐希"],back:["五百城茉央","池田瑛紗","一ノ瀬美空","伊藤理々杏","阪口珠美","佐藤楓","中村麗乃","向井葉月","吉田綾乃クリスティー"]},
+  {num:34,title:"Monopoly",zh:"Monopoly",date:"2023年12月6日",total:20,center:["遠藤さくら","賀喜遥香"],fukujin:["池田瑛紗","井上和","岩本蓮加","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","田村真佑","山下美月","与田祐希"],fukujinLabel:["池田瑛紗（初福神）","井上和","岩本蓮加","梅澤美波","遠藤さくら（W-center）","賀喜遥香（W-center）","川﨑桜","久保史緒里","田村真佑","山下美月","与田祐希"],back:["五百城茉央","一ノ瀬美空","黒見明香","柴田柚菜","菅原咲月","冨里奈央","筒井あやめ","向井葉月","弓木奈於"]},
+  {num:33,title:"おひとりさま天国",zh:"獨自一人的天堂",date:"2023年8月23日",total:20,center:["井上和"],fukujin:["五百城茉央","一ノ瀬美空","井上和","岩本蓮加","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","田村真佑","山下美月","与田祐希"],fukujinLabel:["五百城茉央（初福神）","一ノ瀬美空（初福神）","井上和（初center）","岩本蓮加","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","田村真佑","山下美月","与田祐希"],back:["池田瑛紗","伊藤理々杏","金川沙耶","川﨑桜","柴田柚菜","菅原咲月","筒井あやめ","中村麗乃","弓木奈於"]},
+  {num:32,title:"人は夢を二度見る",zh:"人們終將再度追夢",date:"2023年3月29日",total:20,center:["久保史緒里","山下美月"],fukujin:["井上和","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜","久保史緒里","菅原咲月","田村真佑","筒井あやめ","山下美月","与田祐希"],fukujinLabel:["井上和（初福神）","梅澤美波","遠藤さくら","賀喜遥香","川﨑桜（初福神）","久保史緒里（W-center）","菅原咲月（初福神）","田村真佑","筒井あやめ","山下美月（W-center）","与田祐希"],back:["五百城茉央","一ノ瀬美空","岩本蓮加","金川沙耶","佐藤璃果","柴田柚菜","早川聖来","松尾美佑","弓木奈於"]},
+  {num:31,title:"ここにはないもの",zh:"不存在於此的事物",date:"2022年12月7日",total:18,center:["齋藤飛鳥"],fukujin:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香","金川沙耶","久保史緒里","齋藤飛鳥","鈴木絢音","田村真佑","山下美月","与田祐希"],fukujinLabel:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香","金川沙耶（初福神）","久保史緒里","齋藤飛鳥（center）","鈴木絢音（初福神）","田村真佑","山下美月","与田祐希"],back:["岩本蓮加","阪口珠美","柴田柚菜","筒井あやめ","早川聖来","林瑠奈","弓木奈於"]},
+  {num:30,title:"好きというのはロックだぜ！",zh:"喜歡是件搖滾的事！",date:"2022年8月30日",total:19,center:["賀喜遥香"],fukujin:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","齋藤飛鳥","田村真佑","筒井あやめ","山下美月","与田祐希"],fukujinLabel:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香（center）","久保史緒里","齋藤飛鳥","田村真佑（初福神）","筒井あやめ","山下美月","与田祐希"],back:["岩本蓮加","掛橋沙耶香","金川沙耶","佐藤楓","柴田柚菜","鈴木絢音","清宮レイ","樋口日奈","弓木奈於"]},
+  {num:29,title:"Actually...",zh:"Actually…",date:"2022年3月23日",total:18,center:["中西アルノ"],fukujin:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","齋藤飛鳥","筒井あやめ","中西アルノ","山下美月","与田祐希"],fukujinLabel:["秋元真夏","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","齋藤飛鳥","筒井あやめ","中西アルノ（初center・初福神）","山下美月","与田祐希"],back:["岩本蓮加","掛橋沙耶香","柴田柚菜","鈴木絢音","清宮レイ","田村真佑","早川聖来","樋口日奈"]},
+  {num:28,title:"君に叱られた",zh:"被你罵了",date:"2021年9月22日",total:21,center:["賀喜遥香"],fukujin:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら","賀喜遥香","久保史緒里","齋藤飛鳥","高山一実","筒井あやめ","星野みなみ","山下美月","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら","賀喜遥香（center）","久保史緒里","齋藤飛鳥","高山一実","筒井あやめ","星野みなみ","山下美月","与田祐希"],back:["岩本蓮加","掛橋沙耶香","北野日奈子","新内眞衣","鈴木絢音","清宮レイ","田村真佑","早川聖来","樋口日奈"]},
+  {num:27,title:"ごめんねFingers crossed",zh:"對不起Fingers crossed",date:"2021年6月9日",total:20,center:["遠藤さくら"],fukujin:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら","大園桃子","賀喜遥香","久保史緒里","齋藤飛鳥","星野みなみ","松村沙友理","山下美月","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら（center）","大園桃子","賀喜遥香","久保史緒里","齋藤飛鳥","星野みなみ","松村沙友理","山下美月","与田祐希"],back:["岩本蓮加","新内眞衣","清宮レイ","高山一実","田村真佑","筒井あやめ","早川聖来","樋口日奈"]},
+  {num:26,title:"僕は僕を好きになる",zh:"我會喜歡上自己的",date:"2021年1月27日",total:19,center:["山下美月"],fukujin:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら","大園桃子","賀喜遥香","久保史緒里","齋藤飛鳥","堀未央奈","松村沙友理","山下美月","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","梅澤美波","遠藤さくら","大園桃子","賀喜遥香","久保史緒里","齋藤飛鳥","堀未央奈","松村沙友理","山下美月（初center）","与田祐希"],back:["岩本蓮加","新内眞衣","清宮レイ","高山一実","田村真佑","筒井あやめ","星野みなみ"]},
+  {num:25,title:"しあわせの保護色",zh:"幸福的保護色",date:"2020年3月25日",total:22,center:["白石麻衣"],fukujin:["秋元真夏","生田絵梨花","井上小百合","齋藤飛鳥","白石麻衣","高山一実","中田花奈","樋口日奈","星野みなみ","松村沙友理","和田まあや"],fukujinLabel:["秋元真夏","生田絵梨花","井上小百合","齋藤飛鳥","白石麻衣（center）","高山一実","中田花奈","樋口日奈（初福神）","星野みなみ","松村沙友理","和田まあや（初福神）"],back:["岩本蓮加","梅澤美波","遠藤さくら","大園桃子","賀喜遥香","北野日奈子","久保史緒里","新内眞衣","堀未央奈","山下美月","与田祐希"]},
+  {num:24,title:"夜明けまで強がらなくてもいい",zh:"黎明來臨前無須逞強",date:"2019年9月4日",total:18,center:["遠藤さくら"],fukujin:["生田絵梨花","遠藤さくら","賀喜遥香","齋藤飛鳥","桜井玲香","白石麻衣","筒井あやめ","堀未央奈","松村沙友理","与田祐希"],fukujinLabel:["生田絵梨花","遠藤さくら（初center・初福神）","賀喜遥香（初福神）","齋藤飛鳥","桜井玲香","白石麻衣","筒井あやめ（初福神）","堀未央奈","松村沙友理","与田祐希"],back:["秋元真夏","梅澤美波","北野日奈子","久保史緒里","新内眞衣","高山一実","星野みなみ"]},
+  {num:23,title:"Sing Out!",zh:"Sing Out!",date:"2019年5月29日",total:22,center:["齋藤飛鳥"],fukujin:["秋元真夏","生田絵梨花","梅澤美波","大園桃子","北野日奈子","久保史緒里","齋藤飛鳥","桜井玲香","白石麻衣","高山一実","星野みなみ","堀未央奈","松村沙友理","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","梅澤美波","大園桃子","北野日奈子（初福神）","久保史緒里","齋藤飛鳥（center）","桜井玲香","白石麻衣","高山一実","星野みなみ","堀未央奈","松村沙友理","与田祐希"],back:["伊藤理々杏","井上小百合","岩本蓮加","阪口珠美","佐藤楓","新内眞衣","鈴木絢音","渡辺みり愛"]},
+  {num:22,title:"帰り道は遠回りしたくなる",zh:"想繞遠路回家",date:"2018年11月14日",total:21,center:["西野七瀬"],fukujin:["秋元真夏","生田絵梨花","梅澤美波","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣","西野七瀬","星野みなみ","堀未央奈","松村沙友理","山下美月","与田祐希","若月佑美"],fukujinLabel:["秋元真夏","生田絵梨花","梅澤美波","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣","西野七瀬（center）","星野みなみ","堀未央奈","松村沙友理","山下美月","与田祐希","若月佑美"],back:["伊藤理々杏","井上小百合","大園桃子","斉藤優里","佐藤楓","新内眞衣","高山一実"]},
+  {num:21,title:"ジコチューで行こう！",zh:"以自我為中心！",date:"2018年8月8日",total:21,center:["齋藤飛鳥"],fukujin:["秋元真夏","生田絵梨花","岩本蓮加","梅澤美波","衛藤美彩","大園桃子","齋藤飛鳥","桜井玲香","白石麻衣","西野七瀬","堀未央奈","松村沙友理","山下美月","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","岩本蓮加（初福神）","梅澤美波（初福神）","衛藤美彩","大園桃子","齋藤飛鳥（center）","桜井玲香","白石麻衣","西野七瀬","堀未央奈","松村沙友理","山下美月","与田祐希"],back:["井上小百合","斉藤優里","新内眞衣","鈴木絢音","高山一実","星野みなみ","若月佑美"]},
+  {num:20,title:"シンクロニシティ",zh:"同步巧合",date:"2018年4月25日",total:21,center:["白石麻衣"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","衛藤美彩","大園桃子","久保史緒里","齋藤飛鳥","桜井玲香","白石麻衣","西野七瀬","堀未央奈","松村沙友理","山下美月","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","生駒里奈","衛藤美彩","大園桃子","久保史緒里（初福神）","齋藤飛鳥","桜井玲香","白石麻衣（center）","西野七瀬","堀未央奈","松村沙友理","山下美月（初福神）","与田祐希"],back:["井上小百合","新内眞衣","高山一実","寺田蘭世","樋口日奈","星野みなみ","若月佑美"]},
+  {num:19,title:"いつかできるから今日できる",zh:"及時行事",date:"2017年10月11日",total:19,center:["齋藤飛鳥","西野七瀬"],fukujin:["生田絵梨花","伊藤万理華","井上小百合","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣","西野七瀬","堀未央奈","松村沙友理","若月佑美"],fukujinLabel:["生田絵梨花","伊藤万理華（初福神）","井上小百合（初福神）","衛藤美彩","齋藤飛鳥（W-center）","桜井玲香","白石麻衣","西野七瀬（W-center）","堀未央奈","松村沙友理","若月佑美"],back:["秋元真夏","生駒里奈","北野日奈子","斉藤優里","新内眞衣","高山一実","中田花奈","星野みなみ"]},
+  {num:18,title:"逃げ水",zh:"蜃景",date:"2017年8月9日",total:18,center:["大園桃子","与田祐希"],fukujin:["秋元真夏","生田絵梨花","衛藤美彩","大園桃子","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","星野みなみ","堀未央奈","松村沙友理","与田祐希"],fukujinLabel:["秋元真夏","生田絵梨花","衛藤美彩","大園桃子（初W-center・初福神）","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","星野みなみ","堀未央奈","松村沙友理","与田祐希（初W-center・初福神）"],back:["生駒里奈","伊藤万理華","井上小百合","桜井玲香","新内眞衣","若月佑美"]},
+  {num:17,title:"インフルエンサー",zh:"大影響家",date:"2017年3月22日",total:21,center:["白石麻衣","西野七瀬"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣","高山一実","西野七瀬","堀未央奈","松村沙友理","若月佑美"],fukujinLabel:["秋元真夏","生田絵梨花","生駒里奈","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣（W-center）","高山一実","西野七瀬（W-center）","堀未央奈","松村沙友理","若月佑美"],back:["伊藤万理華","井上小百合","北野日奈子","斉藤優里","新内眞衣","寺田蘭世","中田花奈","樋口日奈","星野みなみ"]},
+  {num:16,title:"サヨナラの意味",zh:"再見的意義",date:"2016年11月9日",total:19,center:["橋本奈々未"],fukujin:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","橋本奈々未","堀未央奈","松村沙友理","若月佑美"],fukujinLabel:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","橋本奈々未（center）","堀未央奈","松村沙友理","若月佑美"],back:["生駒里奈","伊藤万理華","井上小百合","北野日奈子","桜井玲香","新内眞衣","中元日芽香","星野みなみ"]},
+  {num:15,title:"裸足でSummer",zh:"赤腳Summer",date:"2016年7月27日",total:16,center:["齋藤飛鳥"],fukujin:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","桜井玲香","白石麻衣","高山一実","西野七瀬","橋本奈々未","松村沙友理"],fukujinLabel:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥（初center）","桜井玲香","白石麻衣","高山一実","西野七瀬","橋本奈々未","松村沙友理"],back:["生駒里奈","北野日奈子","中元日芽香","星野みなみ","堀未央奈","若月佑美"]},
+  {num:14,title:"ハルジオンが咲く頃",zh:"當春紫苑盛開時",date:"2016年3月23日",total:17,center:["深川麻衣"],fukujin:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","橋本奈々未","深川麻衣","星野みなみ"],fukujinLabel:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","橋本奈々未","深川麻衣（center）","星野みなみ"],back:["生駒里奈","伊藤万理華","井上小百合","桜井玲香","堀未央奈","松村沙友理","若月佑美"]},
+  {num:13,title:"今、話したい誰かがいる",zh:"此刻，想說話的對象",date:"2015年10月28日",total:16,center:["白石麻衣","西野七瀬"],fukujin:["秋元真夏","生田絵梨花","衛藤美彩","齋藤飛鳥","白石麻衣","高山一実","西野七瀬","橋本奈々未","深川麻衣","星野みなみ"],fukujinLabel:["秋元真夏","生田絵梨花","衛藤美彩（初福神）","齋藤飛鳥（初福神）","白石麻衣（W-center）","高山一実","西野七瀬（W-center）","橋本奈々未","深川麻衣","星野みなみ"],back:["生駒里奈","伊藤万理華","井上小百合","桜井玲香","松村沙友理","若月佑美"]},
+  {num:12,title:"太陽ノック",zh:"太陽敲敲門",date:"2015年7月22日",total:18,center:["生駒里奈"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","高山一実","西野七瀬","橋本奈々未","深川麻衣","若月佑美"],fukujinLabel:["秋元真夏","生田絵梨花","生駒里奈（center）","桜井玲香","白石麻衣","高山一実","西野七瀬","橋本奈々未","深川麻衣","若月佑美"],back:["伊藤万理華","井上小百合","衛藤美彩","斉藤優里","齋藤飛鳥","新内眞衣","星野みなみ","松村沙友理"]},
+  {num:11,title:"命は美しい",zh:"生命如此美好",date:"2015年3月18日",total:18,center:["西野七瀬"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","深川麻衣","松井玲奈","若月佑美"],fukujinLabel:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","西野七瀬（center）","橋本奈々未","深川麻衣","松井玲奈","若月佑美"],back:["伊藤万理華","衛藤美彩","齋藤飛鳥","相楽伊織","高山一実","星野みなみ","堀未央奈","松村沙友理"]},
+  {num:10,title:"何度目の青空か？",zh:"第幾次的藍天？",date:"2014年10月8日",total:16,center:["生田絵梨花"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","深川麻衣","松井玲奈","松村沙友理"],fukujinLabel:["秋元真夏","生田絵梨花（初center）","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","深川麻衣","松井玲奈","松村沙友理"],back:["衛藤美彩","斎藤ちはる","高山一実","星野みなみ","堀未央奈","若月佑美"]},
+  {num:9,title:"夏のFree＆Easy",zh:"夏天的Free&Easy",date:"2014年7月9日",total:17,center:["西野七瀬"],fukujin:["秋元真夏","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","深川麻衣","松井玲奈","松村沙友理","若月佑美"],fukujinLabel:["秋元真夏","生駒里奈","桜井玲香","白石麻衣","西野七瀬（center）","橋本奈々未","深川麻衣（初福神）","松井玲奈（初福神）","松村沙友理","若月佑美"],back:["井上小百合","衛藤美彩","斉藤優里","高山一実","星野みなみ","堀未央奈","大和里菜"]},
+  {num:8,title:"気づいたら片想い",zh:"察覺時已是單戀",date:"2014年4月2日",total:16,center:["西野七瀬"],fukujin:["生駒里奈","白石麻衣","西野七瀬","橋本奈々未","堀未央奈"],fukujinLabel:["生駒里奈","白石麻衣","西野七瀬（初center）","橋本奈々未","堀未央奈"],back:["秋元真夏","生田絵梨花","川村真洋","北野日奈子","桜井玲香","高山一実","松村沙友理","樋口日奈","深川麻衣","若月佑美","和田まあや"]},
+  {num:7,title:"バレッタ",zh:"髮夾",date:"2013年11月27日",total:17,center:["堀未央奈"],fukujin:["生田絵梨花","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","堀未央奈","松村沙友理","若月佑美"],fukujinLabel:["生田絵梨花","生駒里奈","桜井玲香","白石麻衣","西野七瀬","橋本奈々未","堀未央奈（初center・初福神）","松村沙友理","若月佑美（初福神）"],back:["秋元真夏","伊藤万理華","衛藤美彩","川後陽菜","齋藤飛鳥","高山一実","中元日芽香","深川麻衣"]},
+  {num:6,title:"ガールズルール",zh:"Girls' Rule",date:"2013年7月3日",total:16,center:["白石麻衣"],fukujin:["生田絵梨花","生駒里奈","桜井玲香","白石麻衣","高山一実","西野七瀬","橋本奈々未","松村沙友理"],fukujinLabel:["生田絵梨花","生駒里奈","桜井玲香","白石麻衣（初center）","高山一実","西野七瀬","橋本奈々未","松村沙友理"],back:["秋元真夏","伊藤万理華","井上小百合","斉藤優里","中田花奈","深川麻衣","星野みなみ","若月佑美"]},
+  {num:5,title:"君の名は希望",zh:"你就是希望",date:"2013年3月13日",total:16,center:["生駒里奈"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","橋本奈々未","星野みなみ","松村沙友理"],fukujinLabel:["秋元真夏","生田絵梨花","生駒里奈（center）","桜井玲香","白石麻衣","橋本奈々未","星野みなみ","松村沙友理"],back:["伊藤寧々","井上小百合","高山一実","中田花奈","永島聖羅","西野七瀬","深川麻衣","若月佑美"]},
+  {num:4,title:"制服のマネキン",zh:"制服模特兒",date:"2012年12月19日",total:16,center:["生駒里奈"],fukujin:["秋元真夏","生田絵梨花","生駒里奈","桜井玲香","白石麻衣","橋本奈々未","星野みなみ","松村沙友理"],fukujinLabel:["秋元真夏（初福神）","生田絵梨花","生駒里奈（center）","桜井玲香","白石麻衣","橋本奈々未","星野みなみ","松村沙友理"],back:["市来玲奈","井上小百合","齋藤飛鳥","高山一実","西野七瀬","能條愛未","深川麻衣","若月佑美"]},
+  {num:3,title:"走れ！Bicycle",zh:"奔馳吧！Bicycle",date:"2012年8月22日",total:16,center:["生駒里奈"],fukujin:["生田絵梨花","生駒里奈","白石麻衣","西野七瀬","橋本奈々未","星野みなみ","松村沙友理"],fukujinLabel:["生田絵梨花","生駒里奈（center）","白石麻衣","西野七瀬（初福神）","橋本奈々未","星野みなみ","松村沙友理"],back:["市来玲奈","伊藤万理華","井上小百合","斉藤優里","桜井玲香","高山一実","中田花奈","深川麻衣","若月佑美"]},
+  {num:2,title:"おいでシャンプー",zh:"來吧Shampoo",date:"2012年5月2日",total:16,center:["生駒里奈"],fukujin:["生駒里奈","桜井玲香","白石麻衣","高山一実","中田花奈","橋本奈々未","松村沙友理"],fukujinLabel:["生駒里奈（center）","桜井玲香（初福神）","白石麻衣","高山一実","中田花奈","橋本奈々未","松村沙友理"],back:["生田絵梨花","岩瀬佑美子","市来玲奈","井上小百合","斉藤優里","西野七瀬","畠中清羅","星野みなみ","宮澤成良"]},
+  {num:1,title:"ぐるぐるカーテン",zh:"窗簾圍繞",date:"2012年2月22日",total:16,center:["生駒里奈"],fukujin:["生田絵梨花","生駒里奈","白石麻衣","高山一実","橋本奈々未","星野みなみ","松村沙友理"],fukujinLabel:["生田絵梨花","生駒里奈（center）","白石麻衣","高山一実","橋本奈々未","星野みなみ","松村沙友理"],back:["市来玲奈","井上小百合","川村真洋","齋藤飛鳥","斉藤優里","桜井玲香","中田花奈","西野七瀬","能條愛未"]},
+];
+const hinataBase=[
+  {num:17,title:"Kind of love",zh:"Kind of love",date:"2026年5月20日",total:14,center:["藤嶌果歩"],rows:[["宮地すみれ","渡辺莉奈","山口陽世","森本茉莉","清水理央","髙橋未来虹"],["片山紗希","上村ひなの","小坂菜緒","金村美玖","松尾桜"],["正源司陽子","藤嶌果歩","大野愛実"]]},
+  {num:16,title:"クリフハンガー",zh:"懸念",date:"2026年1月28日",total:14,center:["大野愛実"],rows:[["小西夏菜実","宮地すみれ","渡辺莉奈","山下葉留花","清水理央","高井俐香"],["松尾桜","藤嶌果歩","松田好花","金村美玖","髙橋未来虹"],["小坂菜緒","大野愛実","正源司陽子"]]},
+  {num:15,title:"お願いバッハ！",zh:"拜託了巴哈！",date:"2025年9月17日",total:19,center:["金村美玖","小坂菜緒"],rows:[["竹内希来里","小西夏菜実","山口陽世","石塚瑶季","山下葉留花","森本茉莉","清水理央","平岡海月"],["上村ひなの","平尾帆夏","河田陽菜","渡辺莉奈","松田好花","宮地すみれ","髙橋未来虹"],["藤嶌果歩","金村美玖","小坂菜緒","正源司陽子"]]},
+  {num:14,title:"Love yourself!",zh:"Love yourself!",date:"2025年5月21日",total:19,center:["小坂菜緒"],rows:[["髙橋未来虹","平岡海月","竹内希来里","渡辺莉奈","山口陽世","石塚瑶季","小西夏菜実","清水理央"],["山下葉留花","森本茉莉","松田好花","河田陽菜","富田鈴花","平尾帆夏","宮地すみれ"],["上村ひなの","金村美玖","小坂菜緒","正源司陽子","藤嶌果歩"]]},
+  {num:13,title:"卒業写真だけが知ってる",zh:"只有畢業照才知道",date:"2025年1月29日",total:14,center:["小坂菜緒"],rows:[["宮地すみれ","平尾帆夏","上村ひなの","森本茉莉","山口陽世","山下葉留花"],["佐々木久美","金村美玖","河田陽菜","松田好花","佐々木美玲"],["正源司陽子","小坂菜緒","藤嶌果歩"]]},
+  {num:12,title:"絶対的第六感",zh:"絕對第六感",date:"2024年9月18日",total:15,center:["正源司陽子","藤嶌果歩"],rows:[["佐々木久美","富田鈴花","上村ひなの","河田陽菜","髙橋未来虹","小西夏菜実"],["松田好花","東村芽依","佐々木美玲","丹生明里","金村美玖"],["加藤史帆","正源司陽子","藤嶌果歩","小坂菜緒"]]},
+  {num:11,title:"君はハニーデュー",zh:"你是蜜瓜",date:"2024年5月8日",total:16,center:["正源司陽子"],rows:[["佐々木久美","東村芽依","平尾帆夏","山下葉留花","上村ひなの","富田鈴花"],["河田陽菜","藤嶌果歩","丹生明里","宮地すみれ","松田好花"],["佐々木美玲","小坂菜緒","正源司陽子","金村美玖","加藤史帆"]]},
+  {num:10,title:"Am I ready?",zh:"Am I ready?",date:"2023年7月26日",total:19,center:["上村ひなの"],rows:[["髙橋未来虹","高瀬愛奈","森本茉莉","潮紗理菜","高本彩花","山口陽世","濱岸ひより","富田鈴花"],["佐々木久美","齊藤京子","小坂菜緒","佐々木美玲","加藤史帆","東村芽依"],["河田陽菜","丹生明里","上村ひなの","松田好花","金村美玖"]]},
+  {num:9,title:"One choice",zh:"One choice",date:"2023年4月19日",total:21,center:["丹生明里"],rows:[["佐々木美玲","山口陽世","高瀬愛奈","高本彩花","東村芽依","潮紗理菜","森本茉莉","髙橋未来虹"],["富田鈴花","松田好花","河田陽菜","小坂菜緒","金村美玖","濱岸ひより","佐々木久美"],["齊藤京子","影山優佳","丹生明里","上村ひなの","加藤史帆"]]},
+  {num:8,title:"月と星が踊るMidnight",zh:"星月共舞的Midnight",date:"2022年7月27日",total:21,center:["齊藤京子"],rows:[["富田鈴花","濱岸ひより","高瀬愛奈","高本彩花","丹生明里","東村芽依","山口陽世","森本茉莉","髙橋未来虹"],["佐々木久美","上村ひなの","河田陽菜","松田好花","影山優佳","潮紗理菜"],["加藤史帆","小坂菜緒","齊藤京子","金村美玖","佐々木美玲"]]},
+  {num:7,title:"僕なんか",zh:"我這種人",date:"2022年6月1日",total:21,center:["小坂菜緒"],rows:[["潮紗理菜","山口陽世","高瀬愛奈","影山優佳","渡邉美穂","宮田愛萌","高本彩花","森本茉莉","髙橋未来虹"],["佐々木久美","東村芽依","河田陽菜","齊藤京子","佐々木美玲","加藤史帆","富田鈴花"],["松田好花","丹生明里","小坂菜緒","上村ひなの","金村美玖"]]},
+  {num:6,title:"ってか",zh:"話說",date:"2021年10月27日",total:21,center:["金村美玖"],rows:[["髙橋未来虹","高瀬愛奈","森本茉莉","高本彩花","上村ひなの","濱岸ひより","宮田愛萌","山口陽世","富田鈴花"],["佐々木久美","影山優佳","松田好花","佐々木美玲","河田陽菜","渡邉美穂","潮紗理菜"],["東村芽依","齊藤京子","金村美玖","加藤史帆","丹生明里"]]},
+  {num:5,title:"君しか勝たん",zh:"只有你最強",date:"2021年5月26日",total:21,center:["加藤史帆"],rows:[["富田鈴花","髙橋未来虹","高瀬愛奈","山口陽世","松田好花","影山優佳","森本茉莉","宮田愛萌","潮紗理菜","佐々木久美"],["東村芽依","上村ひなの","高本彩花","齊藤京子","佐々木美玲","濱岸ひより","渡邉美穂"],["河田陽菜","金村美玖","加藤史帆","小坂菜緒","丹生明里"]]},
+  {num:4,title:"ソンナコトナイヨ",zh:"才沒這回事呢",date:"2020年4月15日",total:19,center:["小坂菜緒"],rows:[["佐々木久美","濱岸ひより","高本彩花","上村ひなの","高瀬愛奈","宮田愛萌","佐々木美玲"],["潮紗理菜","渡邉美穂","丹生明里","河田陽菜","松田好花","富田鈴花"],["齊藤京子","金村美玖","小坂菜緒","東村芽依","加藤史帆"]]},
+  {num:3,title:"こんなに好きになっちゃっていいの？",zh:"如此喜歡你可以嗎？",date:"2019年9月18日",total:18,center:["小坂菜緒"],rows:[["佐々木久美","富田鈴花","井口眞緒","丹生明里","上村ひなの","河田陽菜","高瀬愛奈","潮紗理菜","宮田愛萌"],["東村芽依","松田好花","金村美玖","佐々木美玲","渡邉美穂","高本彩花"],["齊藤京子","小坂菜緒","加藤史帆"]]},
+  {num:2,title:"ドレミソラシド",zh:"Do Re Mi Sol La Si Do",date:"2019年7月17日",total:19,center:["小坂菜緒"],rows:[["佐々木久美","井口眞緒","潮紗理菜","富田鈴花","上村ひなの","高瀬愛奈","濱岸ひより","松田好花"],["宮田愛萌","佐々木美玲","金村美玖","東村芽依","高本彩花","渡邉美穂"],["齊藤京子","丹生明里","小坂菜緒","河田陽菜","加藤史帆"]]},
+  {num:1,title:"キュン",zh:"心動了",date:"2019年3月27日",total:20,center:["小坂菜緒"],rows:[["富田鈴花","濱岸ひより","高瀬愛奈","松田好花","上村ひなの","金村美玖","井口眞緒","宮田愛萌","潮紗理菜"],["佐々木久美","丹生明里","河田陽菜","高本彩花","渡邉美穂","東村芽依"],["佐々木美玲","齊藤京子","小坂菜緒","加藤史帆","柿崎芽実"]]},
+];
+const sakuraBase=[
+  {num:15,title:"Lonesome rabbit",zh:"Lonesome rabbit/What's \"KAZOKU\"?",date:"2026年6月10日",total:16,center:["森田ひかる"],rows:[["松田里奈","谷口愛季","大園玲","的野美青","中川智尋","村井優","小島凪紗"],["藤吉夏鈴","山川宇衣","守屋麗奈","田村保乃","山﨑天","向井純葉"],["浅井恋乃未","森田ひかる","山下瞳月"]]},
+  {num:14,title:"The growing up train",zh:"The growing up train",date:"2026年3月11日",total:16,center:["藤吉夏鈴"],rows:[["中嶋優月","向井純葉","松田里奈","佐藤愛桜","守屋麗奈","山下瞳月","谷口愛季"],["大園玲","山﨑天","山川宇衣","浅井恋乃未","森田ひかる","村井優"],["的野美青","藤吉夏鈴","田村保乃"]]},
+  {num:13,title:"Unhappy birthday構文",zh:"Unhappy birthday語法",date:"2025年10月29日",total:14,center:["村井優"],rows:[["遠藤理子","松田里奈","大園玲","村山美羽","石森璃花","向井純葉"],["的野美青","藤吉夏鈴","森田ひかる","田村保乃","山﨑天"],["山下瞳月","村井優","守屋麗奈"]]},
+  {num:12,title:"Make or Break",zh:"Make or Break",date:"2025年6月25日",total:14,center:["的野美青"],rows:[["松田里奈","向井純葉","村山美羽","中嶋優月","谷口愛季","大園玲"],["森田ひかる","山下瞳月","藤吉夏鈴","村井優","守屋麗奈"],["田村保乃","的野美青","山﨑天"]]},
+  {num:11,title:"UDAGAWA GENERATION",zh:"UDAGAWA GENERATION",date:"2025年2月19日",total:14,center:["森田ひかる"],rows:[["石森璃花","村井優","松田里奈","大園玲","向井純葉","村山美羽"],["山下瞳月","田村保乃","守屋麗奈","谷口愛季","的野美青"],["山﨑天","森田ひかる","藤吉夏鈴"]]},
+  {num:10,title:"I want tomorrow to come",zh:"I want tomorrow to come",date:"2024年10月23日",total:14,center:["山下瞳月"],rows:[["向井純葉","大園玲","村山美羽","中嶋優月","松田里奈","武元唯衣"],["守屋麗奈","山﨑天","藤吉夏鈴","谷口愛季","田村保乃"],["的野美青","山下瞳月","森田ひかる"]]},
+  {num:9,title:"自業自得",zh:"自業自得",date:"2024年6月26日",total:14,center:["山下瞳月"],rows:[["村山美羽","谷口愛季","井上梨名","松田里奈","中嶋優月","村井優"],["大園玲","森田ひかる","山﨑天","藤吉夏鈴","的野美青"],["田村保乃","山下瞳月","守屋麗奈"]]},
+  {num:8,title:"何歳の頃に戻りたいのか？",zh:"想回到幾歲的時候？",date:"2024年2月21日",total:14,center:["山﨑天"],rows:[["的野美青","大園玲","中嶋優月","井上梨名","増本綺良","松田里奈"],["守屋麗奈","山下瞳月","田村保乃","谷口愛季","村井優"],["森田ひかる","山﨑天","藤吉夏鈴"]]},
+  {num:7,title:"承認欲求",zh:"承認欲求",date:"2023年10月18日",total:16,center:["森田ひかる"],rows:[["松田里奈","増本綺良","中嶋優月","小池美波","村井優","土生瑞穂","武元唯衣"],["山﨑天","田村保乃","小林由依","藤吉夏鈴","守屋麗奈","大園玲"],["谷口愛季","森田ひかる","山下瞳月"]]},
+  {num:6,title:"Start over!",zh:"Start over!",date:"2023年6月28日",total:17,center:["藤吉夏鈴"],rows:[["武元唯衣","齋藤冬優花","幸阪茉里乃","大園玲","上村莉菜","大沼晶保","井上梨名"],["増本綺良","小池美波","小林由依","土生瑞穂","松田里奈"],["守屋麗奈","田村保乃","藤吉夏鈴","山﨑天","森田ひかる"]]},
+  {num:5,title:"桜月",zh:"櫻月",date:"2023年2月15日",total:13,center:["守屋麗奈"],rows:[["武元唯衣","松田里奈","土生瑞穂","増本綺良","井上梨名"],["山﨑天","大園玲","森田ひかる","田村保乃","藤吉夏鈴"],["小林由依","守屋麗奈","小池美波"]]},
+  {num:4,title:"五月雨よ",zh:"五月雨啊",date:"2022年4月6日",total:15,center:["山﨑天"],rows:[["武元唯衣","松田里奈","井上梨名","土生瑞穂","関有美子","上村莉菜","大園玲"],["守屋麗奈","小池美波","渡邉理佐","小林由依","藤吉夏鈴"],["森田ひかる","山﨑天","田村保乃"]]},
+  {num:3,title:"流れ弾",zh:"流彈",date:"2021年10月13日",total:14,center:["田村保乃"],rows:[["大園玲","松田里奈","小池美波","藤吉夏鈴","守屋麗奈","武元唯衣"],["菅井友香","渡辺梨加","渡邉理佐","小林由依","土生瑞穂"],["山﨑天","田村保乃","森田ひかる"]]},
+  {num:2,title:"BAN",zh:"BAN",date:"2021年4月14日",total:14,center:["森田ひかる"],rows:[["大園玲","井上梨名","松田里奈","守屋麗奈","渡辺梨加","土生瑞穂"],["田村保乃","山﨑天","小池美波","藤吉夏鈴","菅井友香"],["小林由依","森田ひかる","渡邉理佐"]]},
+  {num:1,title:"Nobody's fault",zh:"Nobody's fault",date:"2020年12月9日",total:14,center:["森田ひかる"],rows:[["武元唯衣","大園玲","守屋茜","松田里奈","尾関梨香","土生瑞穂"],["菅井友香","藤吉夏鈴","小池美波","山﨑天","田村保乃"],["小林由依","森田ひかる","渡邉理佐"]]},
+];
+const keyakiBase=[
+  {num:8,title:"黒い羊",zh:"黑色的羊",date:"2019年2月27日",total:17,center:["平手友梨奈"],rows:[["鈴本美愉","長沢菜々香","尾関梨香","長濱ねる","渡辺梨加","上村莉菜","齋藤冬優花"],["織田奈那","菅井友香","渡邉理佐","守屋茜","土生瑞穂"],["小林由依","石森虹花","平手友梨奈","小池美波","佐藤詩織"]]},
+  {num:7,title:"アンビバレント",zh:"矛盾",date:"2018年8月15日",total:18,center:["平手友梨奈"],rows:[["織田奈那","齋藤冬優花","守屋茜","渡辺梨加","尾関梨香","米谷奈々未","石森虹花","佐藤詩織"],["上村莉菜","菅井友香","長濱ねる","小池美波","長沢菜々香"],["土生瑞穂","鈴本美愉","平手友梨奈","渡邉理佐","小林由依"]]},
+  {num:6,title:"ガラスを割れ！",zh:"打碎玻璃！",date:"2018年3月7日",total:21,center:["平手友梨奈"],rows:[["齋藤冬優花","長沢菜々香","原田葵","織田奈那","米谷奈々未","佐藤詩織","石森虹花"],["志田愛佳","上村莉菜","菅井友香","長濱ねる","守屋茜","尾関梨香","渡辺梨加"],["土生瑞穂","鈴本美愉","小林由依","平手友梨奈","今泉佑唯","小池美波","渡邉理佐"]]},
+  {num:5,title:"風に吹かれても",zh:"即使被風吹散",date:"2017年10月25日",total:21,center:["平手友梨奈"],rows:[["齋藤冬優花","上村莉菜","織田奈那","今泉佑唯","佐藤詩織","長沢菜々香","米谷奈々未"],["志田愛佳","渡邉理佐","原田葵","長濱ねる","小池美波","渡辺梨加","守屋茜"],["土生瑞穂","菅井友香","小林由依","平手友梨奈","鈴本美愉","尾関梨香","石森虹花"]]},
+  {num:4,title:"不協和音",zh:"不和諧音",date:"2017年4月5日",total:21,center:["平手友梨奈"],rows:[["土生瑞穂","石森虹花","尾関梨香","原田葵","齋藤冬優花","小池美波","佐藤詩織"],["鈴本美愉","今泉佑唯","渡辺梨加","守屋茜","渡邉理佐","小林由依","志田愛佳"],["長沢菜々香","上村莉菜","長濱ねる","平手友梨奈","菅井友香","織田奈那","米谷奈々未"]]},
+  {num:3,title:"二人セゾン",zh:"兩人的季節",date:"2016年11月30日",total:21,center:["平手友梨奈"],rows:[["織田奈那","尾関梨香","長沢菜々香","上村莉菜","米谷奈々未","石森虹花","土生瑞穂"],["今泉佑唯","菅井友香","渡辺梨加","長濱ねる","渡邉理佐","志田愛佳","小林由依"],["齋藤冬優花","佐藤詩織","小池美波","平手友梨奈","原田葵","鈴本美愉","守屋茜"]]},
+  {num:2,title:"世界には愛しかない",zh:"世界上只有愛",date:"2016年8月10日",total:21,center:["平手友梨奈"],rows:[["織田奈那","齋藤冬優花","原田葵","上村莉菜","長沢菜々香","小池美波","尾関梨香","佐藤詩織","米谷奈々未","石森虹花"],["土生瑞穂","長濱ねる","菅井友香","守屋茜","鈴本美愉","小林由依"],["志田愛佳","渡辺梨加","平手友梨奈","渡邉理佐","今泉佑唯"]]},
+  {num:1,title:"サイレントマジョリティー",zh:"沉默的大多數",date:"2016年4月6日",total:20,center:["平手友梨奈"],rows:[["齋藤冬優花","織田奈那","上村莉菜","長沢菜々香","小池美波","佐藤詩織","原田葵","米谷奈々未","石森虹花"],["土生瑞穂","尾関梨香","守屋茜","菅井友香","志田愛佳","渡邉理佐"],["渡辺梨加","鈴本美愉","平手友梨奈","今泉佑唯","小林由依"]]},
+];
+
+// ── 動態資料 ──
+const overrides={};
+const addedData={nogi:[],hinata:[],sakura:[],keyaki:[]};
+
+function saveAdded(){
+  try{localStorage.setItem('sakamichi_v3',JSON.stringify(addedData));}catch(e){}
+}
+function loadAdded(){
+  try{
+    const s=localStorage.getItem('sakamichi_v3');
+    if(!s)return;
+    const saved=JSON.parse(s);
+    ['nogi','hinata','sakura','keyaki'].forEach(g=>{
+      if(Array.isArray(saved[g]))addedData[g]=saved[g];
+    });
+  }catch(e){}
+}
+
+function getBase(g){
+  if(g==='nogi')return nogiBase;
+  if(g==='hinata')return hinataBase;
+  if(g==='sakura')return sakuraBase;
+  return keyakiBase;
+}
+function getData(g){
+  const base=getBase(g).map(d=>{const ov=overrides[g+'-'+d.num];return ov?{...d,...ov}:d;});
+  return [...base,...(addedData[g]||[])].sort((a,b)=>b.num-a.num);
+}
+
+const S={nogi:{sort:'desc',filter:null,search:''},hinata:{sort:'desc',filter:null,search:''},sakura:{sort:'desc',filter:null,search:''},keyaki:{sort:'desc',filter:null,search:''}};
+
+function countStats(g,name){
+  let sel=0,ctr=0;
+  getData(g).forEach(d=>{
+    const members=d.fukujin?[...(d.fukujin||[]),...(d.back||[])]:d.rows.flat();
+    const all=new Set([...members,...(d.center||[])]);
+    if(all.has(name)){sel++;if(d.center.includes(name))ctr++;}
+  });
+  return{sel,ctr};
+}
+function switchGroup(g){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+g).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-btn.'+g).classList.add('active');
+}
+function setSort(g,o){
+  S[g].sort=o;
+  const m={nogi:['nd','na'],hinata:['hd','ha'],sakura:['sd','sa'],keyaki:['kd','ka']};
+  document.getElementById(m[g][0]).classList.toggle('active',o==='desc');
+  document.getElementById(m[g][1]).classList.toggle('active',o==='asc');
+  renderG(g);
+}
+function filterByMember(g,name){S[g].filter=S[g].filter===name?null:name;renderG(g);}
+function clearFilter(g){S[g].filter=null;renderG(g);}
+['nogi','hinata','sakura','keyaki'].forEach(g=>{
+  document.getElementById(g+'-search').addEventListener('input',e=>{S[g].search=e.target.value.trim().toLowerCase();renderG(g);});
+});
+function hl(s,n){return(s.filter&&n===s.filter)||(s.search&&n.toLowerCase().includes(s.search));}
+function makeTag(name,cls,label,g){
+  const sp=document.createElement('span');
+  sp.className='tag '+cls; sp.textContent=label;
+  sp.addEventListener('click',()=>filterByMember(g,name));
+  return sp;
+}
+function applyHl(sp,s,name){if(hl(s,name))sp.classList.add('hl');}
+
+function buildNogiCard(d,s){
+  const card=document.createElement('div'); card.className='card card-nogi';
+  const hdr=document.createElement('div'); hdr.className='card-hdr';
+  const badge=document.createElement('span'); badge.className='badge badge-nogi'; badge.textContent='第'+d.num+'張';
+  const title=document.createElement('span'); title.className='card-title'; title.textContent=d.title;
+  hdr.append(badge,title);
+  const zh=document.createElement('div'); zh.className='card-zh'; zh.textContent=d.zh;
+  const meta=document.createElement('div'); meta.className='card-meta';
+  meta.textContent='📅 '+d.date+'・'+d.total+'名　★ '+d.center.join('、');
+  const lbl1=document.createElement('div'); lbl1.className='row-label rl-nogi'; lbl1.textContent='福神（前排）';
+  const mem1=document.createElement('div'); mem1.className='members';
+  (d.fukujin||[]).forEach((name,i)=>{
+    const lbl=(d.fukujinLabel||[])[i]||name;
+    const isC=d.center.includes(name);
+    const sp=makeTag(name,isC?'nc':'nf',(isC?'★ ':'')+lbl,'nogi');
+    applyHl(sp,s,name); mem1.appendChild(sp);
+  });
+  const lbl2=document.createElement('div'); lbl2.className='row-label rl-nogi'; lbl2.textContent='選拔（後排）';
+  const mem2=document.createElement('div'); mem2.className='members';
+  (d.back||[]).forEach(name=>{
+    const sp=makeTag(name,'nb',name,'nogi'); applyHl(sp,s,name); mem2.appendChild(sp);
+  });
+  const footer=document.createElement('div'); footer.className='card-footer';
+  const eb=document.createElement('button'); eb.className='card-edit-btn'; eb.textContent='✏️ 編輯';
+  eb.addEventListener('click',()=>openEditModal('nogi',d.num)); footer.appendChild(eb);
+  card.append(hdr,zh,meta,lbl1,mem1,lbl2,mem2,footer);
+  return card;
+}
+function buildRowsCard(d,g){
+  const s=S[g];
+  const isH=g==='hinata',isK=g==='keyaki';
+  const LABELS=['前排','中排','後排'];
+  const CLS_H=['hm','hb','hback'],CLS_S=['sr1','sr2','sr3'],CLS_K=['km','kb','kback'];
+  const rlCls=isH?'rl-hinata':isK?'rl-keyaki':'rl-sakura';
+  const cardCls=isH?'card-hinata':isK?'card-keyaki':'card-sakura';
+  const badgeCls=isH?'badge-hinata':isK?'badge-keyaki':'badge-sakura';
+  const centerCls=isH?'hcenter':isK?'kcenter':'scenter';
+  const rowCls=isH?CLS_H:isK?CLS_K:CLS_S;
+  const card=document.createElement('div'); card.className='card '+cardCls;
+  const hdr=document.createElement('div'); hdr.className='card-hdr';
+  const badge=document.createElement('span'); badge.className='badge '+badgeCls; badge.textContent='第'+d.num+'張';
+  const title=document.createElement('span'); title.className='card-title'; title.textContent=d.title;
+  hdr.append(badge,title);
+  const zh=document.createElement('div'); zh.className='card-zh'; zh.textContent=d.zh;
+  const meta=document.createElement('div'); meta.className='card-meta';
+  meta.textContent='📅 '+d.date+'・'+d.total+'名　★ '+(d.centerLabel||d.center).join('、');
+  card.append(hdr,zh,meta);
+  [2,1,0].forEach((ri,di)=>{
+    const row=(d.rows||[[],[],[]])[ri]||[];
+    if(!row.length)return;
+    const lbl=document.createElement('div'); lbl.className='row-label '+rlCls; lbl.textContent=LABELS[di];
+    const mem=document.createElement('div'); mem.className='members';
+    row.forEach((name,ni)=>{
+      const isC=d.center.includes(name);
+      const cLabel=isC&&d.centerLabel?d.centerLabel[d.center.indexOf(name)]:name;
+      const sfx='';
+      const cls=isC?centerCls:rowCls[di];
+      const sp=makeTag(name,cls,(isC?'★ ':'')+cLabel+sfx,g);
+      applyHl(sp,s,name); mem.appendChild(sp);
+    });
+    card.append(lbl,mem);
+  });
+  const footer=document.createElement('div'); footer.className='card-footer';
+  const eb=document.createElement('button'); eb.className='card-edit-btn'; eb.textContent='✏️ 編輯';
+  eb.addEventListener('click',()=>openEditModal(g,d.num)); footer.appendChild(eb);
+  card.appendChild(footer);
+  return card;
+}
+
+function renderG(g){
+  const s=S[g];
+  let data=getData(g);
+  if(s.sort==='asc')data.sort((a,b)=>a.num-b.num);
+  const allM=d=>d.fukujin?[...(d.fukujin||[]),...(d.back||[])]:d.rows.flat();
+  if(s.filter)data=data.filter(d=>{
+    const all=new Set([...allM(d),...(d.center||[])]);
+    return all.has(s.filter);
+  });
+  if(s.search)data=data.filter(d=>d.title.toLowerCase().includes(s.search)||d.zh.toLowerCase().includes(s.search)||[...new Set([...allM(d),...(d.center||[])])].some(m=>m.toLowerCase().includes(s.search)));
+  const fb=document.getElementById(g+'-fbar');
+  if(s.filter){
+    const st=countStats(g,s.filter);
+    document.getElementById(g+'-fn').textContent=s.filter;
+    document.getElementById(g+'-fc').textContent=' 選拔次數：'+st.sel+'次　Center次數：'+st.ctr+'次';
+    fb.style.display='block';
+  } else fb.style.display='none';
+  const total=getData(g).length;
+  const spanId={nogi:'nc',hinata:'hc',sakura:'sc',keyaki:'kc'}[g];
+  document.getElementById(spanId).textContent=data.length;
+  const statsEl=document.getElementById('stats-'+g);
+  statsEl.innerHTML=statsEl.innerHTML.replace(/\/\s*\d+\s*張/,'/ '+total+' 張');
+  const grid=document.getElementById(g+'-grid');
+  const none=document.getElementById(g+'-none');
+  if(!data.length){grid.innerHTML='';none.style.display='block';return;}
+  none.style.display='none'; grid.innerHTML='';
+  data.forEach(d=>grid.appendChild(g==='nogi'?buildNogiCard(d,s):buildRowsCard(d,g)));
+  // 排行榜面板開著就同步更新
+  if(rankPanelOpen)buildRankTable();
+}
+
+// 初始化
+loadAdded();
+renderG('nogi');renderG('hinata');renderG('sakura');renderG('keyaki');
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+['addModal','editModal','manageModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+});
+function showMsg(elId,type,text,auto){
+  const el=document.getElementById(elId);
+  el.className='mmsg '+type; el.textContent=text; el.style.display='block';
+  if(auto)setTimeout(()=>el.style.display='none',2500);
+}
+function parseCSV(s){return s.split(',').map(x=>x.trim()).filter(Boolean);}
+
+function openAddModal(){
+  document.getElementById('a-group').value='nogi'; toggleAddSec();
+  ['a-num','a-title','a-zh','a-date','a-center','a-fukujin','a-back','a-row0','a-row1','a-row2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('a-msg').style.display='none';
+  openModal('addModal');
+}
+function toggleAddSec(){
+  const g=document.getElementById('a-group').value;
+  document.getElementById('a-nogi-sec').style.display=g==='nogi'?'block':'none';
+  document.getElementById('a-rows-sec').style.display=g!=='nogi'?'block':'none';
+  document.getElementById('a-rows-title').textContent=g==='hinata'?'日向坂 — 成員隊形':'櫻坂 — 成員隊形';
+}
+function doAdd(){
+  const g=document.getElementById('a-group').value;
+  const num=parseInt(document.getElementById('a-num').value);
+  const title=document.getElementById('a-title').value.trim();
+  const zh=document.getElementById('a-zh').value.trim()||title;
+  const date=document.getElementById('a-date').value.trim();
+  const center=parseCSV(document.getElementById('a-center').value);
+  if(!num||!title||!date||!center.length){showMsg('a-msg','err','請填寫所有必填欄位',false);return;}
+  if(getData(g).find(d=>d.num===num)){showMsg('a-msg','err','第'+num+'張已存在！',false);return;}
+  let entry={num,title,zh,date,center};
+  if(g==='nogi'){
+    const fukujin=parseCSV(document.getElementById('a-fukujin').value);
+    if(!fukujin.length){showMsg('a-msg','err','請填寫福神成員',false);return;}
+    entry.fukujin=fukujin;
+    entry.fukujinLabel=fukujin.map(n=>center.includes(n)?n+(center.length>1?'（W-center）':'（center）'):n);
+    entry.back=parseCSV(document.getElementById('a-back').value);
+    entry.total=entry.fukujin.length+entry.back.length;
+  } else {
+    const r0=parseCSV(document.getElementById('a-row0').value);
+    const r1=parseCSV(document.getElementById('a-row1').value);
+    const r2=parseCSV(document.getElementById('a-row2').value);
+    entry.rows=[r0,r1,r2]; entry.total=r0.length+r1.length+r2.length;
+  }
+  // 判斷 center 標注
+  const isWCenter=center.length>1;
+  entry.centerLabel=center.map(name=>{
+    const sfx=isWCenter?'（W-center）':'（初center）';
+    // 檢查此人在該團體是否曾當過 center
+    const hadCenter=getData(g).some(d=>d.center.includes(name));
+    return hadCenter&&!isWCenter?name:name+sfx;
+  });
+
+  addedData[g].push(entry);
+  saveAdded();
+  renderG(g);
+  if(rankPanelOpen)buildRankTable();
+  showMsg('a-msg','ok','✓ 已新增「'+title+'」！',true);
+  setTimeout(()=>closeModal('addModal'),1200);
+}
+
+let editState={g:null,num:null};
+function openEditModal(g,num){
+  editState={g,num};
+  const d=getData(g).find(x=>x.num===num); if(!d)return;
+  document.getElementById('e-header').textContent='編輯：第'+d.num+'張《'+d.title+'》';
+  document.getElementById('e-sub').textContent={nogi:'乃木坂46',hinata:'日向坂46',sakura:'櫻坂46',keyaki:'欅坂46'}[g];
+  document.getElementById('e-title').value=d.title;
+  document.getElementById('e-zh').value=d.zh;
+  document.getElementById('e-date').value=d.date;
+  document.getElementById('e-center').value=d.center.join(',');
+  const isNogi=g==='nogi';
+  document.getElementById('e-nogi-sec').style.display=isNogi?'block':'none';
+  document.getElementById('e-rows-sec').style.display=!isNogi?'block':'none';
+  if(!isNogi){
+    const labels={hinata:'日向坂 — 成員隊形',sakura:'櫻坂 — 成員隊形',keyaki:'欅坂 — 成員隊形'};
+    document.getElementById('e-rows-title').textContent=labels[g]||'成員隊形';
+  }
+  if(isNogi){
+    document.getElementById('e-fukujin').value=(d.fukujin||[]).join(',');
+    document.getElementById('e-back').value=(d.back||[]).join(',');
+  } else {
+    const rows=d.rows||[[],[],[]];
+    document.getElementById('e-row0').value=(rows[0]||[]).join(',');
+    document.getElementById('e-row1').value=(rows[1]||[]).join(',');
+    document.getElementById('e-row2').value=(rows[2]||[]).join(',');
+  }
+  switchMtab('info');
+  document.getElementById('e-msg').style.display='none';
+  openModal('editModal');
+}
+function switchMtab(t){
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mtab-c').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.mtab[onclick="switchMtab(\''+t+'\')"]').classList.add('active');
+  document.getElementById('mtab-'+t).classList.add('active');
+}
+function doSaveEdit(){
+  const{g,num}=editState;
+  const title=document.getElementById('e-title').value.trim();
+  const zh=document.getElementById('e-zh').value.trim()||title;
+  const date=document.getElementById('e-date').value.trim();
+  const center=parseCSV(document.getElementById('e-center').value);
+  if(!title||!date||!center.length){showMsg('e-msg','err','請填寫必填欄位',false);return;}
+  const isNogi=g==='nogi';
+  let patch={title,zh,date,center};
+  if(isNogi){
+    const fukujin=parseCSV(document.getElementById('e-fukujin').value);
+    patch.fukujin=fukujin;
+    patch.fukujinLabel=fukujin.map(n=>center.includes(n)?n+(center.length>1?'（W-center）':'（center）'):n);
+    patch.back=parseCSV(document.getElementById('e-back').value);
+    patch.total=patch.fukujin.length+patch.back.length;
+  } else {
+    const r0=parseCSV(document.getElementById('e-row0').value);
+    const r1=parseCSV(document.getElementById('e-row1').value);
+    const r2=parseCSV(document.getElementById('e-row2').value);
+    patch.rows=[r0,r1,r2]; patch.total=r0.length+r1.length+r2.length;
+  }
+  const isBase=!!getBase(g).find(x=>x.num===num);
+  if(isBase){overrides[g+'-'+num]=patch;}
+  else{const idx=addedData[g].findIndex(x=>x.num===num);if(idx>=0){addedData[g][idx]={...addedData[g][idx],...patch};saveAdded();}}
+  renderG(g);
+  if(rankPanelOpen)buildRankTable();
+  showMsg('e-msg','ok','✓ 已儲存！',true);
+  setTimeout(()=>closeModal('editModal'),900);
+}
+
+function openManageModal(){
+  document.getElementById('m-group').value='nogi';
+  refreshManageList(); openModal('manageModal');
+}
+function refreshManageList(){
+  const g=document.getElementById('m-group').value;
+  const list=document.getElementById('manage-list'); list.innerHTML='';
+  const data=addedData[g];
+  if(!data.length){
+    const div=document.createElement('div'); div.className='manage-item';
+    div.style.cssText='color:#64748b;justify-content:center;';
+    div.textContent='目前無自訂新增的單曲'; list.appendChild(div); return;
+  }
+  data.forEach((d,i)=>{
+    const item=document.createElement('div'); item.className='manage-item';
+    const sp=document.createElement('span'); sp.textContent='第'+d.num+'張　'+d.title;
+    const btn=document.createElement('button'); btn.className='del-btn'; btn.textContent='🗑 刪除';
+    btn.addEventListener('click',()=>{
+      if(!confirm('確定要刪除「'+d.title+'」嗎？'))return;
+      addedData[g].splice(i,1); saveAdded(); renderG(g); refreshManageList();
+      if(rankPanelOpen)buildRankTable();
+      showMsg('m-msg','ok','已刪除。',true);
+    });
+    item.append(sp,btn); list.appendChild(item);
+  });
+}
+</script>
+</body>
+</html>
