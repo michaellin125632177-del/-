@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>坂道系列成員資料庫 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --nogi-1: #7C3AED; --nogi-2: #5B21B6; --nogi-bg: #EDE9FE;
+    --saku-1: #DB2777; --saku-2: #9D174D; --saku-bg: #FCE7F3;
+    --hina-1: #2563EB; --hina-2: #1D4ED8; --hina-bg: #DBEAFE;
+    --gray1: #F9FAFB; --gray2: #F3F4F6; --gray3: #E5E7EB;
+    --text: #111827; --textm: #6B7280; --texts: #9CA3AF;
+    --radius: 14px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  body { font-family: "Segoe UI","Hiragino Sans","Yu Gothic UI","Microsoft JhengHei",sans-serif; background: var(--gray1); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ── */
+  .site-header { background: linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#4C1D95 100%); padding: 2.4rem 1rem 2rem; text-align: center; }
+  .site-header h1 { font-size: 2rem; font-weight: 900; color: #fff; letter-spacing: .04em; }
+  .site-header p { color: #C4B5FD; font-size: .9rem; margin-top: .4rem; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; padding: 1.2rem 1rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+  .tab-btn { padding: .65rem 1.8rem; border: none; border-radius: 50px; font-size: .95rem; font-weight: 700; cursor: pointer; background: var(--gray2); color: var(--textm); transition: all .2s; }
+  .tab-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .tab-btn.nogi.active { background: linear-gradient(135deg,var(--nogi-1),var(--nogi-2)); color: #fff; box-shadow: 0 4px 16px rgba(124,58,237,.4); }
+  .tab-btn.saku.active { background: linear-gradient(135deg,var(--saku-1),var(--saku-2)); color: #fff; box-shadow: 0 4px 16px rgba(219,39,119,.4); }
+  .tab-btn.hina.active { background: linear-gradient(135deg,var(--hina-1),var(--hina-2)); color: #fff; box-shadow: 0 4px 16px rgba(37,99,235,.4); }
+
+  /* ── Controls ── */
+  .controls { max-width: 1200px; margin: 1.2rem auto 0; padding: 0 1rem; display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+  .search-wrap { flex:1; min-width: 220px; position: relative; }
+  .search-wrap svg { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:var(--texts); pointer-events:none; }
+  .search-input { width:100%; padding:.65rem 1rem .65rem 2.5rem; border:2px solid var(--gray3); border-radius:50px; font-size:.9rem; outline:none; transition:border-color .2s; background:#fff; }
+  .search-input:focus { border-color: var(--nogi-1); }
+  .filter-wrap { display:flex; gap:.4rem; flex-wrap:wrap; }
+  .filter-btn { padding:.45rem 1rem; border:2px solid var(--gray3); border-radius:50px; background:#fff; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; color:var(--textm); }
+  .filter-btn.active-nogi { border-color:var(--nogi-1); background:var(--nogi-bg); color:var(--nogi-1); }
+  .filter-btn.active-saku { border-color:var(--saku-1); background:var(--saku-bg); color:var(--saku-1); }
+  .filter-btn.active-hina { border-color:var(--hina-1); background:var(--hina-bg); color:var(--hina-1); }
+
+  .stats-bar { max-width:1200px; margin:.8rem auto 0; padding:0 1rem; font-size:.84rem; color:var(--textm); }
+  .stats-bar span { font-weight:700; color:var(--text); }
+
+  /* ── Group Sections ── */
+  .group-section { display:none; padding-bottom: 4rem; }
+  .group-section.active { display:block; }
+
+  .group-hero { padding: 1.8rem 1rem 1.4rem; text-align:center; }
+  .group-hero.nogi { background: linear-gradient(180deg,var(--nogi-bg) 0%,var(--gray1) 100%); }
+  .group-hero.saku { background: linear-gradient(180deg,var(--saku-bg) 0%,var(--gray1) 100%); }
+  .group-hero.hina { background: linear-gradient(180deg,var(--hina-bg) 0%,var(--gray1) 100%); }
+  .group-hero h2 { font-size:1.7rem; font-weight:900; }
+  .group-hero h2.nogi { color:var(--nogi-1); }
+  .group-hero h2.saku { color:var(--saku-1); }
+  .group-hero h2.hina { color:var(--hina-1); }
+  .group-hero .desc { color:var(--textm); font-size:.85rem; margin-top:.3rem; }
+  .group-stats { display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; margin-top:.8rem; }
+  .stat-chip { background:#fff; border-radius:50px; padding:.3rem .9rem; font-size:.78rem; font-weight:600; color:var(--textm); box-shadow:var(--shadow); }
+
+  /* ── Member Grid ── */
+  .member-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:1rem; max-width:1200px; margin:1.2rem auto 0; padding:0 1rem; }
+  .member-card { background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); transition:transform .2s,box-shadow .2s; }
+  .member-card:hover { transform:translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.13); }
+  .member-card.hidden { display:none; }
+
+  .card-top { padding:.9rem .9rem .7rem; }
+  .card-top.nogi { background:linear-gradient(135deg,var(--nogi-1),var(--nogi-2)); }
+  .card-top.saku { background:linear-gradient(135deg,var(--saku-1),var(--saku-2)); }
+  .card-top.hina { background:linear-gradient(135deg,var(--hina-1),var(--hina-2)); }
+
+  .avatar { width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-size:1.3rem; margin:0 auto .5rem; border:2px solid rgba(255,255,255,.35); }
+  .name-jp { font-size:.95rem; font-weight:800; color:#fff; text-align:center; line-height:1.3; }
+  .name-ro { font-size:.68rem; color:rgba(255,255,255,.82); text-align:center; margin-top:.15rem; }
+  .badges { display:flex; gap:.25rem; justify-content:center; flex-wrap:wrap; margin-top:.45rem; }
+  .badge { font-size:.62rem; font-weight:700; padding:.17rem .45rem; border-radius:20px; }
+  .b-gen   { background:rgba(255,255,255,.2); color:#fff; }
+  .b-cap   { background:#FCD34D; color:#78350F; }
+  .b-cen   { background:#6EE7B7; color:#064E3B; }
+  .b-gradu { background:#FCA5A5; color:#7F1D1D; }
+  .b-hiat  { background:#E9D5FF; color:#6D28D9; }
+
+  .card-body { padding:.75rem .9rem; }
+  .info-row { display:flex; align-items:center; gap:.4rem; font-size:.77rem; color:#374151; margin-bottom:.38rem; }
+  .info-row .icon { font-size:.85rem; flex-shrink:0; width:18px; text-align:center; }
+  .info-row .val  { color:#1F2937; }
+  .info-row .na   { color:var(--texts); font-style:italic; }
+
+  .no-results { text-align:center; padding:4rem 1rem; color:var(--texts); display:none; }
+  .no-results.show { display:block; }
+
+  /* ── Footer ── */
+  footer { background:#1F2937; color:#9CA3AF; text-align:center; padding:1.5rem; font-size:.78rem; line-height:2; }
+  footer strong { color:#E5E7EB; }
+  footer a { color:#A5B4FC; }
+
+  @media(max-width:600px){
+    .site-header h1 { font-size:1.5rem; }
+    .member-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.7rem; }
+    .tab-btn { padding:.55rem 1.1rem; font-size:.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>🌸 坂道系列成員資料庫</h1>
+  <p>乃木坂46 ・ 櫻坂46 ・ 日向坂46 ／ 2026年7月版</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn nogi active" onclick="switchGroup('nogi')">🟣 乃木坂46</button>
+  <button class="tab-btn saku"        onclick="switchGroup('saku')">🌸 櫻坂46</button>
+  <button class="tab-btn hina"        onclick="switchGroup('hina')">💙 日向坂46</button>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input class="search-input" id="searchInput" type="text" placeholder="搜尋姓名（日文 / 羅馬字）…" oninput="filterMembers()">
+  </div>
+  <div class="filter-wrap" id="filterWrap"></div>
+</div>
+<div class="stats-bar">顯示 <span id="countDisplay">0</span> 名成員</div>
+
+<!-- ===== 乃木坂46 ===== -->
+<section id="sec-nogi" class="group-section active">
+  <div class="group-hero nogi">
+    <h2 class="nogi">乃木坂46</h2>
+    <div class="desc">2011年創立 ・ AKB48姐妹組 ・ 東京都港區乃木坂</div>
+    <div class="group-stats">
+      <span class="stat-chip">3期生 3名</span>
+      <span class="stat-chip">4期生 9名</span>
+      <span class="stat-chip">5期生 10名</span>
+      <span class="stat-chip">6期生 11名</span>
+    </div>
+  </div>
+  <div class="member-grid" id="grid-nogi"></div>
+  <div class="no-results" id="no-nogi">找不到符合的成員</div>
+</section>
+
+<!-- ===== 櫻坂46 ===== -->
+<section id="sec-saku" class="group-section">
+  <div class="group-hero saku">
+    <h2 class="saku">櫻坂46</h2>
+    <div class="desc">前身欅坂46 ・ 2020年11月改名 ・ 東京都渋谷</div>
+    <div class="group-stats">
+      <span class="stat-chip">2期生 11名</span>
+      <span class="stat-chip">3期生 11名</span>
+      <span class="stat-chip">4期生 9名</span>
+    </div>
+  </div>
+  <div class="member-grid" id="grid-saku"></div>
+  <div class="no-results" id="no-saku">找不到符合的成員</div>
+</section>
+
+<!-- ===== 日向坂46 ===== -->
+<section id="sec-hina" class="group-section">
+  <div class="group-hero hina">
+    <h2 class="hina">日向坂46</h2>
+    <div class="desc">前身けやき坂46 ・ 2019年2月獨立 ・ 東京都渋谷</div>
+    <div class="group-stats">
+      <span class="stat-chip">2期生 2名</span>
+      <span class="stat-chip">3期生 4名</span>
+      <span class="stat-chip">4期生 11名</span>
+      <span class="stat-chip">5期生 10名</span>
+    </div>
+  </div>
+  <div class="member-grid" id="grid-hina"></div>
+  <div class="no-results" id="no-hina">找不到符合的成員</div>
+</section>
+
+<footer>
+  <strong>坂道系列成員資料庫 2026年7月版</strong><br>
+  資料來源：官方網站、Wikipedia、粉絲資料庫（Web搜尋彙整）<br>
+  ※ 標記「★卒業予定」表示已宣佈卒業排程，「◎活動休止」表示暫停活動中<br>
+  ※ 部分資料（身高、血型）可能因來源不同而有誤差，如有錯誤歡迎指正<br>
+  本頁面僅供粉絲參考使用，與官方無關
+</footer>
+
+<script>
+// ── Emoji avatar pool ──────────────────────────────
+const emo = ['🌸','⭐','💫','🌟','✨','🌺','🎀','🌷','🌼','🌻','🍀','🦋','🌙','🎵','🌈','💎','🦄','🌿'];
+function av(n){ let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xffffffff; return emo[Math.abs(h)%emo.length]; }
+
+// ── Member Data ────────────────────────────────────
+// role: '' | 'captain' | 'center'
+// status: '' | 'grad_pending' | 'hiatus'
+// Note fields left blank (—) where data not confirmed
+
+const members = {
+
+  /* ===================== 乃木坂46 =====================
+     Sources: Web searches July 2026
+     3期生: 3名 (梅澤美波 卒業済、向井葉月・中村麗乃・与田祐希等 卒業済)
+     4期生: 9名 (矢久保美緒・北川悠理・佐藤璃果 等 卒業済)
+     5期生: 10名 (五百城茉央 2025/04/05 卒業済)
+     6期生: 11名 (2025/04 デビュー)
+  */
+  nogi: [
+    // ── 3期生 ──
+    { name:'伊藤理々杏',  roma:'Ito Riria',              gen:3, born:'2002/10/08', pref:'沖縄',  blood:'B型',  height:'154cm', role:'',       status:'' },
+    { name:'岩本蓮加',    roma:'Iwamoto Renka',          gen:3, born:'2004/02/02', pref:'東京',  blood:'B型',  height:'157cm', role:'',       status:'hiatus' },
+    { name:'吉田綾乃クリスティー', roma:'Yoshida Ayano Christie', gen:3, born:'1995/09/06', pref:'大分', blood:'A型', height:'161cm', role:'', status:'grad_pending' },
+    // ── 4期生 ──
+    { name:'遠藤さくら',  roma:'Endo Sakura',            gen:4, born:'2001/12/04', pref:'長崎',  blood:'A型',  height:'157cm', role:'',       status:'' },
+    { name:'賀喜遥香',    roma:'Kaki Haruka',            gen:4, born:'2001/08/08', pref:'大阪',  blood:'A型',  height:'166cm', role:'captain',status:'' },
+    { name:'金川沙耶',    roma:'Kanagawa Saya',          gen:4, born:'2001/05/07', pref:'神奈川',blood:'B型',  height:'155cm', role:'',       status:'' },
+    { name:'黒見明香',    roma:'Kuromi Haruha',          gen:4, born:'2002/02/01', pref:'大阪',  blood:'A型',  height:'157cm', role:'',       status:'' },
+    { name:'柴田柚奈',    roma:'Shibata Yuna',           gen:4, born:'2002/01/02', pref:'神奈川',blood:'O型',  height:'162cm', role:'',       status:'' },
+    { name:'田村真佑',    roma:'Tamura Mayu',            gen:4, born:'2001/02/07', pref:'千葉',  blood:'O型',  height:'159cm', role:'',       status:'' },
+    { name:'筒井あやめ',  roma:'Tsutsui Ayame',          gen:4, born:'2003/10/09', pref:'大阪',  blood:'B型',  height:'164cm', role:'',       status:'' },
+    { name:'林瑠奈',      roma:'Hayashi Runa',           gen:4, born:'2003/06/09', pref:'神奈川',blood:'A型',  height:'163cm', role:'',       status:'' },
+    { name:'弓木奈於',    roma:'Yumiki Nao',             gen:4, born:'2002/08/26', pref:'大阪',  blood:'O型',  height:'160cm', role:'',       status:'' },
+    // ── 5期生 ──
+    { name:'池田瑛紗',    roma:'Ikeda Teresa',           gen:5, born:'2004/02/06', pref:'東京',  blood:'AB型', height:'163cm', role:'',       status:'' },
+    { name:'一ノ瀬美空',  roma:'Ichinose Miku',          gen:5, born:'2004/06/14', pref:'兵庫',  blood:'O型',  height:'158cm', role:'',       status:'' },
+    { name:'井上和',      roma:'Inoue Nagi',             gen:5, born:'2005/02/17', pref:'神奈川',blood:'B型',  height:'158cm', role:'',       status:'' },
+    { name:'岡本姫奈',    roma:'Okamoto Himena',         gen:5, born:'2003/12/17', pref:'千葉',  blood:'O型',  height:'165cm', role:'',       status:'' },
+    { name:'小川彩',      roma:'Ogawa Aya',              gen:5, born:'2004/09/27', pref:'大阪',  blood:'A型',  height:'163cm', role:'',       status:'' },
+    { name:'奥田いろは',  roma:'Okuda Iroha',            gen:5, born:'2005/08/20', pref:'千葉',  blood:'A型',  height:'157cm', role:'',       status:'' },
+    { name:'川﨑桜',      roma:'Kawasaki Sakura',        gen:5, born:'2005/07/29', pref:'奈良',  blood:'O型',  height:'160cm', role:'',       status:'' },
+    { name:'菅原咲月',    roma:'Sugawara Satsuki',       gen:5, born:'2005/10/31', pref:'宮城',  blood:'O型',  height:'162cm', role:'',       status:'' },
+    { name:'冨里奈央',    roma:'Tomisato Nao',           gen:5, born:'2006/09/18', pref:'神奈川',blood:'O型',  height:'164cm', role:'',       status:'' },
+    { name:'中西アルノ',  roma:'Nakanishi Aruno',        gen:5, born:'2005/08/13', pref:'大阪',  blood:'B型',  height:'164cm', role:'',       status:'' },
+    // ── 6期生（春組）──
+    { name:'矢田萌華',    roma:'Yada Moeka',             gen:6, born:'2007/—/—',  pref:'秋田',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'瀬戸口心月',  roma:'Setoguchi Mitsuki',      gen:6, born:'2005/07/16', pref:'鹿児島',blood:'A型',  height:'153cm', role:'',       status:'' },
+    { name:'川端晃菜',    roma:'Kawabata Kona',          gen:6, born:'2010/—/—',  pref:'東京',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'海邉朱莉',    roma:'Kaibe Akari',            gen:6, born:'2007/—/—',  pref:'兵庫',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'長嶋凛桜',    roma:'Nagashima Rio',          gen:6, born:'2007/—/—',  pref:'北海道',blood:'—',    height:'—',    role:'',       status:'' },
+    // ── 6期生（夏組）──
+    { name:'愛宕心響',    roma:'Atago Kokyou',           gen:6, born:'2005/09/17', pref:'兵庫',  blood:'—',    height:'160cm', role:'',       status:'' },
+    { name:'大越ひなの',  roma:'Okoshi Hinano',          gen:6, born:'2004/12/01', pref:'静岡',  blood:'B型',  height:'164cm', role:'',       status:'' },
+    { name:'小津玲奈',    roma:'Ozu Reina',              gen:6, born:'2007/04/17', pref:'東京',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'鈴木佑捺',    roma:'Suzuki Yuuna',           gen:6, born:'2006/05/18', pref:'山梨',  blood:'AB型', height:'157cm', role:'',       status:'' },
+    { name:'増田三莉音',  roma:'Masuda Mirine',          gen:6, born:'2009/11/01', pref:'大阪',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'森平麗心',    roma:'Morihira Urumi',         gen:6, born:'2009/—/—',  pref:'東京',  blood:'—',    height:'—',    role:'',       status:'' },
+  ],
+
+  /* ===================== 櫻坂46 =====================
+     Sources: Web searches July 2026
+     1期生: 全員卒業済
+     2期生: 武元唯衣(2026/05)・関有美子・松平璃子・井上梨名・上村莉菜 等 卒業済
+     3期生: 11名在籍
+     4期生: 9名 (2025/04/15 加入)
+  */
+  saku: [
+    // ── 2期生 ──
+    { name:'石森虹花',    roma:'Ishimori Nijika',        gen:2, born:'2002/03/07', pref:'千葉',  blood:'A型',  height:'162cm', role:'',       status:'' },
+    { name:'大沼晶保',    roma:'Onuma Akiho',            gen:2, born:'2002/11/26', pref:'北海道',blood:'O型',  height:'161cm', role:'',       status:'' },
+    { name:'遠藤光莉',    roma:'Endo Hikari',            gen:2, born:'2003/04/16', pref:'東京',  blood:'A型',  height:'165cm', role:'',       status:'' },
+    { name:'幸阪茉里乃',  roma:'Kosaka Marino',          gen:2, born:'2003/06/12', pref:'愛知',  blood:'B型',  height:'163cm', role:'',       status:'' },
+    { name:'大橋沙夏',    roma:'Ohashi Saka',            gen:2, born:'2004/02/20', pref:'東京',  blood:'A型',  height:'157cm', role:'',       status:'' },
+    { name:'的野美青',    roma:'Matono Mio',             gen:2, born:'2002/11/20', pref:'福岡',  blood:'O型',  height:'163cm', role:'',       status:'' },
+    { name:'山下瞳月',    roma:'Yamashita Shizuki',      gen:2, born:'2003/09/02', pref:'神奈川',blood:'A型',  height:'166cm', role:'center', status:'' },
+    { name:'守屋麗奈',    roma:'Moriya Rena',            gen:2, born:'2001/08/20', pref:'神奈川',blood:'O型',  height:'163cm', role:'',       status:'' },
+    { name:'田村保乃',    roma:'Tamura Yasuno',          gen:2, born:'2001/05/28', pref:'千葉',  blood:'B型',  height:'165cm', role:'captain',status:'' },
+    { name:'藤吉夏鈴',    roma:'Fujiyoshi Karin',        gen:2, born:'2002/07/06', pref:'広島',  blood:'O型',  height:'164cm', role:'',       status:'' },
+    { name:'山崎天',      roma:'Yamasaki Ten',           gen:2, born:'2003/10/22', pref:'神奈川',blood:'A型',  height:'159cm', role:'',       status:'' },
+    // ── 3期生 ──
+    { name:'遠藤理子',    roma:'Endo Riko',              gen:3, born:'2004/12/03', pref:'東京',  blood:'A型',  height:'160cm', role:'',       status:'' },
+    { name:'大田莉央奈',  roma:'Ota Riona',              gen:3, born:'2005/06/03', pref:'神奈川',blood:'O型',  height:'162cm', role:'',       status:'' },
+    { name:'向井純葉',    roma:'Mukai Sumika',           gen:3, born:'2004/11/15', pref:'兵庫',  blood:'A型',  height:'163cm', role:'',       status:'' },
+    { name:'村井優',      roma:'Murai Yu',               gen:3, born:'2005/02/18', pref:'大阪',  blood:'A型',  height:'165cm', role:'',       status:'' },
+    { name:'谷口愛季',    roma:'Taniguchi Aiki',         gen:3, born:'2005/02/09', pref:'大阪',  blood:'O型',  height:'162cm', role:'',       status:'' },
+    { name:'増田莉央',    roma:'Masuda Rio',             gen:3, born:'2005/10/25', pref:'東京',  blood:'B型',  height:'163cm', role:'',       status:'' },
+    { name:'村山美羽',    roma:'Murayama Miu',           gen:3, born:'2005/07/30', pref:'愛知',  blood:'A型',  height:'165cm', role:'',       status:'' },
+    { name:'中嶋優月',    roma:'Nakashima Yuzuki',       gen:3, born:'2004/02/10', pref:'愛知',  blood:'O型',  height:'161cm', role:'',       status:'' },
+    { name:'曽田陽香',    roma:'Soda Haruka',            gen:3, born:'2005/08/08', pref:'大阪',  blood:'B型',  height:'160cm', role:'',       status:'' },
+    { name:'小田倉麗奈',  roma:'Odakura Reina',          gen:3, born:'2006/01/06', pref:'宮城',  blood:'A型',  height:'163cm', role:'',       status:'' },
+    { name:'井上梨名',    roma:'Inoue Rina',             gen:3, born:'2005/12/19', pref:'東京',  blood:'A型',  height:'161cm', role:'',       status:'' },
+    // ── 4期生 ──
+    { name:'松本和子',    roma:'Matsumoto Wako',         gen:4, born:'2005/02/06', pref:'千葉',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'稲熊ひな',    roma:'Inaguma Hina',           gen:4, born:'2006/03/09', pref:'愛知',  blood:'AB型', height:'156cm', role:'',       status:'' },
+    { name:'佐藤愛桜',    roma:'Sato Neo',               gen:4, born:'2006/12/01', pref:'佐賀',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'中川智尋',    roma:'Nakagawa Chihiro',       gen:4, born:'2007/09/16', pref:'鹿児島',blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'目黒陽色',    roma:'Meguro Hiiro',           gen:4, born:'2006/01/24', pref:'埼玉',  blood:'A型',  height:'169cm', role:'',       status:'' },
+    { name:'浅井恋乃未',  roma:'Asai Konomi',            gen:4, born:'2004/12/22', pref:'埼玉',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'山田桃実',    roma:'Yamada Momomi',          gen:4, born:'2008/07/20', pref:'岡山',  blood:'O型',  height:'157cm', role:'',       status:'' },
+    { name:'勝又春',      roma:'Katsumata Haru',         gen:4, born:'2004/01/24', pref:'滋賀',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'山川宇衣',    roma:'Yamakawa Ui',            gen:4, born:'2005/09/19', pref:'宮城',  blood:'—',    height:'—',    role:'',       status:'' },
+  ],
+
+  /* ===================== 日向坂46 =====================
+     Sources: Web searches July 2026
+     1期生: 全員卒業済（最後は松田好花 2026/01/29）
+     2期生: 残り2名 (金村美玖, 小坂菜緒)
+     3期生: 4名 (上村ひなの, 高橋未来虹, 森本茉莉, 山口陽世)
+     4期生: 11名 (2022/09 加入)
+     5期生: 10名 (2025/03 加入)
+  */
+  hina: [
+    // ── 2期生 ──
+    { name:'金村美玖',    roma:'Kanemura Miku',          gen:2, born:'2002/09/10', pref:'大阪',  blood:'O型',  height:'163cm', role:'',       status:'' },
+    { name:'小坂菜緒',    roma:'Kosaka Nao',             gen:2, born:'2002/09/07', pref:'愛知',  blood:'A型',  height:'161cm', role:'',       status:'' },
+    // ── 3期生 ──
+    { name:'上村ひなの',  roma:'Kamimura Hinano',        gen:3, born:'2004/04/12', pref:'愛知',  blood:'A型',  height:'161cm', role:'captain',status:'' },
+    { name:'高橋未来虹',  roma:'Takahashi Mikuni',       gen:3, born:'2003/09/27', pref:'東京',  blood:'O型',  height:'167cm', role:'',       status:'' },
+    { name:'森本茉莉',    roma:'Morimoto Mari',          gen:3, born:'2003/06/11', pref:'大阪',  blood:'A型',  height:'160cm', role:'',       status:'' },
+    { name:'山口陽世',    roma:'Yamaguchi Haruyo',       gen:3, born:'2003/05/01', pref:'奈良',  blood:'A型',  height:'159cm', role:'',       status:'' },
+    // ── 4期生 ──
+    { name:'石塚玉季',    roma:'Ishizuka Tamaki',        gen:4, born:'2004/08/06', pref:'東京',  blood:'A型',  height:'154cm', role:'',       status:'' },
+    { name:'小西夏菜実',  roma:'Konishi Nanami',         gen:4, born:'2004/10/03', pref:'兵庫',  blood:'B型',  height:'164cm', role:'',       status:'' },
+    { name:'清水莉子',    roma:'Shimizu Rio',            gen:4, born:'2005/01/15', pref:'千葉',  blood:'AB型', height:'165cm', role:'',       status:'' },
+    { name:'正源司陽子',  roma:'Shogenji Yoko',          gen:4, born:'2007/02/14', pref:'兵庫',  blood:'B型',  height:'157cm', role:'',       status:'' },
+    { name:'竹内希来里',  roma:'Takeuchi Kirari',        gen:4, born:'2006/02/20', pref:'広島',  blood:'AB型', height:'153cm', role:'',       status:'' },
+    { name:'平尾帆夏',    roma:'Hirao Honoka',           gen:4, born:'2003/07/31', pref:'鳥取',  blood:'A型',  height:'156cm', role:'',       status:'' },
+    { name:'平岡海月',    roma:'Hiraoka Mitsuki',        gen:4, born:'2002/04/09', pref:'福井',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'藤島かほ',    roma:'Fujishima Kaho',         gen:4, born:'2006/08/07', pref:'北海道',blood:'—',    height:'158cm', role:'',       status:'' },
+    { name:'宮地すみれ',  roma:'Miyachi Sumire',         gen:4, born:'2005/12/31', pref:'神奈川',blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'山下春奈',    roma:'Yamashita Haruka',       gen:4, born:'2003/05/20', pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'渡辺莉奈',    roma:'Watanabe Rina',          gen:4, born:'2009/02/07', pref:'福岡',  blood:'A型',  height:'151cm', role:'',       status:'' },
+    // ── 5期生 ──
+    { name:'大野愛実',    roma:'Ono Manami',             gen:5, born:'2007/—/—',  pref:'東京',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'鶴崎仁子',    roma:'Tsurusaki Niko',         gen:5, born:'2004/03/27', pref:'神奈川',blood:'—',    height:'166cm', role:'',       status:'' },
+    { name:'酒井ニーナ',  roma:'Sakai Nina',             gen:5, born:'2009/—/—',  pref:'神奈川',blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'佐藤柚',      roma:'Sato Yu',                gen:5, born:'2007/—/—',  pref:'福岡',  blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'下田泉樹',    roma:'Shimoda Izuki',          gen:5, born:'2007/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'片山咲希',    roma:'Katayama Saki',          gen:5, born:'2008/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'大田瑞希',    roma:'Ota Mizuki',             gen:5, born:'2008/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'高井りか',    roma:'Takai Rika',             gen:5, born:'2007/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'松尾さくら',  roma:'Matsuo Sakura',          gen:5, born:'2008/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+    { name:'蔵盛姫菜乃',  roma:'Kuramori Hinano',        gen:5, born:'2009/—/—',  pref:'—',     blood:'—',    height:'—',    role:'',       status:'' },
+  ]
+};
+
+// ── State ─────────────────────────────
+let currentGroup = 'nogi';
+let activeGen    = 'all';
+let searchQ      = '';
+const gc = { nogi:'nogi', saku:'saku', hina:'hina' };
+
+// ── Render all cards ──────────────────
+function buildCards() {
+  Object.keys(members).forEach(g => {
+    const grid = document.getElementById('grid-' + g);
+    grid.innerHTML = '';
+    members[g].forEach((m, i) => {
+      const roleLabel  = m.role === 'captain' ? '隊長' : m.role === 'center' ? 'センター' : '';
+      const roleClass  = m.role === 'captain' ? 'b-cap' : m.role === 'center' ? 'b-cen' : '';
+      const statLabel  = m.status === 'grad_pending' ? '★卒業予定' : m.status === 'hiatus' ? '◎活動休止' : '';
+      const statClass  = m.status === 'grad_pending' ? 'b-gradu' : m.status === 'hiatus' ? 'b-hiat' : '';
+      const bornDisp   = m.born.includes('—') ? '確認中' : m.born;
+      const prefDisp   = m.pref === '—' ? '確認中' : m.pref;
+      const bloodDisp  = m.blood === '—' ? '確認中' : m.blood;
+      const hDisp      = m.height === '—' ? '確認中' : m.height;
+      const naClass    = (v) => v === '確認中' ? 'na' : 'val';
+      grid.innerHTML += `
+        <div class="member-card" id="c-${g}-${i}"
+             data-gen="${m.gen}" data-name="${m.name}" data-roma="${m.roma.toLowerCase()}">
+          <div class="card-top ${gc[g]}">
+            <div class="avatar">${av(m.name)}</div>
+            <div class="name-jp">${m.name}</div>
+            <div class="name-ro">${m.roma}</div>
+            <div class="badges">
+              <span class="badge b-gen">${m.gen}期生</span>
+              ${roleLabel  ? `<span class="badge ${roleClass}">${roleLabel}</span>` : ''}
+              ${statLabel  ? `<span class="badge ${statClass}">${statLabel}</span>` : ''}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="info-row"><span class="icon">🎂</span><span class="${naClass(bornDisp)}">${bornDisp}</span></div>
+            <div class="info-row"><span class="icon">📍</span><span class="${naClass(prefDisp)}">${prefDisp}</span></div>
+            <div class="info-row"><span class="icon">🩸</span><span class="${naClass(bloodDisp)}">${bloodDisp}</span></div>
+            <div class="info-row"><span class="icon">📏</span><span class="${naClass(hDisp)}">${hDisp}</span></div>
+          </div>
+        </div>`;
+    });
+  });
+}
+
+// ── Filter cards ──────────────────────
+function filterMembers() {
+  searchQ = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cards = document.querySelectorAll(`#grid-${currentGroup} .member-card`);
+  let vis = 0;
+  cards.forEach(c => {
+    const genOK  = activeGen === 'all' || c.dataset.gen === activeGen;
+    const nameOK = !searchQ || c.dataset.name.includes(searchQ) || c.dataset.roma.includes(searchQ);
+    const show = genOK && nameOK;
+    c.classList.toggle('hidden', !show);
+    if (show) vis++;
+  });
+  document.getElementById('countDisplay').textContent = vis;
+  document.getElementById('no-' + currentGroup).classList.toggle('show', vis === 0);
+}
+
+// ── Gen filter buttons ────────────────
+function buildGenFilters(g) {
+  const gens = [...new Set(members[g].map(m => m.gen))].sort((a,b) => a-b);
+  const wrap = document.getElementById('filterWrap');
+  wrap.innerHTML = '';
+  const mk = (label, gen) => {
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (gen === 'all' && activeGen === 'all' ? ` active-${g}` : '');
+    b.textContent = label;
+    b.dataset.gen = gen;
+    b.onclick = () => setGen(gen, g);
+    wrap.appendChild(b);
+  };
+  mk('全部', 'all');
+  gens.forEach(n => mk(n + '期生', String(n)));
+}
+
+function setGen(gen, g) {
+  activeGen = gen;
+  document.querySelectorAll('#filterWrap .filter-btn').forEach(b => {
+    b.classList.remove('active-nogi','active-saku','active-hina');
+    if (b.dataset.gen === gen) b.classList.add('active-' + g);
+  });
+  filterMembers();
+}
+
+// ── Tab switch ────────────────────────
+function switchGroup(g) {
+  currentGroup = g;
+  activeGen    = 'all';
+  searchQ      = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.group-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + g).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn.${g}`).classList.add('active');
+  buildGenFilters(g);
+  filterMembers();
+}
+
+// ── Init ─────────────────────────────
+buildCards();
+buildGenFilters('nogi');
+filterMembers();
+</script>
+</body>
+</html>
