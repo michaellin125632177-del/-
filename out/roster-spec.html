@@ -1,0 +1,417 @@
+<title>統一出勤表規格書</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+:root{
+  --paper:#FCFCFA; --surface:#FFFFFF; --sunk:#F4F5F3;
+  --ink:#152A2C; --body:#33474A; --muted:#6E8083;
+  --line:#E0E2DD; --line-strong:#C6CBC5;
+  --petrol:#1F5A57; --petrol-soft:#E4EEEC;
+  --cf-input:#FCEFC8; --cf-input-b:#E6C978;
+  --cf-weekend:#DFEAF3; --cf-leave:#E2E2E0; --cf-supp:#D3E8C6;
+  --cf-gap:#FBDEDE; --cf-alert:#F2A9A4;
+  --alert:#A8433C; --ok:#3F7A52;
+  --shadow:0 1px 2px rgba(21,42,44,.06), 0 8px 24px -16px rgba(21,42,44,.28);
+  --serif:"Noto Serif TC", Georgia, "Songti TC", serif;
+  --sans:"Noto Sans TC", -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+    --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+    --line:#263436; --line-strong:#3A4B4D;
+    --petrol:#68AFA6; --petrol-soft:#1B3230;
+    --cf-input:#4A3D1B; --cf-input-b:#7E6828;
+    --cf-weekend:#1F3242; --cf-leave:#303838; --cf-supp:#26401F;
+    --cf-gap:#452525; --cf-alert:#7A3630;
+    --alert:#E08B84; --ok:#7FBE92;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --cf-input:#4A3D1B; --cf-input-b:#7E6828;
+  --cf-weekend:#1F3242; --cf-leave:#303838; --cf-supp:#26401F;
+  --cf-gap:#452525; --cf-alert:#7A3630;
+  --alert:#E08B84; --ok:#7FBE92;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--body); font-family:var(--sans);
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;}
+h1,h2,h3{color:var(--ink); font-family:var(--serif); text-wrap:balance; margin:0;}
+p{margin:0}
+a{color:var(--petrol)}
+:focus-visible{outline:2px solid var(--petrol); outline-offset:3px; border-radius:2px}
+
+.shell{max-width:1180px; margin:0 auto; padding:0 24px 96px;}
+@media(min-width:1040px){
+  .shell{display:grid; grid-template-columns:184px minmax(0,1fr); gap:56px; align-items:start;}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:56px 0 34px; border-bottom:2px solid var(--ink);}
+.kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--petrol); margin-bottom:14px;}
+h1{font-size:clamp(30px,5.2vw,46px); line-height:1.2; letter-spacing:.01em;}
+.standfirst{margin-top:16px; max-width:62ch; font-size:16.5px; color:var(--body);}
+.standfirst strong{color:var(--ink); font-weight:700;}
+.facts{display:flex; flex-wrap:wrap; gap:0; margin-top:28px;
+  border-top:1px solid var(--line);}
+.fact{flex:1 1 140px; padding:14px 18px 12px 0; border-right:1px solid var(--line);}
+.fact:last-child{border-right:0}
+.fact dt{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted);}
+.fact dd{margin:3px 0 0; font-family:var(--serif); font-weight:700; font-size:19px; color:var(--ink);
+  font-variant-numeric:tabular-nums;}
+
+/* ---------- rail ---------- */
+.rail{display:none}
+@media(min-width:1040px){
+  .rail{display:block; position:sticky; top:28px; padding-top:44px; font-size:13px;}
+  .rail ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px;}
+  .rail a{display:block; padding:5px 0 5px 12px; border-left:2px solid var(--line);
+    color:var(--muted); text-decoration:none;}
+  .rail a:hover{color:var(--ink); border-left-color:var(--petrol);}
+}
+
+/* ---------- sections ---------- */
+main{padding-top:34px; display:flex; flex-direction:column; gap:54px; min-width:0;}
+section{scroll-margin-top:24px}
+.sec-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; margin-bottom:6px;}
+h2{font-size:clamp(21px,2.6vw,26px); line-height:1.35;}
+.ref{font-family:var(--mono); font-size:11.5px; color:var(--petrol);
+  background:var(--petrol-soft); padding:2px 8px; border-radius:3px; white-space:nowrap;}
+.lede{max-width:64ch; margin-top:10px;}
+.sec-body{display:flex; flex-direction:column; gap:18px; margin-top:16px;}
+
+/* ---------- principles ---------- */
+.principles{display:grid; gap:0; border-top:1px solid var(--line);}
+.principle{display:grid; gap:4px 20px; padding:18px 0; border-bottom:1px solid var(--line);}
+@media(min-width:640px){.principle{grid-template-columns:190px minmax(0,1fr);}}
+.principle h3{font-size:16px; font-family:var(--sans); font-weight:700; line-height:1.6;}
+.principle p{max-width:60ch}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+.scroll > table{max-width:840px; min-width:520px;}
+.mock .scroll > table{max-width:none; min-width:640px;}
+table{border-collapse:collapse; width:100%; font-size:13.5px;
+  font-variant-numeric:tabular-nums;}
+th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+thead th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); font-weight:500; border-bottom:1.5px solid var(--line-strong);
+  white-space:nowrap; background:var(--paper);}
+tbody th{font-weight:700; color:var(--ink); white-space:nowrap;}
+.code{font-family:var(--mono); font-weight:500; color:var(--ink); white-space:nowrap;}
+td.num{text-align:right; font-family:var(--mono);}
+.grp td{background:var(--sunk); font-family:var(--mono); font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); padding:6px 12px;}
+
+/* ---------- grid mock ---------- */
+.mock{border:1px solid var(--line-strong); border-radius:4px; overflow:hidden;
+  background:var(--surface); box-shadow:var(--shadow);}
+.mock-bar{display:flex; align-items:center; gap:10px; padding:8px 12px;
+  border-bottom:1px solid var(--line); background:var(--sunk); font-family:var(--mono); font-size:11.5px;
+  color:var(--muted);}
+.mock table{font-size:12px}
+.mock th,.mock td{padding:5px 8px; border:1px solid var(--line); text-align:center; white-space:nowrap;}
+.mock thead th{background:var(--sunk); text-transform:none; letter-spacing:0; font-size:11px;}
+.mock tbody th{text-align:left; font-weight:500; font-size:12px;}
+.mock td.c{font-family:var(--mono); font-weight:500; color:var(--ink); min-width:34px;}
+.we{background:var(--cf-weekend)}
+.lv{background:var(--cf-leave)}
+.sp{background:var(--cf-supp)}
+.gp{background:var(--cf-gap)}
+.al{background:var(--cf-alert); color:var(--ink); font-weight:700;}
+.tally th,.tally td{background:var(--sunk); font-weight:700; color:var(--ink); font-size:11.5px;}
+.tally td.al{background:var(--cf-alert)}
+.legend{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:14px; font-size:12.5px; color:var(--muted);}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.sw{width:13px; height:13px; border-radius:2px; border:1px solid var(--line-strong); flex:none;}
+
+/* ---------- sheets ---------- */
+.sheets{display:grid; gap:14px;}
+@media(min-width:720px){.sheets{grid-template-columns:1fr 1fr;}}
+.sheet{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:16px 18px;
+  display:flex; flex-direction:column; gap:7px;}
+.sheet .tab{font-family:var(--mono); font-size:12px; color:var(--ink); font-weight:500;
+  display:flex; align-items:center; gap:8px;}
+.pill{font-family:var(--sans); font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:99px;
+  letter-spacing:.04em;}
+.pill.fill{background:var(--cf-input); color:var(--ink); border:1px solid var(--cf-input-b);}
+.pill.auto{background:var(--petrol-soft); color:var(--petrol); border:1px solid transparent;}
+.sheet p{font-size:13.5px; color:var(--body);}
+.sheet .who{font-size:12px; color:var(--muted); margin-top:auto; padding-top:6px;
+  border-top:1px dashed var(--line);}
+
+/* ---------- steps ---------- */
+.steps{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
+.step{display:grid; gap:2px 18px; padding:16px 0; border-bottom:1px solid var(--line);
+  grid-template-columns:auto minmax(0,1fr);}
+.step .n{font-family:var(--mono); font-size:12px; color:var(--petrol); padding-top:4px;
+  font-variant-numeric:tabular-nums;}
+.step h3{font-size:15.5px; font-family:var(--sans); font-weight:700;}
+.step p{font-size:14px; max-width:58ch;}
+.step .when{grid-column:2; font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:4px;}
+
+/* ---------- asks ---------- */
+.asks{display:flex; flex-direction:column; gap:10px;}
+.ask{display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start;
+  background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--cf-input-b);
+  border-radius:4px; padding:13px 16px;}
+.ask .box{width:14px; height:14px; margin-top:5px; border:1.5px solid var(--line-strong); border-radius:2px;}
+.ask b{color:var(--ink); display:block; font-size:14.5px;}
+.ask span{font-size:13.5px; color:var(--muted);}
+
+/* ---------- callout ---------- */
+.callout{background:var(--surface); border:1px solid var(--line-strong);
+  border-top:3px solid var(--alert); border-radius:4px; padding:20px 22px;
+  display:flex; flex-direction:column; gap:10px;}
+.callout h2{font-size:19px}
+.callout p{max-width:66ch; font-size:14px;}
+.callout .src{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
+
+footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--muted); max-width:70ch;}
+</style>
+
+<div class="shell">
+
+<header class="masthead">
+  <div class="kicker">體系人事作業 · 規格草案 v0.1</div>
+  <h1>統一出勤表規格書</h1>
+  <p class="standfirst">四間院所、三種職類、一份月班表。<strong>統一的是欄位與班別代碼,不是版面</strong>——醫師以「診次」計,醫護長與助理以「工時」計,共用同一套代碼,月結才能橫向比較。</p>
+  <dl class="facts">
+    <div class="fact"><dt>適用院所</dt><dd>4 間</dd></div>
+    <div class="fact"><dt>職類</dt><dd>醫師 · 醫護長 · 助理</dd></div>
+    <div class="fact"><dt>班別代碼</dt><dd>16 組</dd></div>
+    <div class="fact"><dt>分頁</dt><dd>4 頁</dd></div>
+    <div class="fact"><dt>手填欄位</dt><dd>3 處</dd></div>
+  </dl>
+</header>
+
+<nav class="rail" aria-label="章節">
+  <ol>
+    <li><a href="#principles">設計原則</a></li>
+    <li><a href="#roles">三種職類</a></li>
+    <li><a href="#codes">班別代碼表</a></li>
+    <li><a href="#sheets">檔案結構</a></li>
+    <li><a href="#grid">班表長這樣</a></li>
+    <li><a href="#summary">月結統計</a></li>
+    <li><a href="#rollout">導入時程</a></li>
+    <li><a href="#asks">待確認事項</a></li>
+    <li><a href="#law">法規提醒</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="principles">
+  <div class="sec-head"><h2>設計原則</h2></div>
+  <p class="lede">各院所人力結構不同,硬套同一種排班方式只會沒人填。真正要統一的只有三件事。</p>
+  <div class="principles sec-body">
+    <div class="principle">
+      <h3>統一代碼,不統一版面</h3>
+      <p>全體系共用一張班別代碼表,填表只能從下拉選單選。有人打「早班」、有人打「早診」,月結就永遠對不起來。</p>
+    </div>
+    <div class="principle">
+      <h3>手填最少、自動最多</h3>
+      <p>整份檔案只有三處要打字:員工編號、每日班別代碼、加班時數。姓名、職類、工時、診次、假別天數全部公式帶出。</p>
+    </div>
+    <div class="principle">
+      <h3>班表不等於出勤紀錄</h3>
+      <p>這份是「預排 + 月結」。實際到離時間仍以打卡機為準,兩者分開,誰也不假裝是誰。</p>
+    </div>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="sec-head"><h2>三種職類,一套代碼</h2><span class="ref">設定!D36:D64</span></div>
+  <p class="lede">這是統一表最容易踩雷的地方。醫師的一天是「幾個診次」,助理的一天是「幾個小時」,兩者不能塞進同一種格子計算。</p>
+  <div class="sec-body scroll">
+    <table>
+      <thead><tr><th>職類</th><th>計算單位</th><th>主要代碼</th><th>月結看什麼</th><th>特殊狀況</th></tr></thead>
+      <tbody>
+        <tr><th>醫師</th><td>診次</td><td class="code">D1 / D2 / D3 / FD</td><td>總診次、支援他院次數</td><td>跨院支援、學會進修、休診日</td></tr>
+        <tr><th>醫護長</th><td>工時</td><td class="code">A / ADM</td><td>臨床工時 vs 行政工時</td><td>行政時段要與臨床時段分開記</td></tr>
+        <tr><th>助理</th><td>工時</td><td class="code">A / P</td><td>排班工時、加班、假別餘額</td><td>早晚班輪替、加班最需要盯</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="codes">
+  <div class="sec-head"><h2>班別代碼表</h2><span class="ref">設定!B5:I20</span></div>
+  <p class="lede">整套表的核心。月結的每一個數字,都是把這張表的「排班工時」與「診次」權重乘回班表算出來的——改這裡的權重,統計會全部跟著變,不必改任何公式。</p>
+  <div class="sec-body scroll">
+    <table>
+      <thead><tr><th>代碼</th><th>名稱</th><th>時段</th><th class="num">排班工時</th><th class="num">診次</th><th class="num">計出勤</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="6">上班類</td></tr>
+        <tr><td class="code">D1</td><td>早診</td><td class="code">09:00–12:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
+        <tr><td class="code">D2</td><td>午診</td><td class="code">14:00–17:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
+        <tr><td class="code">D3</td><td>晚診</td><td class="code">18:00–21:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
+        <tr><td class="code">FD</td><td>全日診</td><td class="code">09:00–21:00</td><td class="num">6.0</td><td class="num">2</td><td class="num">1</td></tr>
+        <tr><td class="code">A</td><td>早班</td><td class="code">09:00–18:00</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
+        <tr><td class="code">P</td><td>晚班</td><td class="code">13:00–21:30</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
+        <tr><td class="code">ADM</td><td>行政班</td><td class="code">09:00–18:00</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
+        <tr><td class="code">支</td><td>支援他院</td><td class="code">依支援院所</td><td class="num">8.0</td><td class="num">2</td><td class="num">1</td></tr>
+        <tr><td class="code">訓</td><td>教育訓練 / 學會</td><td class="code">全日</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
+        <tr class="grp"><td colspan="6">休假類</td></tr>
+        <tr><td class="code">OFF</td><td>排休</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">特</td><td>特休</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">病</td><td>病假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">事</td><td>事假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">公</td><td>公假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">國</td><td>國定假日</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td class="code">休</td><td>休診</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede" style="font-size:13.5px;color:var(--muted)">特休與公假是有薪假,以「天數」計而非工時,所以排班工時記 0,薪資另依請假天數計算。診次時間請改成貴體系實際的看診時段。</p>
+</section>
+
+<section id="sheets">
+  <div class="sec-head"><h2>檔案結構</h2><span class="ref">4 個分頁</span></div>
+  <p class="lede">一間院所一個檔,從範本另存,檔名格式 <span class="code">2026-10_中山院_出勤表.xlsx</span>。若要放同一個檔,「班表」與「月結統計」必須一起選取後複製,否則統計會算到別間院所。</p>
+  <div class="sheets sec-body">
+    <div class="sheet">
+      <div class="tab">說明 <span class="pill auto">唯讀</span></div>
+      <p>填表順序、顏色定義、交表時程、法規提醒。新到職的醫護長看這頁就會填。</p>
+      <div class="who">維護:總部</div>
+    </div>
+    <div class="sheet">
+      <div class="tab">設定 <span class="pill fill">總部手填</span></div>
+      <p>班別代碼表、院所清單、人員名冊。所有下拉選單都指向這裡,改一處全檔更新。</p>
+      <div class="who">維護:總部 · 各院所勿動</div>
+    </div>
+    <div class="sheet">
+      <div class="tab">班表 <span class="pill fill">院所手填</span></div>
+      <p>30 人 × 31 天的排班格。日期與星期隨年月自動換算,底下三列即時算當日人力。</p>
+      <div class="who">維護:各院所醫護長</div>
+    </div>
+    <div class="sheet">
+      <div class="tab">月結統計 <span class="pill auto">自動</span><span class="pill fill">加班時數手填</span></div>
+      <p>16 欄月結:出勤天數、排班工時、總診次、六種假別天數、支援次數、排班完整度檢核。</p>
+      <div class="who">維護:公式自動 · 加班時數由打卡紀錄填入</div>
+    </div>
+  </div>
+</section>
+
+<section id="grid">
+  <div class="sec-head"><h2>班表長這樣</h2><span class="ref">班表!D6:AH39</span></div>
+  <p class="lede">以中山院 2026 年 10 月前七天為例。顏色不是裝飾——每一種顏色都對應一條檢核規則,讓漏排、假別、支援與人力缺口在掃過去的一瞬間就看得到。</p>
+  <div class="sec-body">
+    <div class="mock">
+      <div class="mock-bar">中山院 · 2026 年 10 月 · 第 1–7 日</div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>姓名</th><th>職類</th><th>1</th><th>2</th><th class="we">3</th><th class="we">4</th><th>5</th><th>6</th><th>7</th></tr>
+            <tr><th></th><th></th><th>四</th><th>五</th><th class="we">六</th><th class="we">日</th><th>一</th><th>二</th><th>三</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>陳彥廷</th><td>醫師</td><td class="c">D1</td><td class="c">FD</td><td class="c we">D2</td><td class="c lv">休</td><td class="c">OFF</td><td class="c">FD</td><td class="c">D1</td></tr>
+            <tr><th>林佳蓉</th><td>醫師</td><td class="c">FD</td><td class="c">D2</td><td class="c we">D3</td><td class="c lv">休</td><td class="c">D1</td><td class="c">OFF</td><td class="c">FD</td></tr>
+            <tr><th>黃冠宇</th><td>醫師</td><td class="c">D2</td><td class="c">D3</td><td class="c we">FD</td><td class="c lv">休</td><td class="c">D1</td><td class="c">D2</td><td class="c sp">支</td></tr>
+            <tr><th>吳淑芬</th><td>醫護長</td><td class="c">A</td><td class="c">A</td><td class="c we">A</td><td class="c lv">OFF</td><td class="c">A</td><td class="c">A</td><td class="c">ADM</td></tr>
+            <tr><th>張怡君</th><td>助理</td><td class="c">A</td><td class="c">P</td><td class="c we">A</td><td class="c lv">OFF</td><td class="c lv">特</td><td class="c">A</td><td class="c lv">特</td></tr>
+            <tr><th>李宗翰</th><td>助理</td><td class="c">P</td><td class="c">A</td><td class="c we">P</td><td class="c lv">OFF</td><td class="c">A</td><td class="c">P</td><td class="c gp"></td></tr>
+            <tr><th>王思婷</th><td>助理</td><td class="c">A</td><td class="c">P</td><td class="c we">OFF</td><td class="c lv">OFF</td><td class="c">P</td><td class="c">A</td><td class="c">OFF</td></tr>
+            <tr class="tally"><th colspan="2">當日醫師人數</th><td>3</td><td>3</td><td>3</td><td>0</td><td>3</td><td>3</td><td>3</td></tr>
+            <tr class="tally"><th colspan="2">當日助理／醫護長</th><td>4</td><td>4</td><td>3</td><td>0</td><td>2</td><td>4</td><td class="al">1</td></tr>
+            <tr class="tally"><th colspan="2">當日總人力</th><td>7</td><td>7</td><td>6</td><td>0</td><td>5</td><td>7</td><td>4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="sw we"></i>週六／週日</span>
+      <span><i class="sw lv"></i>休假類代碼</span>
+      <span><i class="sw sp"></i>支援他院</span>
+      <span><i class="sw gp"></i>該日未排班</span>
+      <span><i class="sw al"></i>人力低於門檻</span>
+    </div>
+    <p class="lede">10 月 7 日兩件事同時亮起:李宗翰整格空著沒排,加上張怡君請特休、王思婷排休,現場只剩醫護長一人顧三診——這正是排班時最容易漏掉、當天才發現的狀況。門檻設定為「有看診的日子至少 1 位醫師、2 位助理或醫護長」;10 月 4 日全院休診,不會誤報。</p>
+  </div>
+</section>
+
+<section id="summary">
+  <div class="sec-head"><h2>月結統計算什麼</h2><span class="ref">月結統計!A4:P34</span></div>
+  <p class="lede">每人一列,全部由班表推算。唯一手填的是加班時數,因為預排班表本來就算不出加班——那要看打卡紀錄。</p>
+  <div class="sec-body scroll">
+    <table>
+      <thead><tr><th>欄位</th><th>怎麼來的</th><th>誰要看</th></tr></thead>
+      <tbody>
+        <tr><th>出勤天數</th><td>代碼「計出勤」欄加總</td><td>院長、人資</td></tr>
+        <tr><th>排班工時</th><td>代碼「排班工時」權重加總</td><td>人資</td></tr>
+        <tr><th>總診次</th><td>代碼「診次」權重加總</td><td>院長、營運</td></tr>
+        <tr><th>六種假別天數</th><td>各假別代碼計次</td><td>人資、當事人</td></tr>
+        <tr><th>支援他院</th><td>代碼「支」計次</td><td>總部調度</td></tr>
+        <tr><th>加班時數</th><td>由打卡紀錄手填</td><td>人資、薪資</td></tr>
+        <tr><th>實際工時</th><td>排班工時 + 加班時數</td><td>人資、薪資</td></tr>
+        <tr><th>排班完整度檢核</th><td>已排格數與當月天數比對,不足顯示「缺 N 天」</td><td>醫護長交表前自檢</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="rollout">
+  <div class="sec-head"><h2>導入時程</h2></div>
+  <p class="lede">四間院所一次全上線幾乎一定會亂。先讓一間跑滿一個月,把真正會卡住的地方挖出來再推。</p>
+  <div class="steps sec-body">
+    <div class="step">
+      <span class="n">01</span>
+      <div><h3>盤點各院所現況</h3><p>現在誰排班?紙本、LINE 群還是各自的 Excel?打卡機能不能匯出檔案?這一步決定後面能省多少手工。</p></div>
+      <div class="when">約 1 週</div>
+    </div>
+    <div class="step">
+      <span class="n">02</span>
+      <div><h3>代碼表定案</h3><p>把班別代碼與診次時間送各院長、醫護長確認。代碼一旦上線就不該再改,改了歷史資料會對不起來。</p></div>
+      <div class="when">約 1 週</div>
+    </div>
+    <div class="step">
+      <span class="n">03</span>
+      <div><h3>單院試辦一個月</h3><p>挑人力最複雜的一間跑滿整個月,含臨時調班與請假。試辦期並行舊做法,不要斷退路。</p></div>
+      <div class="when">1 個月</div>
+    </div>
+    <div class="step">
+      <span class="n">04</span>
+      <div><h3>修正後全體系上線</h3><p>附一頁圖解教學,訂下每月 25 日交下月班表、之後鎖表的規矩。</p></div>
+      <div class="when">次月起</div>
+    </div>
+  </div>
+</section>
+
+<section id="asks">
+  <div class="sec-head"><h2>待確認事項</h2></div>
+  <p class="lede">這四題沒有答案,表就只能停在「好看但不能用」。建議帶著這頁去問。</p>
+  <div class="asks sec-body">
+    <div class="ask"><i class="box"></i><div><b>這份表要不要接薪資?</b><span>要接的話,加班時數就不能只是參考值,必須逐月與打卡紀錄核對。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>醫師跨院支援,出勤算誰的?</b><span>算原院所還是支援院所?牽涉到各院所的人力成本分攤與診次業績歸屬。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>誰可以改、誰只能看?</b><span>建議各院所醫護長只能改自己那一份,總部保留設定分頁的修改權。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>現有打卡機能匯出嗎?</b><span>能匯出 Excel 的話,實際出勤與加班時數就不用手 key,這是省力最大的一環。</span></div></div>
+  </div>
+</section>
+
+<section id="law" class="callout">
+  <h2>法規提醒</h2>
+  <p>本表是<strong>預排班表加月結統計</strong>,不能取代法定出勤紀錄。依勞動基準法第 30 條第 5 項及第 6 項,雇主應置備勞工出勤紀錄,<strong>逐日記載勞工出勤情形至分鐘為止</strong>,並保存 5 年。診所的助理與護理人員屬勞工,務必另備打卡或簽到紀錄。</p>
+  <p>受僱醫師是否適用勞基法、工時如何認定,依其僱傭契約與主管機關公告而定,建議請人資或勞務顧問確認後,再回頭定義醫師的工時欄位。</p>
+  <p class="src">法源:勞動基準法第 30 條(全國法規資料庫)。本頁不構成法律意見。</p>
+</section>
+
+<footer>
+  規格草案 v0.1 · 依現況假設四間院所、每院所至多 30 人。院所名稱、人員名單與診次時間皆為範例資料,上線前請整批置換。附件 Excel 範本已內建下拉選單、條件式格式與月結公式,開檔即可試填。
+</footer>
+
+</main>
+</div>
