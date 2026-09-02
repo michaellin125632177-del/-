@@ -10,7 +10,7 @@
   --petrol:#1F5A57; --petrol-soft:#E4EEEC;
   --cf-input:#FCEFC8; --cf-input-b:#E6C978;
   --cf-weekend:#DFEAF3; --cf-leave:#E2E2E0; --cf-supp:#D3E8C6;
-  --cf-gap:#FBDEDE; --cf-alert:#F2A9A4;
+  --cf-gap:#FBDEDE; --cf-alert:#F2A9A4; --cf-ot:#FBE0CC;
   --alert:#A8433C; --ok:#3F7A52;
   --shadow:0 1px 2px rgba(21,42,44,.06), 0 8px 24px -16px rgba(21,42,44,.28);
   --serif:"Noto Serif TC", Georgia, "Songti TC", serif;
@@ -25,7 +25,7 @@
     --petrol:#68AFA6; --petrol-soft:#1B3230;
     --cf-input:#4A3D1B; --cf-input-b:#7E6828;
     --cf-weekend:#1F3242; --cf-leave:#303838; --cf-supp:#26401F;
-    --cf-gap:#452525; --cf-alert:#7A3630;
+    --cf-gap:#452525; --cf-alert:#7A3630; --cf-ot:#4A3320; --cf-ot:#4A3320;
     --alert:#E08B84; --ok:#7FBE92;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
   }
@@ -130,6 +130,7 @@ td.num{text-align:right; font-family:var(--mono);}
 .lv{background:var(--cf-leave)}
 .sp{background:var(--cf-supp)}
 .gp{background:var(--cf-gap)}
+.ot{background:var(--cf-ot)}
 .al{background:var(--cf-alert); color:var(--ink); font-weight:700;}
 .tally th,.tally td{background:var(--sunk); font-weight:700; color:var(--ink); font-size:11.5px;}
 .tally td.al{background:var(--cf-alert)}
@@ -179,6 +180,12 @@ td.num{text-align:right; font-family:var(--mono);}
 .callout p{max-width:66ch; font-size:14px;}
 .callout .src{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
 
+.callout.note{border-top-color:var(--cf-input-b);}
+.callout.note h2{font-size:17px}
+.finding{background:var(--sunk); border-left:3px solid var(--alert); border-radius:0 4px 4px 0;
+  padding:14px 18px; display:flex; flex-direction:column; gap:8px;}
+.finding b{color:var(--ink); font-size:14.5px;}
+.finding p{font-size:13.5px; max-width:64ch;}
 footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   font-size:12.5px; color:var(--muted); max-width:70ch;}
 </style>
@@ -188,13 +195,13 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 <header class="masthead">
   <div class="kicker">體系人事作業 · 規格草案 v0.1</div>
   <h1>統一出勤表規格書</h1>
-  <p class="standfirst">四間院所、三種職類、一份月班表。<strong>統一的是欄位與班別代碼,不是版面</strong>——醫師以「診次」計,醫護長與助理以「工時」計,共用同一套代碼,月結才能橫向比較。</p>
+  <p class="standfirst">四間院所、三種職類,預排班表與法定出勤紀錄合為一份檔案。<strong>統一的是欄位與班別代碼,不是版面</strong>——醫師以「診次」計,醫護長與助理以「工時」計,共用同一套代碼,月結才能橫向比較。</p>
   <dl class="facts">
     <div class="fact"><dt>適用院所</dt><dd>4 間</dd></div>
     <div class="fact"><dt>職類</dt><dd>醫師 · 醫護長 · 助理</dd></div>
     <div class="fact"><dt>班別代碼</dt><dd>16 組</dd></div>
-    <div class="fact"><dt>分頁</dt><dd>4 頁</dd></div>
-    <div class="fact"><dt>手填欄位</dt><dd>3 處</dd></div>
+    <div class="fact"><dt>分頁</dt><dd>6 頁</dd></div>
+    <div class="fact"><dt>出勤紀錄</dt><dd>930 列</dd></div>
   </dl>
 </header>
 
@@ -205,6 +212,8 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     <li><a href="#codes">班別代碼表</a></li>
     <li><a href="#sheets">檔案結構</a></li>
     <li><a href="#grid">班表長這樣</a></li>
+    <li><a href="#record">出勤紀錄</a></li>
+    <li><a href="#overtime">加班怎麼認定</a></li>
     <li><a href="#summary">月結統計</a></li>
     <li><a href="#rollout">導入時程</a></li>
     <li><a href="#asks">待確認事項</a></li>
@@ -224,17 +233,17 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     </div>
     <div class="principle">
       <h3>手填最少、自動最多</h3>
-      <p>整份檔案只有三處要打字:員工編號、每日班別代碼、加班時數。姓名、職類、工時、診次、假別天數全部公式帶出。</p>
+      <p>整份檔案只有三處要動手:班表選員工編號、逐日選班別代碼、把打卡資料整段貼上。姓名、職類、工時、診次、假別天數、加班、異常判定全部公式帶出。</p>
     </div>
     <div class="principle">
-      <h3>班表不等於出勤紀錄</h3>
-      <p>這份是「預排 + 月結」。實際到離時間仍以打卡機為準,兩者分開,誰也不假裝是誰。</p>
+      <h3>預排與實際分開記</h3>
+      <p>班表是「打算怎麼排」,出勤紀錄是「實際怎麼跑」。兩者各佔一個分頁、互相比對,誰也不假裝是誰——法規要的是後者,排班需要的是前者。</p>
     </div>
   </div>
 </section>
 
 <section id="roles">
-  <div class="sec-head"><h2>三種職類,一套代碼</h2><span class="ref">設定!D36:D64</span></div>
+  <div class="sec-head"><h2>三種職類,一套代碼</h2><span class="ref">設定!D41:D70</span></div>
   <p class="lede">這是統一表最容易踩雷的地方。醫師的一天是「幾個診次」,助理的一天是「幾個小時」,兩者不能塞進同一種格子計算。</p>
   <div class="sec-body scroll">
     <table>
@@ -249,59 +258,69 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 </section>
 
 <section id="codes">
-  <div class="sec-head"><h2>班別代碼表</h2><span class="ref">設定!B5:I20</span></div>
-  <p class="lede">整套表的核心。月結的每一個數字,都是把這張表的「排班工時」與「診次」權重乘回班表算出來的——改這裡的權重,統計會全部跟著變,不必改任何公式。</p>
+  <div class="sec-head"><h2>班別代碼表</h2><span class="ref">設定!B5:J20</span></div>
+  <p class="lede">整套表的核心。月結的每一個數字,都是把這張表的權重乘回班表算出來的——改這裡的權重,統計會全部跟著變,不必動任何公式。有固定時段的代碼必須滿足<strong>應退 − 應到 − 休息 = 排班工時</strong>,否則出勤紀錄會算出不存在的加班。</p>
   <div class="sec-body scroll">
     <table>
-      <thead><tr><th>代碼</th><th>名稱</th><th>時段</th><th class="num">排班工時</th><th class="num">診次</th><th class="num">計出勤</th></tr></thead>
+      <thead><tr><th>代碼</th><th>名稱</th><th>應到</th><th>應退</th><th class="num">休息(分)</th><th class="num">排班工時</th><th class="num">診次</th></tr></thead>
       <tbody>
-        <tr class="grp"><td colspan="6">上班類</td></tr>
-        <tr><td class="code">D1</td><td>早診</td><td class="code">09:00–12:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
-        <tr><td class="code">D2</td><td>午診</td><td class="code">14:00–17:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
-        <tr><td class="code">D3</td><td>晚診</td><td class="code">18:00–21:00</td><td class="num">3.0</td><td class="num">1</td><td class="num">1</td></tr>
-        <tr><td class="code">FD</td><td>全日診</td><td class="code">09:00–21:00</td><td class="num">6.0</td><td class="num">2</td><td class="num">1</td></tr>
-        <tr><td class="code">A</td><td>早班</td><td class="code">09:00–18:00</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
-        <tr><td class="code">P</td><td>晚班</td><td class="code">13:00–21:30</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
-        <tr><td class="code">ADM</td><td>行政班</td><td class="code">09:00–18:00</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
-        <tr><td class="code">支</td><td>支援他院</td><td class="code">依支援院所</td><td class="num">8.0</td><td class="num">2</td><td class="num">1</td></tr>
-        <tr><td class="code">訓</td><td>教育訓練 / 學會</td><td class="code">全日</td><td class="num">8.0</td><td class="num">0</td><td class="num">1</td></tr>
-        <tr class="grp"><td colspan="6">休假類</td></tr>
-        <tr><td class="code">OFF</td><td>排休</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">特</td><td>特休</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">病</td><td>病假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">事</td><td>事假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">公</td><td>公假</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">國</td><td>國定假日</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
-        <tr><td class="code">休</td><td>休診</td><td class="code">—</td><td class="num">0.0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr class="grp"><td colspan="7">上班類 · 計出勤</td></tr>
+        <tr><td class="code">D1</td><td>早診</td><td class="code">09:00</td><td class="code">12:00</td><td class="num">0</td><td class="num">3.0</td><td class="num">1</td></tr>
+        <tr><td class="code">D2</td><td>午診</td><td class="code">14:00</td><td class="code">17:00</td><td class="num">0</td><td class="num">3.0</td><td class="num">1</td></tr>
+        <tr><td class="code">D3</td><td>晚診</td><td class="code">18:00</td><td class="code">21:00</td><td class="num">0</td><td class="num">3.0</td><td class="num">1</td></tr>
+        <tr><td class="code">FD</td><td>全日診(早+午)</td><td class="code">09:00</td><td class="code">17:00</td><td class="num">120</td><td class="num">6.0</td><td class="num">2</td></tr>
+        <tr><td class="code">A</td><td>早班</td><td class="code">09:00</td><td class="code">18:00</td><td class="num">60</td><td class="num">8.0</td><td class="num">0</td></tr>
+        <tr><td class="code">P</td><td>晚班</td><td class="code">12:30</td><td class="code">21:30</td><td class="num">60</td><td class="num">8.0</td><td class="num">0</td></tr>
+        <tr><td class="code">ADM</td><td>行政班</td><td class="code">09:00</td><td class="code">18:00</td><td class="num">60</td><td class="num">8.0</td><td class="num">0</td></tr>
+        <tr><td class="code">支</td><td>支援他院</td><td class="code">無固定</td><td class="code">無固定</td><td class="num">60</td><td class="num">8.0</td><td class="num">2</td></tr>
+        <tr><td class="code">訓</td><td>教育訓練 / 學會</td><td class="code">無固定</td><td class="code">無固定</td><td class="num">60</td><td class="num">8.0</td><td class="num">0</td></tr>
+        <tr class="grp"><td colspan="7">休假類 · 不計出勤</td></tr>
+        <tr><td class="code">OFF</td><td>排休</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">特</td><td>特休</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">病</td><td>病假</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">事</td><td>事假</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">公</td><td>公假</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">國</td><td>國定假日</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
+        <tr><td class="code">休</td><td>休診</td><td class="code">—</td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td><td class="num">0</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="lede" style="font-size:13.5px;color:var(--muted)">特休與公假是有薪假,以「天數」計而非工時,所以排班工時記 0,薪資另依請假天數計算。診次時間請改成貴體系實際的看診時段。</p>
+  <p class="lede" style="font-size:13.5px;color:var(--muted)">支援他院與教育訓練沒有固定時段,不判定遲到早退,工時依實際打卡計。特休與公假是有薪假,以天數計而非工時,所以排班工時記 0,薪資另依請假天數計算。診次時間請改成貴體系實際的看診時段。</p>
 </section>
 
 <section id="sheets">
-  <div class="sec-head"><h2>檔案結構</h2><span class="ref">4 個分頁</span></div>
-  <p class="lede">一間院所一個檔,從範本另存,檔名格式 <span class="code">2026-10_中山院_出勤表.xlsx</span>。若要放同一個檔,「班表」與「月結統計」必須一起選取後複製,否則統計會算到別間院所。</p>
+  <div class="sec-head"><h2>檔案結構</h2><span class="ref">6 個分頁</span></div>
+  <p class="lede">一間院所一個檔,從範本另存,檔名格式 <span class="code">2026-10_中山院_出勤表.xlsx</span>。不建議把多間院所塞進同一個檔——出勤紀錄與月結統計的公式都綁定同一份班表。</p>
   <div class="sheets sec-body">
     <div class="sheet">
       <div class="tab">說明 <span class="pill auto">唯讀</span></div>
-      <p>填表順序、顏色定義、交表時程、法規提醒。新到職的醫護長看這頁就會填。</p>
+      <p>填表順序、顏色定義、交表時程、四個內建假設、法規提醒。新到職的醫護長看這頁就會填。</p>
       <div class="who">維護:總部</div>
     </div>
     <div class="sheet">
       <div class="tab">設定 <span class="pill fill">總部手填</span></div>
-      <p>班別代碼表、院所清單、人員名冊。所有下拉選單都指向這裡,改一處全檔更新。</p>
+      <p>班別代碼表、計算參數、院所清單、人員名冊。所有下拉選單與統計權重都指向這裡,改一處全檔更新。</p>
       <div class="who">維護:總部 · 各院所勿動</div>
     </div>
     <div class="sheet">
       <div class="tab">班表 <span class="pill fill">院所手填</span></div>
-      <p>30 人 × 31 天的排班格。日期與星期隨年月自動換算,底下三列即時算當日人力。</p>
-      <div class="who">維護:各院所醫護長</div>
+      <p>30 人 × 31 天的預排班格。日期與星期隨年月自動換算,底下三列即時算當日人力。</p>
+      <div class="who">維護:各院所醫護長 · 每月 25 日前</div>
     </div>
     <div class="sheet">
-      <div class="tab">月結統計 <span class="pill auto">自動</span><span class="pill fill">加班時數手填</span></div>
-      <p>16 欄月結:出勤天數、排班工時、總診次、六種假別天數、支援次數、排班完整度檢核。</p>
-      <div class="who">維護:公式自動 · 加班時數由打卡紀錄填入</div>
+      <div class="tab">打卡匯入 <span class="pill fill">整段貼上</span></div>
+      <p>只有四欄:員工編號、日期、上班時間、下班時間,一天一列。貼上後自動檢核查無員編與重複打卡。</p>
+      <div class="who">維護:各院所 · 每月初</div>
+    </div>
+    <div class="sheet">
+      <div class="tab">出勤紀錄 <span class="pill auto">自動</span></div>
+      <p>930 列(30 人 × 31 天)的法定紀錄。自動把班表與打卡對起來,判定五種出勤狀態並算加班。</p>
+      <div class="who">維護:公式自動 · 醫護長處理異常</div>
+    </div>
+    <div class="sheet">
+      <div class="tab">月結統計 <span class="pill auto">全自動</span></div>
+      <p>19 欄月結:出勤天數、排班工時、總診次、六種假別、支援次數、加班、遲到早退未打卡次數。</p>
+      <div class="who">維護:不需手填 · 送人資</div>
     </div>
   </div>
 </section>
@@ -344,24 +363,94 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   </div>
 </section>
 
+<section id="record">
+  <div class="sec-head"><h2>出勤紀錄</h2><span class="ref">出勤紀錄!A3:R932</span></div>
+  <p class="lede">一人一天一列,共 930 列。左半邊從班表帶出「應該怎樣」,右半邊從打卡帶出「實際怎樣」,中間那一欄自動判定差在哪裡。這是勞基法要的那份紀錄,也是唯一能證明加班時數的東西。</p>
+  <div class="sec-body">
+    <div class="mock">
+      <div class="mock-bar">出勤紀錄 · 範例中的五筆需處理列</div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>日期</th><th>姓名</th><th>排班</th><th>應到</th><th>應退</th><th>實際上班</th><th>實際下班</th><th>實際工時</th><th>出勤異常</th><th>加班</th></tr></thead>
+          <tbody>
+            <tr><td class="code">10/02</td><th>張怡君</th><td class="c">A</td><td class="code">09:00</td><td class="code">18:00</td><td class="code">09:18</td><td class="code">18:04</td><td class="code">7.77</td><td class="al">遲到</td><td class="code">–</td></tr>
+            <tr><td class="code">10/02</td><th>李宗翰</th><td class="c">P</td><td class="code">12:30</td><td class="code">21:30</td><td class="code">12:30</td><td class="code">20:40</td><td class="code">7.17</td><td class="al">早退</td><td class="code">–</td></tr>
+            <tr><td class="code">10/05</td><th>蔡孟蓉</th><td class="c">A</td><td class="code">09:00</td><td class="code">18:00</td><td class="code">08:58</td><td class="code">20:30</td><td class="code">10.53</td><td>正常</td><td class="code ot">2.50</td></tr>
+            <tr><td class="code">10/08</td><th>王思婷</th><td class="c">A</td><td class="code">09:00</td><td class="code">18:00</td><td class="code">—</td><td class="code">—</td><td class="code">—</td><td class="al">未打卡</td><td class="code">–</td></tr>
+            <tr><td class="code">10/11</td><th>陳彥廷</th><td class="c lv">休</td><td class="code">—</td><td class="code">—</td><td class="code">09:00</td><td class="code">13:00</td><td class="code">4.00</td><td class="al">假日出勤</td><td class="code ot">4.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="sw al"></i>需處理的異常</span>
+      <span><i class="sw ot"></i>當天有加班</span>
+      <span>其餘 925 列判定為「正常」或留白</span>
+    </div>
+    <p class="lede">五種判定:<strong>正常、遲到、早退、未打卡、假日出勤</strong>。整份 930 列用上方篩選鈕挑出非「正常」的,一個月通常只有個位數要處理。假日出勤特別要看——例假日出勤在法規上是有限制的,不該是常態。</p>
+  </div>
+
+  <div class="sec-body">
+    <h3 style="font-family:var(--sans);font-size:16px;font-weight:700;color:var(--ink)">打卡匯入要準備什麼</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>欄</th><th>內容</th><th>格式要求</th></tr></thead>
+        <tbody>
+          <tr><th>A</th><td>員工編號</td><td>要對得上人員名冊,否則檢核欄會標「查無員編」</td></tr>
+          <tr><th>B</th><td>日期</td><td>真正的日期格式,不能是文字</td></tr>
+          <tr><th>C</th><td>上班時間</td><td>真正的時間格式,不能是文字</td></tr>
+          <tr><th>D</th><td>下班時間</td><td>同上。一天一列,不是逐筆刷卡</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede">多數打卡系統都能匯出這種格式,欄位順序不同就先在 Excel 調整。貼上後看最右邊的檢核欄,它會抓出「查無員編」與「同一天重複打卡」兩種問題——這兩種是月結對不起來的主要原因。沒有打卡機的院所,可以直接把出勤紀錄的實際上下班兩欄公式刪掉改成手填,其餘照算。</p>
+  </div>
+</section>
+
+<section id="overtime">
+  <div class="sec-head"><h2>加班怎麼認定</h2><span class="ref">設定!B26:C28</span></div>
+  <div class="sec-body">
+    <div class="finding">
+      <b>這是實測出來的問題,不是理論顧慮</b>
+      <p>用範例的一個月打卡資料試算:同仁平均每天晚 10 到 20 分鐘打下班卡——這是收尾、關機、送最後一位病人的正常時間。如果逐分鐘認定加班,九個人一個月會累積出 <strong>45.6 小時</strong>不存在的加班。套上門檻後是 <strong>6.5 小時</strong>,正好就是那兩筆真的加班:一次假日進診所 4 小時、一次晚班做到 20:30 的 2.5 小時。</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>參數</th><th class="num">預設值</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><th>加班認定門檻</th><td class="num">30 分</td><td>超過排班工時多少分鐘才算加班,低於門檻視為正常收尾</td></tr>
+          <tr><th>加班計算單位</th><td class="num">30 分</td><td>認定後無條件捨去到此單位。填 1 表示逐分鐘計</td></tr>
+          <tr><th>遲到早退寬限</th><td class="num">5 分</td><td>差距在此範圍內不判定為遲到或早退</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede">這三個數字<strong>不是法律規定的</strong>,是勞資雙方的認定慣例。放在設定分頁改一次全檔生效,但上線前一定要跟人資或勞務顧問確認,而且要讓同仁知道規則——事後才說「晚 20 分鐘不算加班」會出事。</p>
+  </div>
+</section>
+
 <section id="summary">
-  <div class="sec-head"><h2>月結統計算什麼</h2><span class="ref">月結統計!A4:P34</span></div>
-  <p class="lede">每人一列,全部由班表推算。唯一手填的是加班時數,因為預排班表本來就算不出加班——那要看打卡紀錄。</p>
+  <div class="sec-head"><h2>月結統計</h2><span class="ref">月結統計!A5:S35</span></div>
+  <p class="lede">每人一列、19 欄,全部由班表與出勤紀錄推算,沒有一格要手填。左半邊回答「排了多少」,右半邊回答「實際跑成怎樣」。</p>
   <div class="sec-body scroll">
     <table>
       <thead><tr><th>欄位</th><th>怎麼來的</th><th>誰要看</th></tr></thead>
       <tbody>
+        <tr class="grp"><td colspan="3">來自班表</td></tr>
         <tr><th>出勤天數</th><td>代碼「計出勤」欄加總</td><td>院長、人資</td></tr>
         <tr><th>排班工時</th><td>代碼「排班工時」權重加總</td><td>人資</td></tr>
         <tr><th>總診次</th><td>代碼「診次」權重加總</td><td>院長、營運</td></tr>
         <tr><th>六種假別天數</th><td>各假別代碼計次</td><td>人資、當事人</td></tr>
         <tr><th>支援他院</th><td>代碼「支」計次</td><td>總部調度</td></tr>
-        <tr><th>加班時數</th><td>由打卡紀錄手填</td><td>人資、薪資</td></tr>
+        <tr class="grp"><td colspan="3">來自出勤紀錄</td></tr>
+        <tr><th>加班時數</th><td>出勤紀錄各日加班加總(已套門檻)</td><td>人資、薪資</td></tr>
         <tr><th>實際工時</th><td>排班工時 + 加班時數</td><td>人資、薪資</td></tr>
+        <tr><th>遲到 / 早退 / 未打卡次數</th><td>出勤異常欄計次,有值就標色</td><td>醫護長、人資</td></tr>
+        <tr class="grp"><td colspan="3">自我檢核</td></tr>
         <tr><th>排班完整度檢核</th><td>已排格數與當月天數比對,不足顯示「缺 N 天」</td><td>醫護長交表前自檢</td></tr>
       </tbody>
     </table>
   </div>
+  <p class="lede" style="font-size:13.5px;color:var(--muted)">加班時數是「實際工時 − 排班工時」,尚未依勞基法第 24 條換算加班費率(平日前兩小時、後兩小時、休息日、例假日費率都不同),薪資請另行計算。不使用打卡匯入的院所,可以直接把加班時數那一欄的公式覆蓋成手動數字。</p>
 </section>
 
 <section id="rollout">
@@ -380,12 +469,12 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     </div>
     <div class="step">
       <span class="n">03</span>
-      <div><h3>單院試辦一個月</h3><p>挑人力最複雜的一間跑滿整個月,含臨時調班與請假。試辦期並行舊做法,不要斷退路。</p></div>
+      <div><h3>單院試辦一個月</h3><p>挑人力最複雜的一間跑滿整個月,含臨時調班與請假。月底真的把打卡機資料匯進來跑一次月結,對照舊方式的數字差在哪。試辦期並行舊做法,不要斷退路。</p></div>
       <div class="when">1 個月</div>
     </div>
     <div class="step">
       <span class="n">04</span>
-      <div><h3>修正後全體系上線</h3><p>附一頁圖解教學,訂下每月 25 日交下月班表、之後鎖表的規矩。</p></div>
+      <div><h3>修正後全體系上線</h3><p>附一頁圖解教學,訂下每月 25 日交下月班表、次月 5 日前完成打卡匯入與異常處理的規矩。每月結束後另存一份唯讀封存檔。</p></div>
       <div class="when">次月起</div>
     </div>
   </div>
@@ -395,22 +484,23 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   <div class="sec-head"><h2>待確認事項</h2></div>
   <p class="lede">這四題沒有答案,表就只能停在「好看但不能用」。建議帶著這頁去問。</p>
   <div class="asks sec-body">
-    <div class="ask"><i class="box"></i><div><b>這份表要不要接薪資?</b><span>要接的話,加班時數就不能只是參考值,必須逐月與打卡紀錄核對。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>加班門檻要設多少?</b><span>預設 30 分鐘認定、30 分鐘為單位。這是慣例不是法規,要人資或勞務顧問拍板,而且必須讓同仁事先知道。</span></div></div>
     <div class="ask"><i class="box"></i><div><b>醫師跨院支援,出勤算誰的?</b><span>算原院所還是支援院所?牽涉到各院所的人力成本分攤與診次業績歸屬。</span></div></div>
     <div class="ask"><i class="box"></i><div><b>誰可以改、誰只能看?</b><span>建議各院所醫護長只能改自己那一份,總部保留設定分頁的修改權。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>現有打卡機能匯出嗎?</b><span>能匯出 Excel 的話,實際出勤與加班時數就不用手 key,這是省力最大的一環。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>打卡機匯出長什麼樣?</b><span>需要「員工編號 / 日期 / 上班 / 下班」一天一列。如果只能匯出逐筆刷卡紀錄,要先在 Excel 併成一天一列。</span></div></div>
   </div>
 </section>
 
 <section id="law" class="callout">
   <h2>法規提醒</h2>
-  <p>本表是<strong>預排班表加月結統計</strong>,不能取代法定出勤紀錄。依勞動基準法第 30 條第 5 項及第 6 項,雇主應置備勞工出勤紀錄,<strong>逐日記載勞工出勤情形至分鐘為止</strong>,並保存 5 年。診所的助理與護理人員屬勞工,務必另備打卡或簽到紀錄。</p>
-  <p>受僱醫師是否適用勞基法、工時如何認定,依其僱傭契約與主管機關公告而定,建議請人資或勞務顧問確認後,再回頭定義醫師的工時欄位。</p>
-  <p class="src">法源:勞動基準法第 30 條(全國法規資料庫)。本頁不構成法律意見。</p>
+  <p>依勞動基準法第 30 條第 5 項及第 6 項,雇主應置備勞工出勤紀錄,<strong>逐日記載勞工出勤情形至分鐘為止</strong>,並保存 5 年。「出勤紀錄」分頁就是為此設計的——但它只有在每月封存後才算數:請每月結束後另存一份唯讀檔歸檔,不要只留一份最新版一直覆蓋,否則五年前的紀錄早就不見了。</p>
+  <p>加班時數欄是「實際工時 − 排班工時」,<strong>尚未換算加班費率</strong>。勞基法第 24 條對平日延長工時前兩小時、後兩小時、休息日、例假日各有不同倍率,薪資請依貴體系辦法另行計算。例假日出勤在法規上有嚴格限制,出勤紀錄把它標紅是提醒,不是核准。</p>
+  <p>受僱醫師是否適用勞基法、工時如何認定,依其僱傭契約與主管機關公告而定,建議請人資或勞務顧問確認後,再回頭定義醫師的工時欄位與班別代碼的排班工時。</p>
+  <p class="src">法源:勞動基準法第 24 條、第 30 條(全國法規資料庫)。本頁不構成法律意見。</p>
 </section>
 
 <footer>
-  規格草案 v0.1 · 依現況假設四間院所、每院所至多 30 人。院所名稱、人員名單與診次時間皆為範例資料,上線前請整批置換。附件 Excel 範本已內建下拉選單、條件式格式與月結公式,開檔即可試填。
+  規格草案 v0.2 · 依現況假設四間院所、每院所至多 30 人。院所名稱、人員名單、診次時間與打卡資料皆為範例(中山院 2026 年 10 月、9 位同仁),上線前請整批置換。範例刻意放了遲到、早退、未打卡、假日出勤、加班各一筆,方便對照異常判定怎麼跑。附件 Excel 範本已內建下拉選單、條件式格式、打卡比對與月結公式,開檔即可試填。
 </footer>
 
 </main>
