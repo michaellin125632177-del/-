@@ -242,6 +242,8 @@ for c in range(DAY_C0, DAY_C1 + 1):
     w.font, w.fill, w.alignment, w.border = font(9, True), SUB_FILL, CTR, BOX
 
 # 範例班表資料
+DOC_OFF = {"D001": 0, "D002": 1, "D003": 4}   # 各醫師固定排休日(週一/二/五)
+
 def build_sample():
     sched = {}
     for i, (eid, name, role, *_ ) in enumerate(PEOPLE):
@@ -249,9 +251,10 @@ def build_sample():
         for d in range(1, DAYS_IN_MONTH + 1):
             wd = dt.date(YEAR, MONTH, d).weekday()   # 0=Mon .. 6=Sun
             if role == "醫師":
+                # 支援班要先判定,否則會被排休蓋掉
                 if wd == 6: code = "休"
-                elif wd == i: code = "OFF"
                 elif eid == "D003" and wd == 2: code = "支"
+                elif wd == DOC_OFF[eid]: code = "OFF"
                 else: code = ["FD","D1","D2","D3","FD","D2"][(d + i) % 6]
             elif role == "醫護長":
                 if wd == 6: code = "OFF"
@@ -265,10 +268,13 @@ def build_sample():
         # 插幾筆假別讓統計看得出來
             row.append(code)
         sched[eid] = row
-    sched["D002"][9]  = "訓"
+    sched["D002"][12] = "訓"     # 10/13 學會
     sched["A001"][14] = "特"
+    sched["A002"][20] = "事"
     sched["A003"][21] = "病"
     sched["N001"][6]  = "特"
+    for eid in sched:            # 10/10 國慶日,全院休診
+        sched[eid][9] = "國"
     return sched
 
 SAMPLE = build_sample()
