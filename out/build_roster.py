@@ -259,6 +259,13 @@ def wd_of(d):     # 該日星期(中文)
     return WK_CH[dt.date(YEAR, MONTH, d).weekday()]
 PERIOD = f"{YEAR} 年 {MONTH} 月"
 
+# 助理側四個分頁在名單匯入前是空的,標題直接講明,避免有人以為壞掉
+PENDING = not ASSISTANTS
+PEND_TAG = "　　⚠ 助理與醫護長名單尚未匯入,本分頁目前是空的" if PENDING else ""
+
+def title_of(text):
+    return text + PEND_TAG
+
 def lookup(eid, idx, fallback_formula):
     """已知人員寫實值,空白列留公式(之後填編號會自動帶出)。"""
     return ROSTER_BY_EID[eid][idx] if eid in ROSTER_BY_EID else fallback_formula
@@ -320,6 +327,11 @@ BLOCKS = [
   "單位(預設 30 分)。否則每天晚幾分鐘打卡都會被算成加班,一個月會憑空多出\n"
   "好幾小時。遲到早退另有寬限(預設 5 分)。三個參數在「設定」的計算參數區。\n"
   "這三個數字是勞資慣例、不是法規,上線前請人資確認,並讓同仁事先知道規則。"),
+ ("兩種下拉箭頭不一樣",
+  "標題列上的箭頭是「篩選鈕」,用來隱藏或顯示列,不是拿來選資料的。\n"
+  "要選員工編號或班別代碼,請點「資料列」的格子——游標移上去右邊才會出現選單箭頭。\n"
+  "另外,助理班表、打卡匯入、出勤紀錄、月結統計這四個分頁在助理與醫護長名單匯入前\n"
+  "都是空的,篩選鈕點開只會看到「(空格)」,那是正常的,不是壞掉。"),
  ("如果有些格子是空白的",
   "姓名、專科、日期、星期都是實際文字,任何檢視器都看得到。\n"
   "但統計類的格子(醫師月結的診次數、班表底下的人力檢核、出勤紀錄、月結統計)是公式,\n"
@@ -788,13 +800,16 @@ for col, w in {"A":9,"B":10,"C":9,"D":10}.items():
     asx.column_dimensions[col].width = w
 for c in range(AS_C0, AS_C1 + 1):
     asx.column_dimensions[get_column_letter(c)].width = 4.4
-put(asx, "A1", "助理 / 醫護長 班表(工時制)", TITLE_F, border=False)
+put(asx, "A1", title_of("助理 / 醫護長 班表(工時制)"), TITLE_F,
+    IN_FILL if PENDING else None, LEFT, border=False)
 asx.merge_cells(start_row=1, start_column=1, end_row=1, end_column=AS_C1)
 put(asx, "A2", "期間", font(10, True), SUB_FILL, CTR)
 asx["B2"] = PERIOD
 asx["B2"].font, asx["B2"].fill, asx["B2"].alignment, asx["B2"].border = (
     font(10, True), CALC_FILL, CTR, BOX)
-put(asx, "E2", "← 各院所醫護長只填自己院所那幾列。院所欄由人員名冊自動帶出。",
+put(asx, "E2",
+    "← 各院所醫護長只填自己院所那幾列。院所欄由人員名冊自動帶出。"
+    "要選員工編號請點「資料列」的格子(第 5 列以下),標題列上的箭頭是篩選鈕不是選單。",
     font(9, color="808080"), None, LEFT, border=False)
 
 for lab, col in (("員工編號",1), ("姓名",2), ("職類",3), ("院所",4)):
@@ -881,7 +896,8 @@ pc.sheet_view.showGridLines = False
 pc.freeze_panes = "A3"
 for col, w in {"A":13,"B":13,"C":12,"D":12,"E":16,"F":16,"G":2,"H":76}.items():
     pc.column_dimensions[col].width = w
-put(pc, "A1", "打卡匯入(把打卡機匯出的資料貼在下面四欄)", TITLE_F, border=False)
+put(pc, "A1", title_of("打卡匯入(把打卡機匯出的資料貼在下面四欄)"), TITLE_F,
+    IN_FILL if PENDING else None, LEFT, border=False)
 pc.merge_cells("A1:F1")
 put(pc, "H1", "貼上規則:一天一列。日期要是真正的日期格式、時間要是真正的時間格式,"
     "不能是文字。E、F 欄是公式,不要覆蓋。", font(9, color="808080"), None, WRAP, border=False)
@@ -918,7 +934,8 @@ AT_COLS = [("A","日期",11), ("B","星期",6), ("C","員工編號",11), ("D","�
            ("O","遲到(分)",9), ("P","早退(分)",9), ("Q","加班時數",10),
            ("R","加班別",10), ("S","備註",22)]
 for col, _, w in AT_COLS: at.column_dimensions[col].width = w
-put(at, "A1", "出勤紀錄(法定紀錄:逐日記載至分鐘,保存 5 年)", TITLE_F, border=False)
+put(at, "A1", title_of("出勤紀錄(法定紀錄:逐日記載至分鐘,保存 5 年)"), TITLE_F,
+    IN_FILL if PENDING else None, LEFT, border=False)
 at.merge_cells("A1:S1")
 header_row(at, 2, [lab for _, lab, _ in AT_COLS], start_col=1, height=28)
 for pi in range(N_ASST):
@@ -989,7 +1006,8 @@ MS_COLS = [("A","員工編號",11), ("B","姓名",11), ("C","職類",9), ("D","�
            ("P","遲到次數",9), ("Q","早退次數",9), ("R","未打卡",8),
            ("S","排班完整度檢核",15)]
 for col, _, w in MS_COLS: ms.column_dimensions[col].width = w
-put(ms, "A1", "月結統計 — 助理 / 醫護長(全自動)", TITLE_F, border=False)
+put(ms, "A1", title_of("月結統計 — 助理 / 醫護長(全自動)"), TITLE_F,
+    IN_FILL if PENDING else None, LEFT, border=False)
 ms.merge_cells("A1:S1")
 put(ms, "A2", "期間", font(10, True), SUB_FILL, CTR)
 ms["B2"] = PERIOD
