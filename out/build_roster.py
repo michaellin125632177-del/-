@@ -8,6 +8,9 @@
   助理與醫護長走「工時制」——沿用班表 + 打卡 + 逐日出勤紀錄那一套。
 """
 import datetime as dt
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from weekly import W as WEEKLY_RAW, SESSION_TIME, NOTES
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -116,7 +119,16 @@ DOCTORS = [
  ("D022","黃育亭","YU-TING HUANG","","寶貝牙院長",["寶貝牙"]),
  ("D023","黃婷愉","TING-YU HUANG","","",["寶貝牙"]),
  ("D024","林紓安","SHU-AN LIN","","",["晶匯","寶貝牙"]),
+ # 以下三位只出現在門診表,官網醫療團隊頁的 24 位名單中沒有,英文名與專科待補
+ ("D025","陳爵安","","","",["晶睿"]),
+ ("D026","吳冠廷","","","",["晶匯"]),
+ ("D027","楊孟庭","","","",["晶匯"]),
 ]
+# 隔週互換的四組:同一位醫師同一時段在兩間院所輪替。
+# 預設在「第 1、3、5 個該星期幾」出現;列在這裡的改為第 2、4 個。
+# ⚠ 哪一週在哪一間目前無從得知,這是暫定假設,需院所確認。
+ALT_EVEN = {("劉立德",3,"曜"), ("朱柏非",6,"匯"), ("王泳泉",1,"睿"), ("陳昺元",6,"匯")}
+
 # 助理與醫護長名單:待提供
 ASSISTANTS = []      # (編號, 姓名, 職類, 院所簡稱, 到職日, 備註)
 
@@ -176,6 +188,45 @@ R_HOME = f"設定!$G${PP_L0}:$G${PP_L1}"
 R_WEEK = "設定!$O$6:$O$12"
 DAYS_FX = f"DAY(EOMONTH(DATE({SET_Y},{SET_M},1),0))"
 
+# ── 門診表 → 每位醫師的每週時段 ────────────────────────────
+DOC_WEEK = {}                       # 姓名 -> {(星期, 診次): (院所代碼, 標記)}
+for _cl, _cells in WEEKLY_RAW.items():
+    for (_wd, _ss), _lst in _cells.items():
+        for _nm, _flag in _lst:
+            DOC_WEEK.setdefault(_nm, {})[(_wd, _ss, _cl)] = _flag
+NAME2EID = {d[1]: d[0] for d in DOCTORS}
+# 各院所有排診的時段 = 有開診。週日五院全休;週六晚診五院全休;寶貝牙平日早診休診。
+OPEN = {c[0]: {(w, t) for (w, t) in WEEKLY_RAW.get(c[0], {})} for c in CLINICS}
+ALL_CLOSED = {(w, t) for w in range(1, 8) for t in range(3)
+              if not any((w, t) in OPEN[c] for c in OPEN)}
+_unknown = [n for n in DOC_WEEK if n not in NAME2EID]
+assert not _unknown, f"門診表出現名冊沒有的醫師:{_unknown}"
+
+def expand_month(name, year, month, ndays):
+    """把每週固定門診表展開成當月 31 天 × 3 診次。"""
+    out = []
+    slots = DOC_WEEK.get(name, {})
+    for d in range(1, ndays + 1):
+        date = dt.date(year, month, d)
+        wd = date.weekday() + 1                      # 1=一 … 7=日
+        occ = (d - 1) // 7 + 1                       # 當月第幾個該星期幾
+        for ss in range(3):
+            if (wd, ss) in ALL_CLOSED:      # 五間院所該時段全休
+                out.append("休"); continue
+            hit = [(cl, fg) for (w, t, cl), fg in slots.items() if w == wd and t == ss]
+            if not hit:
+                out.append(""); continue
+            val = ""
+            for cl, fg in hit:
+                if "~" in fg:                        # 隔週
+                    want_odd = (name, wd, cl) not in ALT_EVEN
+                    if (occ % 2 == 1) != want_odd:
+                        continue
+                val = cl
+                break
+            out.append(val)
+    return out
+
 wb = Workbook()
 
 # ================================================================ 1. 說明
@@ -189,7 +240,7 @@ ws.merge_cells("B2:C2")
 
 BLOCKS = [
  ("為什麼是一個檔",
-  "體系 24 位醫師裡有 16 位跨院看診,林智俊院長一個人就跑四間。\n"
+  "體系 27 位醫師裡有 18 位跨院看診,林智俊院長一個人就跑四間。\n"
   "若一間院所一個檔,排他一個月要開四個檔,而且沒有任何機制擋得住「同一個早診\n"
   "同時被排在晶悅和晶睿」。所以全體系共用這一個檔。"),
  ("醫師與助理為什麼分開排",
@@ -197,11 +248,22 @@ BLOCKS = [
   "醫師 → 醫師班表:一人一列,橫向 31 天 × 早/午/晚,格內填院所代碼(悅睿匯曜寶)。\n"
   "   一格只容得下一間院所,衝堂在結構上就不可能發生。\n"
   "助理與醫護長 → 助理班表:一人一列,橫向 31 天,格內填班別代碼(A/P/OFF/特…)。"),
- ("八個分頁怎麼分工",
+ ("九個分頁怎麼分工",
   "① 說明 ② 設定 — 總部維護,各院所勿動。\n"
-  "③ 醫師班表 ④ 醫師月結 — 醫師診次,建議由總部統一排。\n"
-  "⑤ 助理班表 — 各院所醫護長填自己院所那幾列。\n"
-  "⑥ 打卡匯入 ⑦ 出勤紀錄 ⑧ 月結統計 — 助理與醫護長的法定出勤與月結。"),
+  "③ 醫師週班表 — 官網門診表的固定週輪值,是排月班的母表。\n"
+  "④ 醫師班表 ⑤ 醫師月結 — 本月實際診次,已依週班表填好。\n"
+  "⑥ 助理班表 — 各院所醫護長填自己院所那幾列。\n"
+  "⑦ 打卡匯入 ⑧ 出勤紀錄 ⑨ 月結統計 — 助理與醫護長的法定出勤與月結。"),
+ ("週班表與月班表的關係",
+  "門診表是固定的每週輪值,所以月班表不必一格一格填——「醫師班表」已經照\n"
+  "「醫師週班表」把整個月展開好了,直接改例外即可(請假就把該格改成假別代碼)。\n"
+  "⚠ 改「設定」的本期年月只會更新日期與星期列,格子裡的班不會重排。換月份時\n"
+  "   請告知重新產生,或自行把上個月的格子整段調整。"),
+ ("各院所診次時間不一樣",
+  "晶悅/晶睿/晶匯/晶曜:早 09:00~11:30、午 14:00~16:30、晚 18:00~20:30。\n"
+  "寶貝牙:早 09:00~14:00、午 14:00~17:00、晚 17:30~21:00,且週一至週五早診休診。\n"
+  "五間院所週日全休、週六晚診全休。醫師班表的早/午/晚只是時段代號,\n"
+  "實際幾點到幾點依「設定」院所清單裡該院所的定義。開診時段表也在那裡。"),
  ("每月作業流程",
   "上月底:總部排醫師班表 → 看底下五列「各院所每診次醫師數」有沒有 0 → 發給各院所。\n"
   "     各院所醫護長排助理班表 → 檢查人力檢核列 → 交回。\n"
@@ -232,12 +294,20 @@ BLOCKS = [
   "「出勤紀錄」分頁為此設計,但必須每月另存唯讀封存檔才算數,不要只留一份覆蓋。\n"
   "加班時數為「實際工時 − 排班工時」,未依第 24 條換算費率,薪資須另行計算。\n"
   "受僱醫師是否適用勞基法依僱傭契約與主管機關認定,建議請人資確認後再定義醫師工時。"),
+ ("⚠ 需要核對的三件事",
+  "一、門診表是從截圖轉錄的,姓名與隔週標記請逐格核對「醫師週班表」。\n"
+  "   若能提供五個門診表頁面的網頁存檔,可以完全免除轉錄誤差。\n"
+  "二、陳爵安、吳冠廷、楊孟庭三位只出現在門診表,官網醫療團隊頁的名單沒有,\n"
+  "   已暫編 D025~D027,英文名與專科待補。\n"
+  "三、隔週互換有四組(劉立德週三、朱柏非週六、王泳泉週一、陳昺元週六),\n"
+  "   同一時段在兩間院所輪替。目前假設第 1、3、5 個該星期幾在前一間,\n"
+  "   第 2、4 個在後一間——哪一週在哪一間無從得知,務必確認。"),
  ("目前待補的資料",
-  "一、官網醫療團隊頁有第 2 頁,目前只匯入第 1 頁的 24 位醫師,可能還有遺漏。\n"
-  "二、助理與醫護長名單尚未提供,助理班表/打卡匯入/出勤紀錄/月結統計四個分頁\n"
+  "一、助理與醫護長名單尚未提供,助理班表/打卡匯入/出勤紀錄/月結統計四個分頁\n"
   "   已經建好結構但沒有人員資料,名單一到即可直接灌入。\n"
-  "三、各院所實際的診次時間(早/午/晚幾點到幾點)與助理班別時間需要確認。\n"
-  "四、員工編號目前為暫編 D001~D024,若人事或打卡系統另有編號應以那套為準。"),
+  "二、助理的班別時間(早班/晚班/中班/行政班)目前是暫定值,需要確認。\n"
+  "三、員工編號目前為暫編 D001~D027,若人事或打卡系統另有編號應以那套為準。\n"
+  "四、官網門診表有星號註記者(並非每週固定)需逐一向院所確認。"),
 ]
 r = 4
 for h, body in BLOCKS:
@@ -315,14 +385,40 @@ put(st, f"B{PM_R0+4}",
     "並讓同仁事先知道規則。", font(9, color="808080"), None, LEFT, border=False)
 
 put(st, f"B{CL_R0-1}", "四、院所清單", font(11, True), border=False)
-header_row(st, CL_R0, ["代碼","簡稱","全名","院長","電話","地址"])
+header_row(st, CL_R0, ["代碼","簡稱","全名","院長","電話","地址",
+                       "早診起","早診訖","午診起","午診訖","晚診起","晚診訖"])
+CLINIC_ROWS = [tuple(c) + tuple(t for pair in SESSION_TIME[c[0]] for t in pair)
+               for c in CLINICS]
 for i in range(CL_L1 - CL_L0 + 1):
-    vals = CLINICS[i] if i < len(CLINICS) else ("",)*6
+    vals = CLINIC_ROWS[i] if i < len(CLINIC_ROWS) else ("",)*12
     for j, v in enumerate(vals):
         c = st.cell(row=CL_L0+i, column=2+j, value=v)
         c.font, c.border, c.alignment = font(), BOX, CTR
         if j in (2,5): c.alignment = LEFT
+        if j >= 6: c.font = font(9)
         if j == 0 and v: c.fill = CLINIC_FILL[v]
+
+put(st, "U{}".format(CL_R0), "開診時段(1 = 有開診,0 = 休診;順序為週一早…週六晚)",
+    font(9, True), SUB_FILL, LEFT)
+st.merge_cells(start_row=CL_R0, start_column=21, end_row=CL_R0, end_column=38)
+for i in range(CL_L1 - CL_L0 + 1):
+    code = CLINICS[i][0] if i < len(CLINICS) else None
+    for w in range(6):
+        for t in range(3):
+            c = st.cell(row=CL_L0 + i, column=21 + w * 3 + t)
+            c.value = (1 if code and (w + 1, t) in OPEN[code] else 0) if code else None
+            c.font, c.border, c.alignment = font(8), BOX, CTR
+            if code and (w + 1, t) not in OPEN[code]: c.fill = LEAVE_FILL
+for w in range(6):
+    for t in range(3):
+        c = st.cell(row=CL_R0 - 1, column=21 + w * 3 + t,
+                    value=f"{'一二三四五六'[w]}{SESSIONS[t]}")
+        c.font, c.fill, c.alignment, c.border = font(8, True, "FFFFFF"), HDR_FILL, CTR, BOX
+
+put(st, f"B{CL_L1+2}",
+    "※ 寶貝牙的診次時段與其他四院不同,且週一至週五早診休診、週六晚診休診。"
+    "醫師班表的早/午/晚只是時段代號,實際幾點到幾點依上表該院所的定義。",
+    font(9, color="808080"), None, LEFT, border=False)
 
 put(st, f"B{PP_R0-1}", "五、人員名冊", font(11, True), border=False)
 header_row(st, PP_R0, ["員工編號","姓名","職類","專科","職務","主要院所",
@@ -344,7 +440,81 @@ for i in range(PP_L1 - PP_L0 + 1):
         if j in (3, 6, 9): c.alignment = LEFT
 print(f"人員名冊:{len(ROSTER)} 人(醫師 {len(DOCTORS)}、助理/醫護長 {len(ASSISTANTS)})")
 
-# ================================================================ 3. 醫師班表
+# ================================================================ 3. 醫師週班表
+wk = wb.create_sheet("醫師週班表")
+wk.sheet_view.showGridLines = False
+WK_ROW0 = 5
+WK_ROW1 = WK_ROW0 + N_DOC - 1
+WK_C0 = 3                                   # C 欄起,18 格
+wk.freeze_panes = "C5"
+wk.column_dimensions["A"].width = 9
+wk.column_dimensions["B"].width = 10
+for i in range(18):
+    wk.column_dimensions[get_column_letter(WK_C0 + i)].width = 5.2
+wk.column_dimensions[get_column_letter(WK_C0 + 18)].width = 3
+wk.column_dimensions[get_column_letter(WK_C0 + 19)].width = 40
+put(wk, "A1", "醫師週班表(固定門診表 · 這是排月班的母表)", TITLE_F, border=False)
+wk.merge_cells(start_row=1, start_column=1, end_row=1, end_column=WK_C0 + 17)
+put(wk, "A2", "資料來源:官網各院所門診表(自截圖轉錄,請核對)。改這裡不會自動改「醫師班表」,"
+    "月班表是照這張表產生出來的固定值。", font(9, color="808080"), None, LEFT, border=False)
+for lab, col in (("員工編號", 1), ("姓名", 2)):
+    c = wk.cell(row=3, column=col, value=lab)
+    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
+    wk.merge_cells(start_row=3, start_column=col, end_row=4, end_column=col)
+WD_LAB = ["一", "二", "三", "四", "五", "六"]
+for w in range(6):
+    a = WK_C0 + w * 3
+    c = wk.cell(row=3, column=a, value=f"週{WD_LAB[w]}")
+    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
+    wk.merge_cells(start_row=3, start_column=a, end_row=3, end_column=a + 2)
+    for sidx in range(3):
+        cc = wk.cell(row=4, column=a + sidx, value=SESSIONS[sidx])
+        cc.font, cc.fill, cc.alignment = font(8), SUB_FILL, CTR
+        cc.border = DAYSEP if sidx == 0 else BOX
+put(wk, f"{get_column_letter(WK_C0+19)}3", "附註", HDR_F, HDR_FILL, CTR)
+wk.merge_cells(start_row=3, start_column=WK_C0+19, end_row=4, end_column=WK_C0+19)
+
+for i in range(N_DOC):
+    r = WK_ROW0 + i
+    wk.row_dimensions[r].height = 17
+    eid = DOCTORS[i][0] if i < len(DOCTORS) else None
+    nm = DOCTORS[i][1] if i < len(DOCTORS) else None
+    a = wk.cell(row=r, column=1, value=eid)
+    a.font, a.fill, a.border, a.alignment = font(9), IN_FILL, BOX, CTR
+    b = wk.cell(row=r, column=2)
+    b.value = f'=IFERROR(INDEX({R_NAME},MATCH($A{r},{R_EID},0)),"")'
+    b.font, b.fill, b.border, b.alignment = font(9), CALC_FILL, BOX, CTR
+    slots = DOC_WEEK.get(nm, {}) if nm else {}
+    notes = []
+    for w in range(6):
+        for sidx in range(3):
+            cc = wk.cell(row=r, column=WK_C0 + w * 3 + sidx)
+            hit = [(cl, fg) for (ww, tt, cl), fg in slots.items()
+                   if ww == w + 1 and tt == sidx]
+            if hit:
+                cc.value = "".join(f"{cl}{fg}" for cl, fg in sorted(hit))
+                cc.fill = CLINIC_FILL.get(hit[0][0], CALC_FILL)
+            cc.font, cc.alignment = font(8, True), CTR
+            cc.border = DAYSEP if sidx == 0 else BOX
+    for (ww, tt, cl), fg in sorted(slots.items()):
+        if "!" in fg and (cl, ww, tt) not in ():
+            key = (cl, ww, tt)
+        if "!" in fg:
+            notes.append(NOTES.get((cl, ww, tt), "有附加條件"))
+    n = wk.cell(row=r, column=WK_C0 + 19, value=" / ".join(dict.fromkeys(notes)))
+    n.font, n.border, n.alignment = font(8), BOX, LEFT
+NOTE0 = WK_ROW1 + 2
+for i, t in enumerate([
+  "※ 標記:~ = 隔週看診   * = 官網註明並非每週固定,詳情請聯繫院所   格內兩個代碼 = 兩間院所輪替。",
+  "※ 隔週的四組互換(劉立德週三、朱柏非週六、王泳泉週一、陳昺元週六)目前假設在「第 1、3、5 個該星期幾」"
+  "出現於前一間、第 2、4 個出現於後一間。哪一週在哪一間需要院所確認。",
+  "※ 週日五間院所皆休診。寶貝牙另有週一至週五早診休診、週六晚診休診。",
+]):
+    put(wk, f"A{NOTE0+i}", t, font(9, color="808080"), None, LEFT, border=False)
+dv_wk = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=True)
+wk.add_data_validation(dv_wk); dv_wk.add(f"A{WK_ROW0}:A{WK_ROW1}")
+
+# ================================================================ 4. 醫師班表
 ds = wb.create_sheet("醫師班表")
 ds.sheet_view.showGridLines = False
 DS_C0 = 5                                   # E 欄起
@@ -360,7 +530,7 @@ for d in range(1, DAYS_IN_MONTH+1):
         ds.column_dimensions[get_column_letter(dcol(d, sidx))].width = 3.4
 LAST_C = dcol(DAYS_IN_MONTH, 2)
 
-put(ds, "A1", "醫師班表(診次制 · 一格 = 一個診次 · 填院所代碼)", TITLE_F, border=False)
+put(ds, "A1", "醫師班表(診次制 · 一格 = 一個診次 · 已依週班表填好本月)", TITLE_F, border=False)
 ds.merge_cells(start_row=1, start_column=1, end_row=1, end_column=min(LAST_C, 40))
 put(ds, "A2", "期間", font(10, True), SUB_FILL, CTR)
 ds["B2"] = f'={SET_Y}&"年"&{SET_M}&"月"'
@@ -405,9 +575,14 @@ for i in range(N_DOC):
         c.value = f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")'
         c.font, c.fill, c.border, c.alignment = font(9), CALC_FILL, BOX, CTR
         if col == 3: c.alignment = LEFT
+    nm = DOCTORS[i][1] if i < len(DOCTORS) else None
+    month_vals = expand_month(nm, YEAR, MONTH, DAYS_IN_MONTH) if nm else None
     for d in range(1, DAYS_IN_MONTH+1):
         for sidx in range(3):
             cc = ds.cell(row=r, column=dcol(d, sidx))
+            if month_vals:
+                v = month_vals[(d-1)*3 + sidx]
+                if v: cc.value = v
             cc.font, cc.alignment = font(9, True), CTR
             cc.border = DAYSEP if sidx == 0 else BOX
 
@@ -423,15 +598,22 @@ for k, (code, short, *_r) in enumerate(CLINICS):
         for sidx in range(3):
             cc = dcol(d, sidx); CL = get_column_letter(cc)
             c = ds.cell(row=r, column=cc)
+            orow = CL_L0 + k
             c.value = (f'=IF({CL}$4="","",'
-                       f'COUNTIF({CL}${DS_ROW0}:{CL}${DS_ROW1},"{code}"))')
+                       f'IF(INDEX(設定!$U${orow}:$AL${orow},'
+                       f'(WEEKDAY(DATE({SET_Y},{SET_M},{d}),2)-1)*3+{sidx+1})=0,"休",'
+                       f'COUNTIF({CL}${DS_ROW0}:{CL}${DS_ROW1},"{code}")))')
             c.font, c.fill, c.alignment = font(8, True), CALC_FILL, CTR
             c.border = DAYSEP if sidx == 0 else BOX
             c.number_format = FMT_CNT
-put(ds, f"A{TALLY0+len(CLINICS)+1}",
-    "※ 一格只容得下一間院所,所以同一位醫師同一診次被排到兩間院所在結構上不可能發生。"
-    "上面五列是反向檢查:某間院所某個診次掛 0,表示那個時段沒有醫師。",
-    font(9, color="808080"), None, LEFT, border=False)
+for _i, _t in enumerate([
+  "※ 一格只容得下一間院所,所以同一位醫師同一診次被排到兩間院所在結構上不可能發生。"
+  "上面五列是反向檢查:某間院所某個診次掛 0,表示那個時段沒有醫師。",
+  "※ 本表已依「醫師週班表」把固定門診展開成本月的值,可以直接改。請假就把該格改成假別代碼。",
+  "※ 換月份時:改「設定」的本期年月只會更新上方日期與星期,格子裡的班不會自動重排——"
+  "固定班表是照週班表產生的值,需要重新產生。",
+], ):
+    put(ds, f"A{TALLY0+len(CLINICS)+1+_i}", _t, font(9, color="808080"), None, LEFT, border=False)
 
 dv_doc = DataValidation(type="list", formula1=R_DC, allow_blank=True,
                         showErrorMessage=True, errorTitle="診次代碼無效",
@@ -455,7 +637,7 @@ ds.conditional_formatting.add(f"{E0}4:{EL}5", FormulaRule(
 for k, code in enumerate(CLINIC_CODES):
     r = TALLY0 + k
     ds.conditional_formatting.add(f"{E0}{r}:{EL}{r}", FormulaRule(
-        formula=[f'AND({E0}$4<>"",{E0}{r}=0)'], fill=ALERT_FILL))
+        formula=[f'AND({E0}$4<>"",ISNUMBER({E0}{r}),{E0}{r}=0)'], fill=ALERT_FILL))
 
 # ================================================================ 4. 醫師月結
 dm = wb.create_sheet("醫師月結")

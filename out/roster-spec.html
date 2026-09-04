@@ -216,12 +216,12 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 <header class="masthead">
   <div class="kicker">日三牙醫體系 · 人事作業規格 · 草案 v1.0</div>
   <h1>日三體系出勤表規格書</h1>
-  <p class="standfirst">五間院所、24 位醫師,加上助理與醫護長,合為<strong>一個檔案</strong>。醫師以「診次」排、助理以「工時」排,兩套並存但共用同一份人員名冊與同一套統計邏輯。</p>
+  <p class="standfirst">五間院所、27 位醫師,加上助理與醫護長,合為<strong>一個檔案</strong>。醫師以「診次」排、助理以「工時」排,兩套並存但共用同一份人員名冊與同一套統計邏輯。</p>
   <dl class="facts">
     <div class="fact"><dt>院所</dt><dd>5 間</dd></div>
-    <div class="fact"><dt>醫師</dt><dd>24 位</dd></div>
+    <div class="fact"><dt>醫師</dt><dd>27 位</dd></div>
     <div class="fact"><dt>跨院看診</dt><dd>16 位</dd></div>
-    <div class="fact"><dt>分頁</dt><dd>8 頁</dd></div>
+    <div class="fact"><dt>分頁</dt><dd>9 頁</dd></div>
     <div class="fact"><dt>醫師班表</dt><dd>93 診次欄</dd></div>
   </dl>
 </header>
@@ -230,6 +230,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   <ol>
     <li><a href="#why">為什麼是一個檔</a></li>
     <li><a href="#clinics">五間院所</a></li>
+    <li><a href="#weekly">週班表</a></li>
     <li><a href="#doctors">醫師班表</a></li>
     <li><a href="#docsum">醫師月結</a></li>
     <li><a href="#assist">助理與出勤紀錄</a></li>
@@ -245,13 +246,12 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 
 <section id="why">
   <div class="sec-head"><h2>為什麼是一個檔</h2></div>
-  <p class="lede">原本的設計是「一間院所一個檔」。醫師名單一進來就推翻了這個假設——體系 24 位醫師裡有 <strong>16 位跨院看診</strong>,佔七成。</p>
+  <p class="lede">原本的設計是「一間院所一個檔」。醫師名單一進來就推翻了這個假設——體系 27 位醫師裡有 <strong>16 位跨院看診</strong>,將近六成;五位醫師同時在三間院所看診。</p>
   <div class="sec-body">
-    <div class="bar" role="img" aria-label="24 位醫師的跨院分布:單院 8 位、兩院 11 位、三院 4 位、四院 1 位">
-      <span style="flex:8" class="k1">單院 8</span>
+    <div class="bar" role="img" aria-label="27 位醫師的跨院分布:單院 11 位、兩院 11 位、三院 5 位">
+      <span style="flex:11" class="k1">單院 11</span>
       <span style="flex:11" class="k2">兩院 11</span>
-      <span style="flex:4" class="k3">三院 4</span>
-      <span style="flex:1" class="k4">四院 1</span>
+      <span style="flex:5" class="k3">三院 5</span>
     </div>
     <div class="finding">
       <b>一院一檔會壞在哪裡</b>
@@ -266,22 +266,55 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   <p class="lede">比原先假設多了一間:寶貝牙牙醫診所在大園區,其餘四間在中壢與桃園區。每間院所有自己的代碼與底色,醫師班表上一位醫師整月在五間之間怎麼跑,橫著看一列就知道。</p>
   <div class="sec-body scroll">
     <table>
-      <thead><tr><th>代碼</th><th>院所</th><th>院長</th><th class="num">本月醫師數</th><th>電話</th><th>地址</th></tr></thead>
+      <thead><tr><th>代碼</th><th>院所</th><th>院長</th><th class="num">醫師</th><th class="num">每週診次人次</th><th>早診</th><th>午診</th><th>晚診</th></tr></thead>
       <tbody>
-        <tr><td class="code k1">悅</td><th>晶悅牙醫診所</th><td>林智俊</td><td class="num">14</td><td class="code">03-4257710</td><td>桃園市中壢區新生路 251 號</td></tr>
-        <tr><td class="code k2">睿</td><th>晶睿牙醫診所</th><td>温健成</td><td class="num">11</td><td class="code">03-4522360</td><td>桃園市中壢區福州二街 502 號</td></tr>
-        <tr><td class="code k3">匯</td><th>晶匯牙醫診所</th><td>陳昺元</td><td class="num">7</td><td class="code">03-4550719</td><td>桃園市中壢區成章一街 172 號</td></tr>
-        <tr><td class="code k4">曜</td><th>晶曜牙醫診所</th><td>劉立德</td><td class="num">7</td><td class="code">03-3150666</td><td>桃園市桃園區中正路 1398-1 號</td></tr>
-        <tr><td class="code k5">寶</td><th>寶貝牙牙醫診所</th><td>黃育亭</td><td class="num">7</td><td class="code">03-2871688</td><td>桃園市大園區新生路四段 273 號 2 樓</td></tr>
+        <tr><td class="code k1">悅</td><th>晶悅</th><td>林智俊</td><td class="num">14</td><td class="num">76</td><td class="code">09:00–11:30</td><td class="code">14:00–16:30</td><td class="code">18:00–20:30</td></tr>
+        <tr><td class="code k2">睿</td><th>晶睿</th><td>温健成</td><td class="num">11</td><td class="num">54</td><td class="code">09:00–11:30</td><td class="code">14:00–16:30</td><td class="code">18:00–20:30</td></tr>
+        <tr><td class="code k3">匯</td><th>晶匯</th><td>陳昺元</td><td class="num">9</td><td class="num">37</td><td class="code">09:00–11:30</td><td class="code">14:00–16:30</td><td class="code">18:00–20:30</td></tr>
+        <tr><td class="code k4">曜</td><th>晶曜</th><td>劉立德</td><td class="num">7</td><td class="num">42</td><td class="code">09:00–11:30</td><td class="code">14:00–16:30</td><td class="code">18:00–20:30</td></tr>
+        <tr><td class="code k5">寶</td><th>寶貝牙</th><td>黃育亭</td><td class="num">7</td><td class="num">20</td><td class="code">09:00–14:00</td><td class="code">14:00–17:00</td><td class="code">17:30–21:00</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="lede" style="font-size:13.5px;color:var(--muted)">醫師數合計 46 人次而非 24 人,正是因為跨院。資料取自官網醫療團隊頁,電話地址取自頁尾。</p>
+  <p class="lede"><strong>寶貝牙的診次時間跟另外四間不一樣</strong>,而且週一至週五早診休診。五間院所週日全休、週六晚診全休。所以班表上的「早/午/晚」只是時段代號,實際幾點到幾點要看是哪一間院所——這一層對照表在設定分頁裡,出勤紀錄算工時時就是查它。</p>
+  <p class="lede" style="font-size:13.5px;color:var(--muted)">醫師數合計 48 人次而非 27 人,正是因為跨院。資料取自官網醫療團隊頁與五個院所的門診表。</p>
+</section>
+
+<section id="weekly">
+  <div class="sec-head"><h2>週班表</h2><span class="ref">醫師週班表!C5:T44</span></div>
+  <p class="lede">門診表是<strong>固定的每週輪值</strong>,不是每個月重排。所以月班表不必一格一格填——把週班表當母表,整個月自動展開,排班者只要改例外。</p>
+  <div class="sec-body">
+    <div class="mock">
+      <div class="mock-bar">醫師週班表 · 27 位醫師 × 週一到週六 × 早午晚 = 18 格</div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th rowspan="2">姓名</th><th colspan="3">週一</th><th colspan="3">週二</th><th colspan="3">週三</th><th colspan="3">週四</th><th colspan="3">週五</th><th colspan="3">週六</th></tr>
+            <tr><th>早</th><th>午</th><th>晚</th><th>早</th><th>午</th><th>晚</th><th>早</th><th>午</th><th>晚</th><th>早</th><th>午</th><th>晚</th><th>早</th><th>午</th><th>晚</th><th>早</th><th>午</th><th>晚</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>林智俊</th><td class="c">　</td><td class="c k1">悅</td><td class="c k1">悅</td><td class="c k4">曜</td><td class="c k4">曜</td><td class="c">　</td><td class="c k1">悅</td><td class="c k1">悅</td><td class="c k1">悅</td><td class="c">　</td><td class="c k3">匯</td><td class="c">　</td><td class="c">　</td><td class="c k1">悅</td><td class="c k1">悅</td><td class="c k1">悅~</td><td class="c">　</td><td class="c">　</td></tr>
+            <tr><th>王泳泉</th><td class="c">　</td><td class="c k1">悅~睿~</td><td class="c k1">悅~睿~</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c k1">悅</td><td class="c k1">悅</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c k1">悅</td><td class="c">　</td><td class="c">　</td></tr>
+            <tr><th>劉立德</th><td class="c k4">曜</td><td class="c k4">曜</td><td class="c k4">曜</td><td class="c">　</td><td class="c k2">睿</td><td class="c k2">睿</td><td class="c k4">曜~睿~</td><td class="c k4">曜~睿~</td><td class="c">　</td><td class="c k4">曜</td><td class="c k4">曜</td><td class="c k4">曜</td><td class="c">　</td><td class="c k2">睿</td><td class="c k2">睿</td><td class="c">　</td><td class="c">　</td><td class="c">　</td></tr>
+            <tr><th>黃育亭</th><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c k5">寶</td><td class="c k5">寶</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c">　</td><td class="c k5">寶*</td><td class="c k5">寶*</td><td class="c">　</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip k1">～ = 隔週看診</span><span class="chip k3">* = 官網註明非每週固定</span>
+      <span class="chip lv">一格兩個代碼 = 兩間院所輪替</span>
+    </div>
+    <div class="finding">
+      <b>隔週互換有四組,而且方向未知</b>
+      <p>王泳泉週一午晚在晶悅與晶睿之間輪替、劉立德週三在晶曜與晶睿、朱柏非與陳昺元週六在晶悅與晶匯。<strong>兩邊都標隔週,代表是互補輪替</strong>——這反而確認了隔週的意思。但「哪一週在哪一間」官網沒寫,目前假設第 1、3、5 個該星期幾在前一間、第 2、4 個在後一間。這個假設錯了,一個月就有八個時段的醫師跑錯院所。</p>
+    </div>
+  </div>
 </section>
 
 <section id="doctors">
   <div class="sec-head"><h2>醫師班表</h2><span class="ref">醫師班表!E6:CS45</span></div>
-  <p class="lede">一位醫師一列,橫向是 31 天 × 早/午/晚三個診次,共 93 格。格內填院所代碼,空白代表該診次沒排班,請假也填在診次格裡。</p>
+  <p class="lede">一位醫師一列,橫向是 31 天 × 早/午/晚三個診次,共 93 格。<strong>已經照週班表把整個月展開好了</strong>,排班者只要改例外——請假就把該格改成假別代碼。格內是院所代碼,空白代表該診次沒排班。</p>
   <div class="sec-body">
     <div class="mock">
       <div class="mock-bar">版面示意 · 2026 年 10 月 1–5 日 · 情境為說明用</div>
@@ -434,16 +467,16 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 
 <section id="todo">
   <div class="sec-head"><h2>待補與待確認</h2></div>
-  <p class="lede">前四項是缺資料,後四項是要有人拍板。</p>
+  <p class="lede">前三項是資料正確性,錯了會排錯班;後面是要有人拍板。</p>
   <div class="asks sec-body">
-    <div class="ask"><i class="box"></i><div><b>官網醫療團隊頁第 2 頁</b><span>目前只匯入第 1 頁的 24 位醫師,頁面有分頁連結,可能還有遺漏。</span></div></div>
+    <div class="ask" style="border-left-color:var(--alert)"><i class="box"></i><div><b>門診表是從截圖轉錄的</b><span>239 格全部逐字打進去,姓名與隔週標記都可能有誤。附了一份核對表可以逐格對。<strong>最保險的做法是給我五個門診表頁面的網頁存檔</strong>,像醫療團隊頁那樣,轉錄誤差就完全消失。</span></div></div>
+    <div class="ask" style="border-left-color:var(--alert)"><i class="box"></i><div><b>隔週互換的方向</b><span>四組互換(王泳泉週一、劉立德週三、朱柏非與陳昺元週六)目前是猜的。只要確認其中一組哪一週在哪一間,其餘三組也跟著定案。</span></div></div>
+    <div class="ask" style="border-left-color:var(--alert)"><i class="box"></i><div><b>三位醫師不在官網名單上</b><span>陳爵安(晶睿,每週 8 診次)、吳冠廷(晶匯,6)、楊孟庭(晶匯,4)只出現在門診表。已暫編 D025~D027,英文名與專科待補。是新進還是官網漏更新?</span></div></div>
     <div class="ask"><i class="box"></i><div><b>助理與醫護長名單</b><span>四個工時制分頁已建好結構,名單一到即可灌入。目前預留 60 人。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>各院所實際診次時間</b><span>早/午/晚各幾點到幾點,五間是否一致?助理班別時間目前是暫定值。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>七位醫師的專科未列</b><span>官網上林紫亭、蔡季軒、温健成等七位沒標專科,是一般科還是漏列?</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>員工編號用哪一套</b><span>目前是暫編 D001~D024。若人事或打卡系統另有編號,應以那套為主鍵。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>醫師班表誰來排</b><span>跨院醫師佔七成,建議總部統一排;若各院所各排各的,衝堂會回來。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>加班門檻要設多少</b><span>預設 30 分認定、30 分為單位。這是慣例不是法規,要人資拍板並讓同仁事先知道。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>醫師的診次要不要接薪酬</b><span>若要,總診次與跨院分攤的定義必須先講清楚——某位醫師在四間看診,成本算誰的?</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>官網星號註記的班</b><span>「並非每週固定,詳情請聯繫院所」的格子有六處(翁崎紘週五、黃榆鈞與黃育亭在寶貝牙週六等),需要向院所逐一確認。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>助理班別時間</b><span>早班 / 晚班 / 中班 / 行政班的實際起訖時間目前是暫定值。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>員工編號用哪一套</b><span>目前暫編 D001~D027。若人事或打卡系統另有編號,應以那套為主鍵。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>加班門檻與跨院成本分攤</b><span>加班門檻預設 30 分認定、30 分為單位,是慣例不是法規。另外某位醫師在三間看診,診次業績與人力成本算誰的?</span></div></div>
   </div>
 </section>
 
@@ -456,7 +489,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 </section>
 
 <footer>
-  規格草案 v1.0 · 醫師名單與院所資料取自日三牙醫體系官網醫療團隊頁,員工編號 D001~D024 為暫編。醫師班表與助理班表皆未填入實際班表資料,附件 Excel 開檔即可試填。本頁的班表示意是為呈現全部標示規則而構成的情境,非實際排班。
+  規格草案 v1.1 · 醫師名單與院所資料取自日三牙醫體系官網醫療團隊頁,門診表自五張截圖轉錄,員工編號 D001~D027 為暫編。醫師班表已依週班表展開為 2026 年 10 月;助理側尚未填入人員。本頁的班表示意為說明用途,非實際排班。
 </footer>
 
 </main>
