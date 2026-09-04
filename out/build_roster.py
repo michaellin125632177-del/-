@@ -584,10 +584,36 @@ for i in range(N_DOC):
             notes.append(NOTES.get((cl, ww, tt), "有附加條件"))
     n = wk.cell(row=r, column=WK_C0 + 19, value=" / ".join(dict.fromkeys(notes)))
     n.font, n.border, n.alignment = font(8), BOX, LEFT
+# 週班表的儲存格值比醫師班表複雜:除了單一代碼,還有隔週(悅~)、
+# 兩院輪替(悅~睿~)、官網星號(寶*)與附註(悅!)。列成下拉方便選,
+# 但不強制——showErrorMessage=False,任何值都還是打得進去。
+WK_USED = sorted({wk.cell(row=r, column=c).value
+                  for r in range(WK_ROW0, WK_ROW1 + 1)
+                  for c in range(WK_C0, WK_C0 + 18)
+                  if wk.cell(row=r, column=c).value})
+_base = [c for c in CLINIC_CODES] + [c + "~" for c in CLINIC_CODES]
+WK_CHOICES = (_base + [v for v in WK_USED
+                       if v not in _base and v != "訓" and v not in DOC_LEAVE]
+              + ["訓"] + DOC_LEAVE)
+WK_CHOICES = list(dict.fromkeys(WK_CHOICES))
+WKC_R0 = 6
+put(st, f"AP{WKC_R0-1}", "週班表下拉(自動產生)", font(9, True), SUB_FILL, CTR)
+st.column_dimensions["AP"].width = 16
+for i, v in enumerate(WK_CHOICES):
+    put(st, f"AP{WKC_R0+i}", v, font(9), CALC_FILL, CTR)
+dv_wkcell = DataValidation(
+    type="list", formula1=f"設定!$AP${WKC_R0}:$AP${WKC_R0+len(WK_CHOICES)-1}",
+    allow_blank=True, showErrorMessage=False)
+wk.add_data_validation(dv_wkcell)
+dv_wkcell.add(f"{get_column_letter(WK_C0)}{WK_ROW0}:"
+              f"{get_column_letter(WK_C0+17)}{WK_ROW1}")
+print(f"週班表下拉選項 {len(WK_CHOICES)} 項:{'、'.join(WK_CHOICES)}")
+
 NOTE0 = WK_ROW1 + 2
 for i, t in enumerate([
   "※ 資料由官網五個門診表頁面直接解析產生,非人工轉錄。標記:~ = 隔週看診   "
   "* = 官網註明並非每週固定,詳情請聯繫院所   格內兩個代碼 = 兩間院所輪替。",
+  "※ 資料格有下拉選單(常用值),但不強制——特殊組合直接打字也可以,不會被擋。",
   "※ 隔週的四組互換(劉立德週三、朱柏非週六、王泳泉週一、陳昺元週六)以固定基準日(2026/9/28 起)"
   "連續數週判定單雙週,跨月不會斷。哪一組先需要院所確認——確認後把基準日挪一週即可整體對齊。",
   "※ 週日五間院所皆休診。寶貝牙另有週一至週五早診休診、週六晚診休診。",
