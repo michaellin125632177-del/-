@@ -1,0 +1,327 @@
+<title>出勤表怎麼填</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --paper:#FCFCFA; --surface:#FFFFFF; --sunk:#F4F5F3;
+  --ink:#152A2C; --body:#33474A; --muted:#6E8083;
+  --line:#E0E2DD; --line-strong:#C6CBC5;
+  --petrol:#1F5A57; --petrol-soft:#E4EEEC;
+  --amber:#B8811A; --amber-fill:#FFF2CC; --amber-line:#E6C978;
+  --grey-fill:#EDEDEB; --blue-fill:#DDEBF7; --red-fill:#FFD5D5;
+  --orange-fill:#FCE4D6; --green-fill:#D9EAD3;
+  --alert:#A8433C;
+  --serif:"Noto Serif TC",Georgia,serif;
+  --sans:"Noto Sans TC",-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-fill:#4A3D1B; --amber-line:#7E6828;
+  --grey-fill:#2C3638; --blue-fill:#1F3242; --red-fill:#4B2523;
+  --orange-fill:#4A3320; --green-fill:#25401F;
+  --alert:#E08B84;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-fill:#4A3D1B; --amber-line:#7E6828;
+  --grey-fill:#2C3638; --blue-fill:#1F3242; --red-fill:#4B2523;
+  --orange-fill:#4A3320; --green-fill:#25401F;
+  --alert:#E08B84;
+}
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--body); font-family:var(--sans);
+  font-size:14.5px; line-height:1.65; -webkit-font-smoothing:antialiased;}
+h1,h2,h3{color:var(--ink); margin:0; text-wrap:balance;}
+h1{font-family:var(--serif)}
+p{margin:0}
+.wrap{max-width:840px; margin:0 auto; padding:0 22px 80px;}
+
+/* ---- 抬頭 ---- */
+header{padding:44px 0 22px; border-bottom:3px solid var(--ink);}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--petrol); margin-bottom:10px;}
+h1{font-size:clamp(27px,5vw,38px); line-height:1.15;}
+.sub{margin-top:12px; font-size:15.5px; max-width:56ch;}
+
+/* ---- 三原則 ---- */
+.rules{display:grid; gap:12px; margin-top:26px;}
+@media(min-width:700px){.rules{grid-template-columns:repeat(3,1fr)}}
+.rule{background:var(--surface); border:1px solid var(--line);
+  border-top:3px solid var(--petrol); border-radius:5px; padding:14px 16px;}
+.rule b{display:block; color:var(--ink); font-size:15px; font-weight:900; margin-bottom:4px;}
+.rule span{font-size:13px; color:var(--muted); display:block;}
+
+main{padding-top:32px; display:flex; flex-direction:column; gap:36px;}
+section{break-inside:avoid}
+.hd{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  border-bottom:1.5px solid var(--line-strong); padding-bottom:7px; margin-bottom:16px;}
+h2{font-size:19px; font-family:var(--sans); font-weight:900;}
+.when{font-family:var(--mono); font-size:11.5px; color:var(--petrol);
+  background:var(--petrol-soft); padding:2px 9px; border-radius:3px;}
+.tab{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
+
+/* ---- 步驟 ---- */
+.steps{display:flex; flex-direction:column; gap:14px;}
+.step{display:grid; grid-template-columns:26px minmax(0,1fr); gap:4px 12px; break-inside:avoid;}
+.step .n{font-family:var(--mono); font-size:12px; font-weight:600; color:#fff;
+  background:var(--petrol); width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin-top:2px;}
+.step h3{font-size:14.5px; font-weight:700; line-height:1.5;}
+.step p{grid-column:2; font-size:13.5px; max-width:62ch;}
+
+/* ---- 試算表示意 ---- */
+.mock{grid-column:2; margin-top:8px; border:1px solid var(--line-strong);
+  border-radius:4px; overflow:hidden; background:var(--surface);}
+.mock .bar{padding:5px 10px; background:var(--sunk); border-bottom:1px solid var(--line);
+  font-family:var(--mono); font-size:10.5px; color:var(--muted);}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse; font-size:12px; width:100%;
+  font-variant-numeric:tabular-nums;}
+.mock td,.mock th{border:1px solid var(--line); padding:4px 7px; text-align:center;
+  white-space:nowrap; color:var(--ink);}
+.mock thead th{background:var(--sunk); font-size:10.5px; color:var(--muted); font-weight:500;}
+.fill{background:var(--amber-fill); font-weight:700;}
+.calc{background:var(--grey-fill); color:var(--muted);}
+.we{background:var(--blue-fill)} .lv{background:var(--grey-fill)}
+.bad{background:var(--red-fill); font-weight:700}
+.ot{background:var(--orange-fill)}
+.mock .note{padding:6px 10px; font-size:11.5px; color:var(--muted);
+  border-top:1px solid var(--line); background:var(--sunk); text-align:left;}
+
+/* ---- 一般表格 ---- */
+.plain{border-collapse:collapse; width:100%; font-size:13px;}
+.plain th,.plain td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+  vertical-align:top;}
+.plain thead th{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  border-bottom:1.5px solid var(--line-strong);}
+.plain tbody th{color:var(--ink); font-weight:700; white-space:nowrap;}
+.code{font-family:var(--mono); font-weight:600; color:var(--ink);}
+
+/* ---- 色票 ---- */
+.sw{display:flex; flex-wrap:wrap; gap:9px 16px;}
+.sw span{display:inline-flex; align-items:center; gap:7px; font-size:13px;}
+.sw i{width:15px; height:15px; border-radius:3px; border:1px solid var(--line-strong); flex:none;}
+
+/* ---- 警告 ---- */
+.dont{background:var(--surface); border:1px solid var(--line);
+  border-left:3px solid var(--alert); border-radius:0 4px 4px 0; padding:13px 16px;
+  display:flex; flex-direction:column; gap:7px;}
+.dont b{color:var(--ink); font-size:14px;}
+.dont li{font-size:13.5px; margin:0}
+.dont ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:5px;}
+
+footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
+  font-size:12px; color:var(--muted);}
+
+@media print{
+  @page{size:A4; margin:9mm}
+  body{background:#fff; font-size:9pt; line-height:1.4; color:#000}
+  .wrap{max-width:none; padding:0}
+  header{padding:0 0 9px; border-bottom-width:2px}
+  h1{font-size:19pt} .sub{font-size:9.5pt; margin-top:7px}
+  .eyebrow{font-size:7.5pt; margin-bottom:5px}
+  .rules{gap:6px; margin-top:11px}
+  .rule{padding:6px 9px; border-top-width:2px}
+  .rule b{font-size:9.5pt; margin-bottom:2px} .rule span{font-size:8pt; line-height:1.35}
+  main{gap:13px; padding-top:13px}
+  .hd{padding-bottom:4px; margin-bottom:9px}
+  h2{font-size:11.5pt} .when,.tab{font-size:7.5pt}
+  .steps{gap:9px}
+  .step{grid-template-columns:20px minmax(0,1fr); gap:2px 8px}
+  .step .n{width:17px; height:17px; font-size:8pt}
+  .step h3{font-size:9.5pt} .step p{font-size:8.5pt; line-height:1.4}
+  .mock{margin-top:5px}
+  .mock td,.mock th{padding:2px 5px; font-size:7.5pt}
+  .mock .bar,.mock .note{padding:3px 7px; font-size:7pt}
+  .plain{font-size:8.5pt} .plain th,.plain td{padding:3.5px 7px}
+  .plain thead th{font-size:7.5pt}
+  .sw{gap:5px 12px} .sw span{font-size:8.5pt}
+  .dont{padding:8px 11px; gap:4px}
+  .dont b{font-size:9.5pt} .dont li{font-size:8.5pt; line-height:1.4}
+  .dont ul{gap:2px}
+  footer{margin-top:14px; padding-top:7px; font-size:7.5pt}
+  section{break-inside:avoid}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">日三牙醫體系 · 統一出勤表</div>
+  <h1>出勤表怎麼填</h1>
+  <p class="sub">給各院所醫護長。你只需要顧兩件事:月底前排下個月的助理班表,月初把打卡資料匯進來。醫師班表由總部排,不用你動。</p>
+  <div class="rules">
+    <div class="rule"><b>只有黃底要填</b><span>灰底是公式自動算的,改到就壞了。</span></div>
+    <div class="rule"><b>代碼一律下拉選</b><span>自己打字會拼錯,月結就對不起來。</span></div>
+    <div class="rule"><b>交表前看檢核欄</b><span>紅色和「缺 N 天」都要處理完才送。</span></div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="hd"><h2>排下個月的班</h2><span class="when">每月 25 日前</span><span class="tab">分頁:助理班表</span></div>
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>A 欄選員工編號</h3>
+      <p>點格子會出現下拉選單。選好之後,姓名、職類、院所會自己跳出來 —— 那三欄是灰底,不用也不能填。只排你自己院所的人。</p>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>逐日選班別代碼</h3>
+      <p>每一格代表一天。上班就選班別、休假就選假別,不要留空 —— 留空會變粉紅色,提醒你漏排。</p>
+      <div class="mock">
+        <div class="bar">助理班表</div>
+        <div class="scroll"><table>
+          <thead><tr><th>員工編號</th><th>姓名</th><th>職類</th><th>院所</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+          <tr><th></th><th></th><th></th><th></th><th>四</th><th>五</th><th class="we">六</th><th class="we">日</th><th>一</th></tr></thead>
+          <tbody>
+            <tr><td class="fill">A001</td><td class="calc">張怡君</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">A</td><td class="fill">P</td><td class="fill we">A</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
+            <tr><td class="fill">A002</td><td class="calc">李宗翰</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">P</td><td class="fill">A</td><td class="fill we">P</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
+          </tbody>
+        </table></div>
+        <div class="note">黃底 = 你填的 · 灰底 = 自動帶出 · 粉紅 = 這天還沒排</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <h3>看最底下你們院所那一列</h3>
+      <p>那是當天在班人數。<strong>變紅代表低於 2 人</strong>,要調班。國定假日顯示「假」、週日顯示「休」,那是正常的,不用理。</p>
+    </div>
+    <div class="step">
+      <span class="n">4</span>
+      <h3>到「月結統計」看最右邊那欄</h3>
+      <p>顯示「OK」才算排完。出現「⚠ 缺 3 天」就是那個人還有三天沒排,回去補完再交。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="hd"><h2>月初把打卡資料匯進來</h2><span class="when">次月 5 日前</span><span class="tab">分頁:打卡匯入 → 出勤紀錄</span></div>
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>打卡機匯出,貼進四欄</h3>
+      <p>只要 <span class="code">員工編號 / 日期 / 上班時間 / 下班時間</span>,一天一列。日期跟時間要是真正的日期時間格式,不能是文字。E、F 兩欄是公式,不要碰。</p>
+      <div class="mock">
+        <div class="bar">打卡匯入</div>
+        <div class="scroll"><table>
+          <thead><tr><th>A 員工編號</th><th>B 日期</th><th>C 上班</th><th>D 下班</th><th>E 對照鍵</th><th>F 檢核</th></tr></thead>
+          <tbody>
+            <tr><td class="fill">A001</td><td class="fill">2026/10/1</td><td class="fill">08:56</td><td class="fill">18:07</td><td class="calc">A001|1</td><td class="calc">OK</td></tr>
+            <tr><td class="fill">A009</td><td class="fill">2026/10/1</td><td class="fill">09:02</td><td class="fill">18:11</td><td class="calc">A009|1</td><td class="bad">⚠ 查無員編</td></tr>
+          </tbody>
+        </table></div>
+        <div class="note">F 欄出現「查無員編」或「重複打卡」要先修好,不然月結會少算</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>到「出勤紀錄」篩選異常</h3>
+      <p>點「出勤異常」欄的篩選鈕,把「正常」取消勾選,剩下的就是要處理的。一個月通常只有個位數。紅底 = 要處理,橘底 = 那天有加班。</p>
+      <div class="mock">
+        <div class="bar">出勤紀錄</div>
+        <div class="scroll"><table>
+          <thead><tr><th>日期</th><th>姓名</th><th>排班</th><th>應到</th><th>應退</th><th>實際上班</th><th>實際下班</th><th>出勤異常</th><th>加班</th></tr></thead>
+          <tbody>
+            <tr><td>10/02</td><td>張怡君</td><td>A</td><td>09:00</td><td>18:00</td><td class="bad">09:18</td><td>18:04</td><td class="bad">遲到</td><td>–</td></tr>
+            <tr><td>10/05</td><td>蔡孟蓉</td><td>A</td><td>09:00</td><td>18:00</td><td>08:58</td><td class="ot">20:30</td><td>正常</td><td class="ot">2.50</td></tr>
+            <tr><td>10/08</td><td>王思婷</td><td>A</td><td>09:00</td><td>18:00</td><td class="bad">—</td><td class="bad">—</td><td class="bad">未打卡</td><td>–</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <h3>逐筆處理,備註欄寫原因</h3>
+      <p>最右邊的備註欄是黃底,可以打字。忘記打卡、臨時調班、加班有沒有事先核准,都寫在那裡 —— 這是日後唯一查得到的紀錄。</p>
+    </div>
+    <div class="step">
+      <span class="n">4</span>
+      <h3>「月結統計」不用填,直接送</h3>
+      <p>全部自動算好。確認遲到 / 早退 / 未打卡三欄都處理完(有值會標色),就可以送人資。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="hd"><h2>五種出勤異常</h2><span class="tab">出勤紀錄的「出勤異常」欄</span></div>
+  <div class="scroll"><table class="plain">
+    <thead><tr><th>顯示</th><th>意思</th><th>你要做什麼</th></tr></thead>
+    <tbody>
+      <tr><th>正常</th><td>打卡與排班相符</td><td>不用管</td></tr>
+      <tr><th>遲到</th><td>比應到時間晚超過 5 分鐘</td><td>問當事人,備註寫原因</td></tr>
+      <tr><th>早退</th><td>比應退時間早超過 5 分鐘</td><td>同上</td></tr>
+      <tr><th>未打卡</th><td>排了班卻沒有打卡紀錄</td><td>補登並註記,<strong>不可以留空</strong></td></tr>
+      <tr><th>假日出勤</th><td>排休假卻有打卡紀錄</td><td>確認是不是加班。例假日出勤法規有限制,要先報備</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="hd"><h2>班別代碼速查</h2><span class="tab">設定分頁有完整版</span></div>
+  <div class="scroll"><table class="plain">
+    <thead><tr><th>上班</th><th>時間</th><th>休假</th><th>用在什麼時候</th></tr></thead>
+    <tbody>
+      <tr><td><span class="code">A</span> 早班</td><td>09:00–18:00</td><td><span class="code">OFF</span> 排休</td><td>輪休,不扣假</td></tr>
+      <tr><td><span class="code">P</span> 晚班</td><td>12:30–21:30</td><td><span class="code">特</span> 特休</td><td>年資給的有薪假</td></tr>
+      <tr><td><span class="code">MD</span> 中班</td><td>11:00–20:00</td><td><span class="code">病</span> <span class="code">事</span> <span class="code">公</span></td><td>病假 / 事假 / 公假</td></tr>
+      <tr><td><span class="code">ADM</span> 行政班</td><td>09:00–18:00</td><td><span class="code">國</span> 國定假日</td><td>全院休診,通常已預先填好</td></tr>
+      <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td>依實際</td><td><span class="code">休</span> 休診</td><td>診所沒開,不是個人請假</td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:10px;font-size:13px;color:var(--muted)">班別時間目前是暫定值,確認後會更新。以「設定」分頁的內容為準。</p>
+</section>
+
+<section>
+  <div class="hd"><h2>顏色速查</h2></div>
+  <div class="sw">
+    <span><i class="fill"></i>黃底 = 你要填</span>
+    <span><i class="calc"></i>灰底 = 自動算,別動</span>
+    <span><i class="we"></i>淺藍欄 = 週六 / 週日</span>
+    <span><i class="lv"></i>灰格 = 休假類代碼</span>
+    <span><i class="bad"></i>紅色 = 要處理</span>
+    <span><i class="ot"></i>橘色 = 有加班</span>
+  </div>
+</section>
+
+<section>
+  <div class="hd"><h2>不要做的事</h2></div>
+  <div class="dont">
+    <b>這幾件會直接把表弄壞</b>
+    <ul>
+      <li><strong>不要改灰底格子。</strong>那是公式,覆蓋掉就不會再自動算了。</li>
+      <li><strong>不要自己打代碼。</strong>有人打「早班」有人打「A」,月結就永遠對不起來。一律下拉選。</li>
+      <li><strong>不要動「設定」分頁。</strong>那是總部維護的,改了會影響全體系五間院所。</li>
+      <li><strong>不要插入或刪除整列。</strong>公式是按列對應的,插一列就全錯位。人員有異動請通知總部。</li>
+      <li><strong>月結完要另存封存檔。</strong>出勤紀錄依法要保存 5 年,只留一份一直覆蓋等於沒有紀錄。</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="hd"><h2>兩個常見狀況</h2></div>
+  <div class="scroll"><table class="plain">
+    <thead><tr><th>狀況</th><th>怎麼辦</th></tr></thead>
+    <tbody>
+      <tr><th>有些格子是空白的</th><td>統計類的格子是公式,在手機預覽或雲端硬碟預覽裡不會算。用 Excel 或 Google 試算表正式開啟就有了;還是空白就按 <span class="code">Ctrl+Alt+F9</span> 強制重算。姓名、日期、星期是實際文字,任何地方都看得到。</td></tr>
+      <tr><th>要換下個月</th><td>改「設定」的年月<strong>不會</strong>自動重排班表 —— 醫師班表是照固定門診表產生出來的值。換月請通知總部重新產生。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+
+<footer>
+  日三牙醫體系 · 統一出勤表 v1.0 · 有問題找總部。班別時間、加班門檻與國定假日尚待人資確認,以「設定」分頁的內容為準。
+</footer>
+</div>
