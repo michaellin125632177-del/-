@@ -1,0 +1,267 @@
+<title>出勤表上線待辦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --paper:#FCFCFA; --surface:#FFFFFF; --sunk:#F4F5F3;
+  --ink:#152A2C; --body:#33474A; --muted:#6E8083;
+  --line:#E0E2DD; --line-strong:#C6CBC5;
+  --petrol:#1F5A57; --petrol-soft:#E4EEEC;
+  --amber:#C08A1E; --amber-soft:#FCEFC8;
+  --alert:#A8433C; --alert-soft:#FBDEDE;
+  --ok:#3F7A52;
+  --serif:"Noto Serif TC", Georgia, serif;
+  --sans:"Noto Sans TC", -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-soft:#43331A;
+  --alert:#E08B84; --alert-soft:#3E2320;
+  --ok:#7FBE92;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-soft:#43331A;
+  --alert:#E08B84; --alert-soft:#3E2320;
+  --ok:#7FBE92;
+}
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--body); font-family:var(--sans);
+  font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased;}
+h1,h2{color:var(--ink); font-family:var(--serif); margin:0; text-wrap:balance;}
+p{margin:0}
+:focus-visible{outline:2px solid var(--petrol); outline-offset:3px; border-radius:3px}
+
+.shell{max-width:820px; margin:0 auto; padding:0 22px 90px;}
+.masthead{padding:52px 0 26px; border-bottom:2px solid var(--ink);}
+.kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--petrol); margin-bottom:12px;}
+h1{font-size:clamp(28px,5vw,40px); line-height:1.2;}
+.standfirst{margin-top:14px; max-width:60ch; font-size:16px;}
+
+.meter{margin-top:26px; display:flex; flex-direction:column; gap:8px;}
+.meter-bar{height:8px; border-radius:99px; background:var(--sunk);
+  border:1px solid var(--line); overflow:hidden;}
+.meter-fill{height:100%; width:0%; background:var(--petrol); transition:width .3s ease;}
+.meter-txt{display:flex; justify-content:space-between; font-family:var(--mono);
+  font-size:12px; color:var(--muted);}
+.meter-txt b{color:var(--ink); font-weight:500;}
+
+main{padding-top:34px; display:flex; flex-direction:column; gap:44px;}
+section{scroll-margin-top:20px}
+.sec-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
+h2{font-size:21px; line-height:1.35;}
+.count{font-family:var(--mono); font-size:12px; color:var(--muted);}
+.sec-note{margin-top:8px; max-width:62ch; font-size:14px; color:var(--muted);}
+
+.list{margin-top:16px; display:flex; flex-direction:column; gap:0;
+  border-top:1px solid var(--line);}
+.item{display:grid; grid-template-columns:auto minmax(0,1fr); gap:2px 14px;
+  padding:15px 2px; border-bottom:1px solid var(--line); align-items:start;
+  cursor:pointer; transition:opacity .2s;}
+.item:hover{background:var(--sunk)}
+.box{width:18px; height:18px; margin-top:3px; border:1.5px solid var(--line-strong);
+  border-radius:3px; background:var(--surface); flex:none; position:relative;
+  display:flex; align-items:center; justify-content:center;}
+.box::after{content:"✓"; font-size:13px; font-weight:700; color:var(--surface);
+  opacity:0; transition:opacity .15s;}
+.item.done .box{background:var(--petrol); border-color:var(--petrol);}
+.item.done .box::after{opacity:1; color:#fff;}
+.item.done .t{text-decoration:line-through; color:var(--muted);}
+.item.done{opacity:.55}
+.head{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;}
+.t{color:var(--ink); font-weight:700; font-size:15px;}
+.d{grid-column:2; font-size:13.5px; color:var(--body); max-width:60ch;}
+.item.done .d{color:var(--muted)}
+.tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.05em; padding:1px 7px;
+  border-radius:99px; white-space:nowrap; border:1px solid transparent;}
+.who{background:var(--petrol-soft); color:var(--petrol);}
+.blk{background:var(--alert-soft); color:var(--alert); font-weight:700;}
+.new{background:var(--amber-soft); color:var(--amber); font-weight:700;}
+
+.save{position:fixed; left:50%; transform:translateX(-50%); bottom:22px;
+  background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:12px;
+  padding:7px 16px; border-radius:99px; opacity:0; transition:opacity .25s;
+  pointer-events:none; z-index:10;}
+.save.on{opacity:1}
+footer{margin-top:50px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--muted); max-width:66ch;}
+@media print{.save{display:none}}
+</style>
+
+<div class="shell">
+<header class="masthead">
+  <div class="kicker">日三牙醫體系 · 統一出勤表</div>
+  <h1>出勤表上線待辦</h1>
+  <p class="standfirst">距離「五間院所真的用這份表」還差的每一件事。勾起來會存下來,換裝置或分享給別人看都是同一份進度。</p>
+  <div class="meter">
+    <div class="meter-bar"><div class="meter-fill" id="fill"></div></div>
+    <div class="meter-txt"><span id="pct">0%</span><span><b id="dn">0</b> / <span id="tot">0</span> 項完成</span></div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="sec-head"><h2>你現在就能做</h2><span class="count">不用等任何人</span></div>
+  <p class="sec-note">這幾件不需要誰批准,做完直接推進度。第一項是擋路的——門診表轉錯,整份月班表就是錯的。</p>
+  <div class="list">
+    <div class="item" data-id="a1"><i class="box"></i><div class="head"><span class="t">核對門診表轉錄</span><span class="tag blk">擋路</span></div><p class="d">239 格是我從截圖逐字打的,姓名與隔週標記都可能有誤。更省事的做法:把五個門診表頁面存成網頁檔給我,像醫療團隊頁那樣,轉錄誤差直接歸零。</p></div>
+    <div class="item" data-id="a2"><i class="box"></i><div class="head"><span class="t">補齊人員名冊的到職日</span><span class="tag new">你可能沒想到</span></div><p class="d">特休天數依年資給,沒有到職日就算不出特休餘額,月結的特休欄永遠只能看「用掉幾天」不能看「還剩幾天」。醫師與助理都要。</p></div>
+    <div class="item" data-id="a3"><i class="box"></i><div class="head"><span class="t">整理 2026 年國定假日行事曆</span></div><p class="d">哪幾天放假要標進班表的「國」代碼,加班費率也跟這個綁。人事行政局每年公告,把日期給我就能一次標進去。</p></div>
+    <div class="item" data-id="a4"><i class="box"></i><div class="head"><span class="t">拿一份打卡機匯出檔</span></div><p class="d">不用真實資料,一兩天的樣本就好。我要確認欄位順序、日期時間格式,以及是「一天一列」還是「逐筆刷卡」——後者要先併過才能匯入。</p></div>
+    <div class="item" data-id="a5"><i class="box"></i><div class="head"><span class="t">盤點五間院所現在怎麼排班</span></div><p class="d">紙本、LINE 群、還是各自的 Excel?誰在排?這決定推行時的阻力在哪,也決定要不要保留舊做法並行一陣子。</p></div>
+    <div class="item" data-id="a6"><i class="box"></i><div class="head"><span class="t">補三位醫師的資料</span></div><p class="d">陳爵安、吳冠廷、楊孟庭只出現在門診表,官網醫療團隊頁沒有。英文名、專科、到職日待補,順便確認是新進還是官網漏更新。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>要上級或人資拍板</h2><span class="count">你決定不了的</span></div>
+  <p class="sec-note">建議整理成一張紙一次問完,不要分次問——這幾題彼此有關聯。</p>
+  <div class="list">
+    <div class="item" data-id="b1"><i class="box"></i><div class="head"><span class="t">隔週輪替哪一組先</span><span class="tag blk">擋路</span></div><p class="d">王泳泉週一、劉立德週三、朱柏非與陳昺元週六,各自在兩間院所輪替。只要確認其中一組(例如「10/5 那個週一,王泳泉在晶悅還是晶睿」),其餘三組跟著定案。猜錯的話一個月有八個時段的醫師跑錯院所。</p></div>
+    <div class="item" data-id="b2"><i class="box"></i><div class="head"><span class="t">加班門檻 30 分能不能接受</span></div><p class="d">預設超過 30 分鐘才認定加班、無條件捨去到 30 分。這是慣例不是法規。拍板後<strong>必須公告給同仁</strong>——事後才說「晚 20 分鐘不算加班」會出事。</p></div>
+    <div class="item" data-id="b3"><i class="box"></i><div class="head"><span class="t">跨院醫師的診次算誰的</span></div><p class="d">16 位跨院,林智俊院長跑四間。診次業績歸屬與人力成本分攤沒講清楚,月結數字出來就會有人有意見。</p></div>
+    <div class="item" data-id="b4"><i class="box"></i><div class="head"><span class="t">醫師班表由誰排</span></div><p class="d">建議總部統一排。若讓五間各排各的,衝堂會從另一個方向跑回來——兩間院所同時排走同一位醫師的同一個診次。</p></div>
+    <div class="item" data-id="b5"><i class="box"></i><div class="head"><span class="t">受僱醫師要不要納入工時管理</span></div><p class="d">目前醫師只做診次統計、不算工時與加班。若人資認定醫師需納入勞基法工時管理,醫師也要接上打卡與出勤紀錄,架構要再擴充。</p></div>
+    <div class="item" data-id="b6"><i class="box"></i><div class="head"><span class="t">這份表要不要接薪資</span></div><p class="d">要接的話,加班時數就不是參考值,必須逐月與打卡紀錄核對,而且要補上勞基法第 24 條的費率換算。</p></div>
+    <div class="item" data-id="b7"><i class="box"></i><div class="head"><span class="t">檔案權限怎麼設</span></div><p class="d">誰能改、誰唯讀?建議各院所醫護長只能改自己院所那幾列,設定分頁只有總部能動。出勤紀錄含個資,不該全體系都看得到。</p></div>
+    <div class="item" data-id="b8"><i class="box"></i><div class="head"><span class="t">員工編號以哪一套為準</span></div><p class="d">目前是暫編 D001~D027。若人事系統或打卡機另有編號,應以那套當主鍵——上線後再改會動到整份檔案的比對。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>容易被漏掉的連動</h2><span class="count">出勤表以外</span></div>
+  <p class="sec-note">班表不是孤立的一張表。它一改，下面這幾件事會跟著要改，漏掉會直接影響病人或觸法。</p>
+  <div class="list">
+    <div class="item" data-id="c1"><i class="box"></i><div class="head"><span class="t">官網門診表要同步更新</span><span class="tag new">你可能沒想到</span></div><p class="d">這其實是你的本業。班表改了、官網門診表沒改,病人照著官網跑一趟卻沒醫師。建議把「班表定案 → 更新官網」變成同一個流程的兩個步驟,不要當成兩件事。</p></div>
+    <div class="item" data-id="c2"><i class="box"></i><div class="head"><span class="t">約診系統要同步</span><span class="tag new">你可能沒想到</span></div><p class="d">醫師那個診次沒班,約診系統卻還開放預約,櫃檯就會約進去。班表與約診系統之間要有人負責同步,或至少約定改班表後多久內要更新。</p></div>
+    <div class="item" data-id="c3"><i class="box"></i><div class="head"><span class="t">確認跨院執業的報備狀態</span><span class="tag new">你可能沒想到</span></div><p class="d">醫師法規定執業應在核准登記的機構為之,支援他院須事先報准。16 位醫師跨院,這件事應該早就在做,但值得跟院所或衛生局確認每一位的報備都是有效的——班表會白紙黑字記錄誰哪天在哪一間。這不是法律意見,請以主管機關與貴體系顧問的認定為準。</p></div>
+    <div class="item" data-id="c4"><i class="box"></i><div class="head"><span class="t">調班與代班怎麼留痕</span></div><p class="d">臨時調班只在 LINE 群講,月底就對不起來。要訂一個最低限度:誰核准、改在哪裡、備註欄怎麼寫。班表的備註欄就是為此留的。</p></div>
+    <div class="item" data-id="c5"><i class="box"></i><div class="head"><span class="t">出勤紀錄的個資保護</span></div><p class="d">逐日到離時間是個資。檔案放哪、誰能開、離職員工的紀錄怎麼處理,建議跟法定的 5 年保存一起訂。</p></div>
+    <div class="item" data-id="c6"><i class="box"></i><div class="head"><span class="t">特休、勞健保、勞退的銜接</span></div><p class="d">出勤表算得出「用掉幾天特休」,但給假天數、投保級距、勞退提繳是人資系統的事。要確認兩邊的數字對得起來,不要各算各的。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>上線前要訂的流程</h2><span class="count">規矩不訂就沒人填</span></div>
+  <div class="list">
+    <div class="item" data-id="d1"><i class="box"></i><div class="head"><span class="t">訂下交表時程並公告</span></div><p class="d">建議:每月 25 日前各院所交下月班表,總部彙整後鎖表;次月 5 日前完成打卡匯入與異常處理,月結送人資。</p></div>
+    <div class="item" data-id="d2"><i class="box"></i><div class="head"><span class="t">建立每月封存機制</span></div><p class="d">出勤紀錄要保存 5 年。每月結束後另存一份唯讀檔歸檔,不要只留一份最新版一直覆蓋——覆蓋掉就等於沒有紀錄。</p></div>
+    <div class="item" data-id="d3"><i class="box"></i><div class="head"><span class="t">挑一間試辦一個月</span></div><p class="d">建議挑晶悅(14 位醫師、每週 76 個診次人次,最複雜)。跑滿整個月含臨時調班與請假,月底真的把打卡資料匯進來跑一次月結,對照舊方式差在哪。試辦期並行舊做法。</p></div>
+    <div class="item" data-id="d4"><i class="box"></i><div class="head"><span class="t">做一頁式圖解教學</span></div><p class="d">給各院所醫護長。重點只有三個:黃底才要填、代碼從下拉選、交表前看檢核欄。這個我可以幫你做。</p></div>
+    <div class="item" data-id="d5"><i class="box"></i><div class="head"><span class="t">訂臨時休診與加診的通報路徑</span></div><p class="d">醫師臨時請假、診所臨時加診,誰通知誰?這條路徑沒訂,班表就會慢慢跟現實脫節,最後變成沒人信的一張表。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>行有餘力再做</h2><span class="count">上線之後</span></div>
+  <p class="sec-note">這幾件不影響上線,但做起來上級會很有感——資料已經在表裡了,只是還沒拿來用。</p>
+  <div class="list">
+    <div class="item" data-id="e1"><i class="box"></i><div class="head"><span class="t">各院所診次與人力月報</span></div><p class="d">五間院所每月的總診次、醫師人次、助理工時,做成一頁圖表。資料月結完就有了。</p></div>
+    <div class="item" data-id="e2"><i class="box"></i><div class="head"><span class="t">醫師跨院負荷分析</span></div><p class="d">誰跑最多間、誰的診次最滿、哪個時段全體系最吃緊。排班調整與人力招募都用得到。</p></div>
+    <div class="item" data-id="e3"><i class="box"></i><div class="head"><span class="t">助理排班公平性檢查</span></div><p class="d">晚班、週六班、國定假日班有沒有平均分配。這是助理最容易有怨言、也最少被量化的一件事。</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  依 2026 年 9 月的專案狀態整理。醫師側(週班表、醫師班表、醫師月結)已可使用;助理與醫護長側的四個分頁結構已建好,等名單。勾選狀態會存進這個頁面本身,任何有編輯權的人打勾,所有人看到的都是同一份進度。
+</footer>
+</div>
+
+<div class="save" id="save">已儲存</div>
+<script id="state" type="application/json">{"done":[]}</script>
+<script>
+(function(){
+  var PRISTINE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  var S = {done: []};
+  try { S = JSON.parse(document.getElementById("state").textContent) || S; } catch(e) {}
+  if (!Array.isArray(S.done)) S.done = [];
+  var items = Array.prototype.slice.call(document.querySelectorAll(".item"));
+  var saveEl = document.getElementById("save"), api = null, readOnly = false, timer = null;
+
+  function paint(){
+    var n = 0;
+    items.forEach(function(el){
+      var on = S.done.indexOf(el.dataset.id) >= 0;
+      el.classList.toggle("done", on);
+      el.setAttribute("aria-checked", on ? "true" : "false");
+      if (on) n++;
+    });
+    var pct = items.length ? Math.round(n / items.length * 100) : 0;
+    document.getElementById("fill").style.width = pct + "%";
+    document.getElementById("pct").textContent = pct + "%";
+    document.getElementById("dn").textContent = n;
+    document.getElementById("tot").textContent = items.length;
+  }
+  function flash(msg){
+    saveEl.textContent = msg; saveEl.classList.add("on");
+    setTimeout(function(){ saveEl.classList.remove("on"); }, 1800);
+  }
+  function localSave(){
+    try { localStorage.setItem("roster-todo", JSON.stringify(S.done)); } catch(e) {}
+  }
+  function buildHTML(){
+    var open = '<script id="state" type="application/json">';
+    var i = PRISTINE.indexOf(open);
+    if (i < 0) return null;
+    var j = PRISTINE.indexOf("<\/script>", i);
+    if (j < 0) return null;
+    return PRISTINE.slice(0, i + open.length)
+         + JSON.stringify({done: S.done})
+         + PRISTINE.slice(j);
+  }
+  function commit(){
+    localSave();
+    if (!api || readOnly) return;
+    clearTimeout(timer);
+    timer = setTimeout(function(){
+      var html = buildHTML();
+      if (!html) return;
+      api.publish(html).then(function(){ flash("已儲存"); })
+        .catch(function(err){
+          var c = err && err.code;
+          if (c === "conflict") return;                 // 頁面會自行重載到最新版
+          if (c === "not_writer" || c === "not_declared" || c === "not_granted") {
+            readOnly = true; flash("此檢視為唯讀,勾選只留在你的瀏覽器");
+          } else { flash("儲存失敗,勾選只留在你的瀏覽器"); }
+        });
+    }, 1200);
+  }
+  items.forEach(function(el){
+    el.setAttribute("role", "checkbox");
+    el.setAttribute("tabindex", "0");
+    function toggle(){
+      var id = el.dataset.id, k = S.done.indexOf(id);
+      if (k >= 0) S.done.splice(k, 1); else S.done.push(id);
+      paint(); commit();
+    }
+    el.addEventListener("click", toggle);
+    el.addEventListener("keydown", function(e){
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); }
+    });
+  });
+  paint();
+  if (window.claude && claude.use) {
+    claude.use("artifact").then(function(a){
+      api = a;
+      if (!a) {                                          // 無法儲存到頁面,退回本機
+        try {
+          var v = localStorage.getItem("roster-todo");
+          if (v) { S.done = JSON.parse(v) || []; paint(); }
+        } catch(e) {}
+      }
+    }).catch(function(){});
+  }
+})();
+</script>
