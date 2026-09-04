@@ -10,7 +10,8 @@
 import datetime as dt
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from weekly import W as WEEKLY_RAW, SESSION_TIME, NOTES
+from weekly import (W as WEEKLY_RAW, SESSION_TIME, NOTES, SPEC as WEB_SPEC,
+                    HOLIDAYS_2026)
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -133,6 +134,16 @@ ALT_EPOCH = dt.date(2026, 9, 28)          # 2026 年第 40 週的星期一
 # 隔週互換的四組:同一位醫師同一時段在兩間院所輪替,列在這裡的排在 B 組。
 ALT_B = {("劉立德",3,"曜"), ("朱柏非",6,"匯"), ("王泳泉",1,"睿"), ("陳昺元",6,"匯")}
 
+# 官網門診表的 icon 有標專科,醫療團隊頁沒列到的補進來
+DOCTORS = [
+    (eid, nm, eng, spec or WEB_SPEC.get(nm, ""), duty, teams)
+    for eid, nm, eng, spec, duty, teams in DOCTORS
+]
+
+# 國定假日:全院休診,班表填「國」
+HOLIDAY_SET = {dt.date(YEAR, m, d): name for m, d, name, _mk in HOLIDAYS_2026
+               if m and d}
+
 # 助理與醫護長名單:待提供
 ASSISTANTS = []      # (編號, 姓名, 職類, 院所簡稱, 到職日, 備註)
 
@@ -190,6 +201,7 @@ R_SPEC = f"設定!$E${PP_L0}:$E${PP_L1}"
 R_DUTY = f"設定!$F${PP_L0}:$F${PP_L1}"
 R_HOME = f"設定!$G${PP_L0}:$G${PP_L1}"
 R_WEEK = "設定!$O$6:$O$12"
+R_HOL  = "設定!$W$6:$W$40"          # 國定假日日期清單
 DAYS_FX = f"DAY(EOMONTH(DATE({SET_Y},{SET_M},1),0))"
 
 # ── 門診表 → 每位醫師的每週時段 ────────────────────────────
@@ -215,6 +227,8 @@ def expand_month(name, year, month, ndays):
         wd = date.weekday() + 1                      # 1=一 … 7=日
         wk = (date - ALT_EPOCH).days // 7            # 自基準日起的連續週序
         for ss in range(3):
+            if date in HOLIDAY_SET:         # 國定假日,全院休診
+                out.append("國"); continue
             if (wd, ss) in ALL_CLOSED:      # 五間院所該時段全休
                 out.append("休"); continue
             hit = [(cl, fg) for (w, t, cl), fg in slots.items() if w == wd and t == ss]
@@ -324,7 +338,7 @@ for h, body in BLOCKS:
 st = wb.create_sheet("設定")
 st.sheet_view.showGridLines = False
 for col, w in {"A":2,"B":11,"C":18,"D":9,"E":9,"F":10,"G":11,"H":8,"I":9,"J":9,
-               "K":2,"L":12,"M":2,"N":9,"O":8,"P":2,"Q":13,"R":2,"S":16}.items():
+               "K":2,"L":12,"M":2,"N":9,"O":8,"P":2,"Q":13,"R":2,"S":16,"T":2,"W":12,"X":26,"Y":8}.items():
     st.column_dimensions[col].width = w
 put(st, "B1", "設定表(總部維護,各院所請勿修改)", TITLE_F, border=False)
 put(st, "B2", "本期年月", font(10, True), SUB_FILL, CTR)
@@ -354,6 +368,33 @@ for i, (code, mean) in enumerate(DOC_CODES):
     put(st, f"C{DC_R0+i}", mean, font(), None, LEFT)
 put(st, f"B{DC_R1+1}",
     "※ 醫師班表一格 = 一個診次。填院所代碼表示該診次在哪間看診,填休假代碼表示該診次請假。",
+    font(9, color="808080"), None, LEFT, border=False)
+
+put(st, "W4", f"六、{YEAR} 年國定假日(全院休診,班表自動填「國」)",
+    font(10, True), SUB_FILL, LEFT)
+st.merge_cells("W4:Y4")
+for i, lab in enumerate(["日期", "名稱", "類別"]):
+    c = st.cell(row=5, column=23 + i, value=lab)
+    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
+WK_CH = "一二三四五六日"
+for i in range(35):
+    r = 6 + i
+    if i < len(HOLIDAYS_2026):
+        m, d, name, mk = HOLIDAYS_2026[i]
+        date = dt.date(YEAR, m, d)
+        put(st, f"W{r}", date, font(9), IN_FILL, CTR, FMT_DATE)
+        put(st, f"X{r}", f"{name}(週{WK_CH[date.weekday()]})", font(9), IN_FILL, LEFT)
+        put(st, f"Y{r}", "補假" if mk else "", font(9), IN_FILL, CTR)
+    else:
+        for cc in range(23, 26):
+            c = st.cell(row=r, column=cc)
+            c.font, c.border, c.alignment = font(9), BOX, CTR
+put(st, "W{}".format(6 + 36),
+    "※ ⚠ 這份是草稿,務必與行政院人事行政總處公告的「政府行政機關辦公日曆表」核對。"
+    "法定紀念日日期可信度高,但補假與調整放假(彈性放假)每年公告,以官方版本為準。",
+    font(9, color="A8433C"), None, LEFT, border=False)
+put(st, "W{}".format(6 + 37),
+    "※ 改這裡不會自動改醫師班表——月班表是產生出來的固定值,改完要重新產生。",
     font(9, color="808080"), None, LEFT, border=False)
 
 put(st, "S5", "助理/醫護長編號(下拉用)", font(9, True), SUB_FILL, CTR)
@@ -509,7 +550,8 @@ for i in range(N_DOC):
     n.font, n.border, n.alignment = font(8), BOX, LEFT
 NOTE0 = WK_ROW1 + 2
 for i, t in enumerate([
-  "※ 標記:~ = 隔週看診   * = 官網註明並非每週固定,詳情請聯繫院所   格內兩個代碼 = 兩間院所輪替。",
+  "※ 資料由官網五個門診表頁面直接解析產生,非人工轉錄。標記:~ = 隔週看診   "
+  "* = 官網註明並非每週固定,詳情請聯繫院所   格內兩個代碼 = 兩間院所輪替。",
   "※ 隔週的四組互換(劉立德週三、朱柏非週六、王泳泉週一、陳昺元週六)以固定基準日(2026/9/28 起)"
   "連續數週判定單雙週,跨月不會斷。哪一組先需要院所確認——確認後把基準日挪一週即可整體對齊。",
   "※ 週日五間院所皆休診。寶貝牙另有週一至週五早診休診、週六晚診休診。",
@@ -604,9 +646,10 @@ for k, (code, short, *_r) in enumerate(CLINICS):
             c = ds.cell(row=r, column=cc)
             orow = CL_L0 + k
             c.value = (f'=IF({CL}$4="","",'
+                       f'IF(COUNTIF({R_HOL},DATE({SET_Y},{SET_M},{d}))>0,"假",'
                        f'IF(INDEX(設定!$U${orow}:$AL${orow},'
                        f'(WEEKDAY(DATE({SET_Y},{SET_M},{d}),2)-1)*3+{sidx+1})=0,"休",'
-                       f'COUNTIF({CL}${DS_ROW0}:{CL}${DS_ROW1},"{code}")))')
+                       f'COUNTIF({CL}${DS_ROW0}:{CL}${DS_ROW1},"{code}"))))')
             c.font, c.fill, c.alignment = font(8, True), CALC_FILL, CTR
             c.border = DAYSEP if sidx == 0 else BOX
             c.number_format = FMT_CNT
@@ -765,13 +808,18 @@ for k, (code, short, *_r) in enumerate(CLINICS):
     for c in range(AS_C0, AS_C1 + 1):
         L = get_column_letter(c)
         cell = asx.cell(row=r, column=c)
-        cell.value = (f'=IF({L}$3="","",SUMPRODUCT(($D${AS_ROW0}:$D${AS_ROW1}="{short}")'
-                      f'*(COUNTIF({R_WC_W},{L}${AS_ROW0}:{L}${AS_ROW1})>0)))')
+        d_ = c - AS_C0 + 1
+        cell.value = (f'=IF({L}$3="","",'
+                      f'IF(COUNTIF({R_HOL},DATE({SET_Y},{SET_M},{d_}))>0,"假",'
+                      f'IF({L}$4="日","休",'
+                      f'SUMPRODUCT(($D${AS_ROW0}:$D${AS_ROW1}="{short}")'
+                      f'*(COUNTIF({R_WC_W},{L}${AS_ROW0}:{L}${AS_ROW1})>0)))))')
         cell.font, cell.fill, cell.alignment, cell.border = (
             font(9, True), CALC_FILL, CTR, BOX)
         cell.number_format = FMT_CNT
 put(asx, f"A{AS_TALLY+len(CLINICS)+1}",
-    "※ 門檻:有看診的日子每間院所至少 2 位在班,低於門檻自動變紅;全院休診日不示警。"
+    "※ 門檻:有看診的日子每間院所至少 2 位在班,低於門檻自動變紅。"
+    "國定假日顯示「假」、週日顯示「休」,都不示警。"
     "門檻要調請改這幾列的條件式格式。", font(9, color="808080"), None, LEFT, border=False)
 
 dv_wc = DataValidation(type="list", formula1=R_WC, allow_blank=True,
@@ -798,7 +846,7 @@ asx.conditional_formatting.add(f"{A0}3:{A1}4", FormulaRule(
 for k in range(len(CLINICS)):
     r = AS_TALLY + k
     asx.conditional_formatting.add(f"{A0}{r}:{A1}{r}", FormulaRule(
-        formula=[f'AND({A0}$3<>"",{A0}{r}>0,{A0}{r}<2)'], fill=ALERT_FILL))
+        formula=[f'AND({A0}$3<>"",ISNUMBER({A0}{r}),{A0}{r}>0,{A0}{r}<2)'], fill=ALERT_FILL))
 
 # ================================================================ 6. 打卡匯入
 PUNCH_R0 = 3

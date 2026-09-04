@@ -86,6 +86,7 @@ h2{font-size:21px; line-height:1.35;}
 .who{background:var(--petrol-soft); color:var(--petrol);}
 .blk{background:var(--alert-soft); color:var(--alert); font-weight:700;}
 .new{background:var(--amber-soft); color:var(--amber); font-weight:700;}
+.ok-tag{background:var(--petrol-soft); color:var(--petrol); font-weight:700;}
 
 .save{position:fixed; left:50%; transform:translateX(-50%); bottom:22px;
   background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:12px;
@@ -114,9 +115,9 @@ footer{margin-top:50px; padding-top:16px; border-top:1px solid var(--line);
   <div class="sec-head"><h2>你現在就能做</h2><span class="count">不用等任何人</span></div>
   <p class="sec-note">這幾件不需要誰批准,做完直接推進度。第一項是擋路的——門診表轉錯,整份月班表就是錯的。</p>
   <div class="list">
-    <div class="item" data-id="a1"><i class="box"></i><div class="head"><span class="t">核對門診表轉錄</span><span class="tag blk">擋路</span></div><p class="d">239 格是我從截圖逐字打的,姓名與隔週標記都可能有誤。更省事的做法:把五個門診表頁面存成網頁檔給我,像醫療團隊頁那樣,轉錄誤差直接歸零。</p></div>
+    <div class="item" data-id="a1"><i class="box"></i><div class="head"><span class="t">門診表已改由官網原始碼直接解析</span><span class="tag ok-tag">已解決</span></div><p class="d">五個門診表頁面的網頁檔已提供,週班表現在由 HTML 直接解析產生,不再有轉錄誤差(先前截圖轉錄的 231 筆中有 4 筆錯誤,已全數修正)。這項可以直接勾掉。</p></div>
     <div class="item" data-id="a2"><i class="box"></i><div class="head"><span class="t">補齊人員名冊的到職日</span><span class="tag new">你可能沒想到</span></div><p class="d">特休天數依年資給,沒有到職日就算不出特休餘額,月結的特休欄永遠只能看「用掉幾天」不能看「還剩幾天」。醫師與助理都要。</p></div>
-    <div class="item" data-id="a3"><i class="box"></i><div class="head"><span class="t">整理 2026 年國定假日行事曆</span></div><p class="d">哪幾天放假要標進班表的「國」代碼,加班費率也跟這個綁。人事行政局每年公告,把日期給我就能一次標進去。</p></div>
+    <div class="item" data-id="a3"><i class="box"></i><div class="head"><span class="t">核對 2026 國定假日草稿</span><span class="tag blk">擋路</span></div><p class="d">已建好 21 天的草稿並接進班表(國定假日全院休診、自動填「國」、檢核列不會誤報)。<strong>但補假與調整放假的安排是我推的,務必跟行政院人事行政總處公告的「政府行政機關辦公日曆表」核對</strong>——法定紀念日日期可信度高,補假不一定。表在設定分頁 W 欄。</p></div>
     <div class="item" data-id="a4"><i class="box"></i><div class="head"><span class="t">拿一份打卡機匯出檔</span></div><p class="d">不用真實資料,一兩天的樣本就好。我要確認欄位順序、日期時間格式,以及是「一天一列」還是「逐筆刷卡」——後者要先併過才能匯入。</p></div>
     <div class="item" data-id="a5"><i class="box"></i><div class="head"><span class="t">盤點五間院所現在怎麼排班</span></div><p class="d">紙本、LINE 群、還是各自的 Excel?誰在排?這決定推行時的阻力在哪,也決定要不要保留舊做法並行一陣子。</p></div>
     <div class="item" data-id="a6"><i class="box"></i><div class="head"><span class="t">補三位醫師的資料</span></div><p class="d">陳爵安、吳冠廷、楊孟庭只出現在門診表,官網醫療團隊頁沒有。英文名、專科、到職日待補,順便確認是新進還是官網漏更新。</p></div>
