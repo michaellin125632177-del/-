@@ -245,6 +245,24 @@ def expand_month(name, year, month, ndays):
             out.append(val)
     return out
 
+# 名冊是靜態資料,直接寫實值而非公式——公式沒有快取值,不重算的檢視器會顯示空白
+ROSTER_BY_EID = {}
+for _eid, _nm, _eng, _spec, _duty, _teams in DOCTORS:
+    _home = SHORT2CODE[_teams[0]] if not _duty else SHORT2CODE[_duty.replace("院長", "")]
+    ROSTER_BY_EID[_eid] = (_nm, "醫師", _spec, _duty,
+                           next(c[1] for c in CLINICS if c[0] == _home))
+for _a in ASSISTANTS:
+    ROSTER_BY_EID[_a[0]] = (_a[1], _a[2], "", "", _a[3])
+
+WK_CH = "一二三四五六日"
+def wd_of(d):     # 該日星期(中文)
+    return WK_CH[dt.date(YEAR, MONTH, d).weekday()]
+PERIOD = f"{YEAR} 年 {MONTH} 月"
+
+def lookup(eid, idx, fallback_formula):
+    """已知人員寫實值,空白列留公式(之後填編號會自動帶出)。"""
+    return ROSTER_BY_EID[eid][idx] if eid in ROSTER_BY_EID else fallback_formula
+
 wb = Workbook()
 
 # ================================================================ 1. 說明
@@ -302,6 +320,12 @@ BLOCKS = [
   "單位(預設 30 分)。否則每天晚幾分鐘打卡都會被算成加班,一個月會憑空多出\n"
   "好幾小時。遲到早退另有寬限(預設 5 分)。三個參數在「設定」的計算參數區。\n"
   "這三個數字是勞資慣例、不是法規,上線前請人資確認,並讓同仁事先知道規則。"),
+ ("如果有些格子是空白的",
+  "姓名、專科、日期、星期都是實際文字,任何檢視器都看得到。\n"
+  "但統計類的格子(醫師月結的診次數、班表底下的人力檢核、出勤紀錄、月結統計)是公式,\n"
+  "在不會重算公式的檢視器裡會顯示空白——手機預覽、雲端硬碟預覽、部分看圖工具都是這樣。\n"
+  "用 Excel 或 Google 試算表正式開啟就會算出來;若仍空白,按 Ctrl+Alt+F9 強制重算。\n"
+  "這些欄位不能寫死成固定數字,否則你改了班表,統計不會跟著變。"),
  ("顏色代表什麼",
   "黃底 = 你要填的格子        灰底 = 公式自動算,別動\n"
   "淺藍欄 = 週六/週日          灰色格 = 休假類代碼\n"
@@ -527,7 +551,7 @@ for i in range(N_DOC):
     a = wk.cell(row=r, column=1, value=eid)
     a.font, a.fill, a.border, a.alignment = font(9), IN_FILL, BOX, CTR
     b = wk.cell(row=r, column=2)
-    b.value = f'=IFERROR(INDEX({R_NAME},MATCH($A{r},{R_EID},0)),"")'
+    b.value = lookup(eid, 0, f'=IFERROR(INDEX({R_NAME},MATCH($A{r},{R_EID},0)),"")')
     b.font, b.fill, b.border, b.alignment = font(9), CALC_FILL, BOX, CTR
     slots = DOC_WEEK.get(nm, {}) if nm else {}
     notes = []
@@ -579,7 +603,7 @@ LAST_C = dcol(DAYS_IN_MONTH, 2)
 put(ds, "A1", "醫師班表(診次制 · 一格 = 一個診次 · 已依週班表填好本月)", TITLE_F, border=False)
 ds.merge_cells(start_row=1, start_column=1, end_row=1, end_column=min(LAST_C, 40))
 put(ds, "A2", "期間", font(10, True), SUB_FILL, CTR)
-ds["B2"] = f'={SET_Y}&"年"&{SET_M}&"月"'
+ds["B2"] = PERIOD
 ds["B2"].font, ds["B2"].fill, ds["B2"].alignment, ds["B2"].border = (
     font(10, True), CALC_FILL, CTR, BOX)
 put(ds, "D2", "圖例:", font(9, True), None, LEFT, border=False)
@@ -596,14 +620,13 @@ for lab, col in (("員工編號",1), ("姓名",2), ("專科",3), ("職務",4)):
 
 for d in range(1, DAYS_IN_MONTH+1):
     a = dcol(d, 0); L = get_column_letter(a)
-    c = ds.cell(row=3, column=a, value=f'=IF({d}>{DAYS_FX},"",{d})')
+    c = ds.cell(row=3, column=a, value=d)
     c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
     ds.merge_cells(start_row=3, start_column=a, end_row=3, end_column=a+2)
     for sidx in range(3):
         cc = dcol(d, sidx); CL = get_column_letter(cc)
         w = ds.cell(row=4, column=cc)
-        w.value = (f'=IF({d}>{DAYS_FX},"",'
-                   f'INDEX({R_WEEK},WEEKDAY(DATE({SET_Y},{SET_M},{d}),1)))')
+        w.value = wd_of(d)
         w.font, w.fill, w.alignment = font(8, True), SUB_FILL, CTR
         w.border = DAYSEP if sidx == 0 else BOX
         s = ds.cell(row=5, column=cc, value=SESSIONS[sidx])
@@ -616,9 +639,9 @@ for i in range(N_DOC):
     eid = DOCTORS[i][0] if i < len(DOCTORS) else None
     a = ds.cell(row=r, column=1, value=eid)
     a.font, a.fill, a.border, a.alignment = font(9), IN_FILL, BOX, CTR
-    for col, src in ((2, R_NAME), (3, R_SPEC), (4, R_DUTY)):
+    for col, src, ix in ((2, R_NAME, 0), (3, R_SPEC, 2), (4, R_DUTY, 3)):
         c = ds.cell(row=r, column=col)
-        c.value = f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")'
+        c.value = lookup(eid, ix, f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")')
         c.font, c.fill, c.border, c.alignment = font(9), CALC_FILL, BOX, CTR
         if col == 3: c.alignment = LEFT
     nm = DOCTORS[i][1] if i < len(DOCTORS) else None
@@ -657,6 +680,8 @@ for _i, _t in enumerate([
   "※ 一格只容得下一間院所,所以同一位醫師同一診次被排到兩間院所在結構上不可能發生。"
   "上面五列是反向檢查:某間院所某個診次掛 0,表示那個時段沒有醫師。",
   "※ 本表已依「醫師週班表」把固定門診展開成本月的值,可以直接改。請假就把該格改成假別代碼。",
+  "※ 姓名、專科、日期、星期都是實際文字不是公式,任何檢視器都看得到;"
+  "底下的人力檢核列是公式,不重算的檢視器會空白。",
   "※ 換月份時:改「設定」的本期年月只會更新上方日期與星期,格子裡的班不會自動重排——"
   "固定班表是照週班表產生的值,需要重新產生。",
 ], ):
@@ -701,7 +726,7 @@ put(dm, "A1", "醫師月結(全自動 · 以診次為單位)", TITLE_F, border=F
 dm.merge_cells("A1:U1")
 put(dm, "A2", "期間", font(10, True), SUB_FILL, CTR)
 dm["A2"].alignment = CTR
-dm["B2"] = f'={SET_Y}&"年"&{SET_M}&"月"'
+dm["B2"] = PERIOD
 dm["B2"].font, dm["B2"].fill, dm["B2"].alignment, dm["B2"].border = (
     font(10, True), CALC_FILL, CTR, BOX)
 header_row(dm, 4, [lab for _, lab, _ in DM_COLS], start_col=1, height=30)
@@ -711,10 +736,11 @@ for i in range(N_DOC):
     rng = f"醫師班表!${E0}{sr}:${EL}{sr}"
     g = f'IF($A{r}="","",'
     vals = {
-        "A": f'=IF(醫師班表!$A{sr}="","",醫師班表!$A{sr})',
-        "B": f'={g}醫師班表!$B{sr})',
-        "C": f'={g}醫師班表!$C{sr})',
-        "D": f'={g}醫師班表!$D{sr})',
+        "A": (DOCTORS[i][0] if i < len(DOCTORS)
+              else f'=IF(醫師班表!$A{sr}="","",醫師班表!$A{sr})'),
+        "B": lookup(DOCTORS[i][0] if i < len(DOCTORS) else None, 0, f'={g}醫師班表!$B{sr})'),
+        "C": lookup(DOCTORS[i][0] if i < len(DOCTORS) else None, 2, f'={g}醫師班表!$C{sr})'),
+        "D": lookup(DOCTORS[i][0] if i < len(DOCTORS) else None, 3, f'={g}醫師班表!$D{sr})'),
         "J": f'={g}SUM($E{r}:$I{r}))',
         "K": f'={g}SUMPRODUCT(($E{r}:$I{r}>0)*1))',
         "L": f'={g}COUNTIF({rng},"訓"))',
@@ -765,7 +791,7 @@ for c in range(AS_C0, AS_C1 + 1):
 put(asx, "A1", "助理 / 醫護長 班表(工時制)", TITLE_F, border=False)
 asx.merge_cells(start_row=1, start_column=1, end_row=1, end_column=AS_C1)
 put(asx, "A2", "期間", font(10, True), SUB_FILL, CTR)
-asx["B2"] = f'={SET_Y}&"年"&{SET_M}&"月"'
+asx["B2"] = PERIOD
 asx["B2"].font, asx["B2"].fill, asx["B2"].alignment, asx["B2"].border = (
     font(10, True), CALC_FILL, CTR, BOX)
 put(asx, "E2", "← 各院所醫護長只填自己院所那幾列。院所欄由人員名冊自動帶出。",
@@ -777,11 +803,10 @@ for lab, col in (("員工編號",1), ("姓名",2), ("職類",3), ("院所",4)):
     asx.merge_cells(start_row=3, start_column=col, end_row=4, end_column=col)
 for c in range(AS_C0, AS_C1 + 1):
     d = c - AS_C0 + 1; L = get_column_letter(c)
-    h = asx.cell(row=3, column=c, value=f'=IF({d}>{DAYS_FX},"",{d})')
+    h = asx.cell(row=3, column=c, value=d)
     h.font, h.fill, h.alignment, h.border = HDR_F, HDR_FILL, CTR, BOX
     w = asx.cell(row=4, column=c)
-    w.value = (f'=IF({L}$3="","",'
-               f'INDEX({R_WEEK},WEEKDAY(DATE({SET_Y},{SET_M},{L}$3),1)))')
+    w.value = wd_of(d)
     w.font, w.fill, w.alignment, w.border = font(9, True), SUB_FILL, CTR, BOX
 
 for i in range(N_ASST):
@@ -790,9 +815,9 @@ for i in range(N_ASST):
     eid = ASSISTANTS[i][0] if i < len(ASSISTANTS) else None
     a = asx.cell(row=r, column=1, value=eid)
     a.font, a.fill, a.border, a.alignment = font(9), IN_FILL, BOX, CTR
-    for col, src in ((2, R_NAME), (3, R_ROLE), (4, R_HOME)):
+    for col, src, ix in ((2, R_NAME, 0), (3, R_ROLE, 1), (4, R_HOME, 4)):
         c = asx.cell(row=r, column=col)
-        c.value = f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")'
+        c.value = lookup(eid, ix, f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")')
         c.font, c.fill, c.border, c.alignment = font(9), CALC_FILL, BOX, CTR
     for c in range(AS_C0, AS_C1 + 1):
         cc = asx.cell(row=r, column=c)
@@ -967,7 +992,7 @@ for col, _, w in MS_COLS: ms.column_dimensions[col].width = w
 put(ms, "A1", "月結統計 — 助理 / 醫護長(全自動)", TITLE_F, border=False)
 ms.merge_cells("A1:S1")
 put(ms, "A2", "期間", font(10, True), SUB_FILL, CTR)
-ms["B2"] = f'={SET_Y}&"年"&{SET_M}&"月"'
+ms["B2"] = PERIOD
 ms["B2"].font, ms["B2"].fill, ms["B2"].alignment, ms["B2"].border = (
     font(10, True), CALC_FILL, CTR, BOX)
 header_row(ms, 4, [lab for _, lab, _ in MS_COLS], start_col=1, height=30)
