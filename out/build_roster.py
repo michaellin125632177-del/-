@@ -444,7 +444,7 @@ put(st, f"E{MARK_R0 + len(MARKS) + 1}",
     "※ 單數/雙數週以計算參數區的「隔週基準日」起算,跨月跨年連續不會斷。",
     font(9, color="808080"), None, LEFT, border=False)
 put(st, f"E{MARK_R0 + len(MARKS) + 2}",
-    "※ 週班表的資料格有下拉選單(來源在 AP 欄),但不強制;特殊組合直接打字也可以。",
+    "※ 週班表的資料格有下拉選單,但不強制——輸入清單外的寫法只會跳提醒,按「是」照樣存入。",
     font(9, color="808080"), None, LEFT, border=False)
 
 put(st, "W4", f"六、{YEAR} 年國定假日(全院休診,班表自動填「國」)",
@@ -648,9 +648,16 @@ st.merge_cells(f"AP{WKC_R0-1}:AR{WKC_R0-1}")
 st.column_dimensions["AP"].width = 16
 for i, v in enumerate(WK_CHOICES):
     put(st, f"AP{WKC_R0+i}", v, font(9), CALC_FILL, CTR)
+# ⚠ showErrorMessage=False 會讓 Excel 整條驗證失效(下拉不會出現)。
+# 要「有下拉但不強制」,正確做法是 errorStyle="warning":輸入清單外的值只跳
+# 提醒,按「是」仍可存入。清單直接內嵌,不依賴跨分頁參照,最不容易出問題。
+_inline = ",".join(WK_CHOICES)
+assert len(_inline) <= 255, f"內嵌清單過長({len(_inline)} 字元)"
 dv_wkcell = DataValidation(
-    type="list", formula1=f"設定!$AP${WKC_R0}:$AP${WKC_R0+len(WK_CHOICES)-1}",
-    allow_blank=True, showErrorMessage=False)
+    type="list", formula1=f'"{_inline}"', allow_blank=True,
+    showErrorMessage=True, errorStyle="warning",
+    errorTitle="不在常用清單中",
+    error="這個寫法不在常用清單裡。若是特殊組合(例如三間輪替),按「是」即可照樣存入。")
 wk.add_data_validation(dv_wkcell)
 dv_wkcell.add(f"{get_column_letter(WK_C0)}{WK_ROW0}:"
               f"{get_column_letter(WK_C0+17)}{WK_ROW1}")
@@ -666,7 +673,10 @@ for i, t in enumerate([
   "※ 週日五間院所皆休診。寶貝牙另有週一至週五早診休診、週六晚診休診。",
 ]):
     put(wk, f"A{NOTE0+i}", t, font(9, color="808080"), None, LEFT, border=False)
-dv_wk = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=True)
+dv_wk = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=True,
+                       showErrorMessage=True, errorStyle="warning",
+                       errorTitle="不在醫師名冊中",
+                       error="這個編號不在醫師名冊裡。確定要用請按「是」。")
 wk.add_data_validation(dv_wk); dv_wk.add(f"A{WK_ROW0}:A{WK_ROW1}")
 
 # ================================================================ 4. 醫師班表
@@ -777,7 +787,11 @@ dv_doc = DataValidation(type="list", formula1=R_DC, allow_blank=True,
                         error="請填院所代碼(悅睿匯曜寶)或休假代碼。")
 ds.add_data_validation(dv_doc)
 dv_doc.add(f"{get_column_letter(DS_C0)}{DS_ROW0}:{get_column_letter(LAST_C)}{DS_ROW1}")
-dv_deid = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=True)
+dv_deid = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=True,
+                         showErrorMessage=True, errorStyle="warning",
+                         errorTitle="不在醫師名冊中",
+                         error="這個編號不在醫師名冊裡。確定要用請按「是」,"
+                               "但建議先到「設定」分頁把人加進名冊。")
 ds.add_data_validation(dv_deid); dv_deid.add(f"A{DS_ROW0}:A{DS_ROW1}")
 
 E0 = get_column_letter(DS_C0); EL = get_column_letter(LAST_C)
@@ -941,7 +955,9 @@ dv_wc = DataValidation(type="list", formula1=R_WC, allow_blank=True,
 asx.add_data_validation(dv_wc)
 dv_wc.add(f"{A0}{AS_ROW0}:{A1}{AS_ROW1}")
 dv_aeid = DataValidation(type="list", formula1=f"設定!$S$6:$S${5+N_ASST_SLOTS}",
-                         allow_blank=True)
+                         allow_blank=True, showErrorMessage=True, errorStyle="warning",
+                         errorTitle="不在助理名冊中",
+                         error="這個編號不在助理/醫護長名冊裡。確定要用請按「是」。")
 asx.add_data_validation(dv_aeid); dv_aeid.add(f"A{AS_ROW0}:A{AS_ROW1}")
 
 AGRID = f"{A0}{AS_ROW0}:{A1}{AS_ROW1}"
