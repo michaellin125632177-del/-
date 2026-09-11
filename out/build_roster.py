@@ -155,19 +155,24 @@ ASSISTANTS = []      # (編號, 姓名, 職類, 院所簡稱, 到職日, 備註)
 
 # 助理/醫護長 班別代碼:代碼,名稱,應到,應退,休息分,排班工時,計出勤,類別
 WORK_CODES = [
-    ("A",  "早班",          T(9,0),  T(18,0),  60, 8.0, 1, "上班"),
-    ("P",  "晚班",          T(12,30),T(21,30), 60, 8.0, 1, "上班"),
-    ("MD", "中班",          T(11,0), T(20,0),  60, 8.0, 1, "上班"),
-    ("ADM","行政班",        T(9,0),  T(18,0),  60, 8.0, 1, "上班"),
-    ("支", "支援他院",      None,    None,     60, 8.0, 1, "上班"),
-    ("訓", "教育訓練/會議",  None,    None,     60, 8.0, 1, "上班"),
-    ("OFF","排休",          None,    None,      0, 0.0, 0, "休假"),
-    ("特", "特休",          None,    None,      0, 0.0, 0, "休假"),
-    ("病", "病假",          None,    None,      0, 0.0, 0, "休假"),
-    ("事", "事假",          None,    None,      0, 0.0, 0, "休假"),
-    ("公", "公假",          None,    None,      0, 0.0, 0, "休假"),
-    ("國", "國定假日",      None,    None,      0, 0.0, 0, "休假"),
-    ("休", "休診",          None,    None,      0, 0.0, 0, "休假"),
+    # 體系以早/午/晚三個診次計算。一格一天,所以做兩個以上診次要用組合代碼。
+    # 「休息(分)」= 診次之間不算工時的空檔,滿足「應退 − 應到 − 休息 = 排班工時」。
+    ("早",   "早班",          T(9,0),  T(12,0),   0, 3.0, 1, "上班"),
+    ("午",   "午班",          T(14,0), T(17,0),   0, 3.0, 1, "上班"),
+    ("晚",   "晚班",          T(18,0), T(21,0),   0, 3.0, 1, "上班"),
+    ("早午", "早班+午班",     T(9,0),  T(17,0), 120, 6.0, 1, "上班"),
+    ("午晚", "午班+晚班",     T(14,0), T(21,0),  60, 6.0, 1, "上班"),
+    ("早晚", "早班+晚班",     T(9,0),  T(21,0), 360, 6.0, 1, "上班"),
+    ("全日", "早+午+晚",      T(9,0),  T(21,0), 180, 9.0, 1, "上班"),
+    ("支",   "支援他院",      None,    None,      0, 6.0, 1, "上班"),
+    ("訓",   "教育訓練/會議",  None,    None,      0, 6.0, 1, "上班"),
+    ("OFF", "排休",          None,    None,      0, 0.0, 0, "休假"),
+    ("特",   "特休",          None,    None,      0, 0.0, 0, "休假"),
+    ("病",   "病假",          None,    None,      0, 0.0, 0, "休假"),
+    ("事",   "事假",          None,    None,      0, 0.0, 0, "休假"),
+    ("公",   "公假",          None,    None,      0, 0.0, 0, "休假"),
+    ("國",   "國定假日",      None,    None,      0, 0.0, 0, "休假"),
+    ("休",   "休診",          None,    None,      0, 0.0, 0, "休假"),
 ]
 for c in WORK_CODES:                      # 工時定義一致性檢查
     if c[2] and c[3]:
@@ -181,14 +186,38 @@ DOC_CODES = ([(c[0], f"{c[1]}牙醫") for c in CLINICS] +
               ("國", "國定假日"), ("休", "休診")])
 DOC_LEAVE = [c[0] for c in DOC_CODES if c[0] not in CLINIC_CODES and c[0] != "訓"]
 
+def wk_label(hit):
+    """週班表格子的顯示寫法。hit = [(院所代碼, 標記), ...]
+
+    悅        每週固定
+    悅(隔)    隔週看診
+    悅/睿     兩院輪替(斜線前 = 單數週)
+    寶(不定)  官網註明非每週固定
+    悅(註)    有附加條件,詳見附註欄
+    """
+    if len(hit) > 1:
+        return "/".join(cl for cl, _ in hit)
+    cl, fg = hit[0]
+    if "~" in fg: return f"{cl}(隔)"
+    if "*" in fg: return f"{cl}(不定)"
+    if "!" in fg: return f"{cl}(註)"
+    return cl
+
 # ================================================================ 設定分頁座標
 SET_Y, SET_M = "設定!$C$2", "設定!$D$2"
-WC_R0 = 6;   WC_R1 = WC_R0 + len(WORK_CODES) - 1        # 6..18
-WC_WORK1 = WC_R0 + 5                                     # 上班類最後一列 11
-DC_R0 = 23;  DC_R1 = DC_R0 + len(DOC_CODES) - 1          # 23..35
-PM_R0 = 39                                               # 參數:40,41,42
-CL_R0 = 46;  CL_L0 = 47; CL_L1 = CL_L0 + 6               # 47..53
-PP_R0 = 56;  PP_L0 = 57; PP_L1 = PP_L0 + 139             # 57..196
+# 座標全部由上一區塊推算,增減代碼不會再壓到下面的區塊
+WC_R0    = 6                                    # 一、助理班別代碼:表頭 5、資料 6 起
+WC_R1    = WC_R0 + len(WORK_CODES) - 1
+WC_WORK1 = WC_R0 + 8                            # 上班類最後一列(早/午/晚/早午/午晚/早晚/全日/支/訓)
+DC_R0    = WC_R1 + 5                            # 二、醫師診次代碼:標題 -2、表頭 -1
+DC_R1    = DC_R0 + len(DOC_CODES) - 1
+PM_R0    = DC_R1 + 5                            # 三、計算參數:標題 -1、表頭 PM_R0、值 +1 起
+CL_R0    = PM_R0 + 8                            # 四、院所清單:標題 -1、表頭 CL_R0
+CL_L0    = CL_R0 + 1
+CL_L1    = CL_L0 + 6
+PP_R0    = CL_L1 + 3                            # 五、人員名冊
+PP_L0    = PP_R0 + 1
+PP_L1    = PP_L0 + 139
 
 R_WC     = f"設定!$B${WC_R0}:$B${WC_R1}"
 R_WC_W   = f"設定!$B${WC_R0}:$B${WC_WORK1}"
@@ -199,7 +228,10 @@ R_WC_RST = f"設定!$F${WC_R0}:$F${WC_R1}"
 R_WC_HRS = f"設定!$G${WC_R0}:$G${WC_R1}"
 R_WC_ATT = f"設定!$H${WC_R0}:$H${WC_R1}"
 R_DC     = f"設定!$B${DC_R0}:$B${DC_R1}"
-P_OT_MIN, P_OT_UNIT, P_GRACE = "設定!$C$40", "設定!$C$41", "設定!$C$42"
+P_OT_MIN  = f"設定!$C${PM_R0+1}"
+P_OT_UNIT = f"設定!$C${PM_R0+2}"
+P_GRACE   = f"設定!$C${PM_R0+3}"
+P_EPOCH   = f"設定!$C${PM_R0+4}"                 # 隔週基準日
 R_EID  = f"設定!$B${PP_L0}:$B${PP_L1}"
 R_NAME = f"設定!$C${PP_L0}:$C${PP_L1}"
 R_ROLE = f"設定!$D${PP_L0}:$D${PP_L1}"
@@ -207,9 +239,8 @@ R_SPEC = f"設定!$E${PP_L0}:$E${PP_L1}"
 R_DUTY = f"設定!$F${PP_L0}:$F${PP_L1}"
 R_HOME = f"設定!$G${PP_L0}:$G${PP_L1}"
 R_WEEK = "設定!$O$6:$O$12"
-R_HOL  = "設定!$W$6:$W$40"          # 國定假日日期清單
-P_EPOCH = "設定!$C$43"              # 隔週基準日
-R_OPEN = "設定!$U$47:$AO$51"        # 五間院所的開診時段旗標(含週日)
+R_HOL  = "設定!$W$6:$W$40"                       # 國定假日清單(W 欄,與上列區塊不重疊)
+R_OPEN = f"設定!$U${CL_L0}:$AO${CL_L0+4}"        # 五間院所的開診時段旗標(含週日)
 DAYS_FX = f"DAY(EOMONTH(DATE({SET_Y},{SET_M},1),0))"
 
 # ── 門診表 → 每位醫師的每週時段 ────────────────────────────
@@ -340,11 +371,11 @@ BLOCKS = [
   "   (旁邊的格子公式一樣,貼過來會自動對應到正確的日期與診次。)"),
  ("醫師週班表的標記怎麼看",
   "週班表是母表,要表示「這一週在 A 院、下一週在 B 院」,所以比醫師班表多幾種寫法:\n"
-  "  悅     每週固定在晶悅\n"
-  "  悅~    隔週在晶悅(單數週有、雙數週沒有)\n"
-  "  悅~睿~ 兩間輪替——單數週晶悅、雙數週晶睿,全表共四組\n"
-  "  寶*    官網註明非每週固定,需向院所確認\n"
-  "  悅!    有附加條件,寫在該列最右邊的附註欄\n"
+  "  悅        每週固定在晶悅\n"
+  "  悅(隔)    隔週在晶悅(單數週有、雙數週沒有)\n"
+  "  悅/睿     兩間輪替——斜線前是單數週、斜線後是雙數週,全表共四組\n"
+  "  寶(不定)  官網註明非每週固定,需向院所確認\n"
+  "  悅(註)    有附加條件,寫在該列最右邊的附註欄\n"
   "完整對照表在「設定」分頁的「二之二、醫師週班表的標記」。\n"
   "醫師班表(月班表)不用這些標記,一格就是一個單純的代碼。"),
  ("出勤紀錄怎麼看",
@@ -488,16 +519,17 @@ for i, lab in enumerate(["寫法", "意思", "舉例說明"]):
     c = st.cell(row=MARK_R0, column=5 + i, value=lab)
     c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
 MARKS = [
-    ("悅",      "每週固定",       "每一週的這個診次都在晶悅"),
-    ("悅~",     "隔週看診",       "單數週在晶悅,雙數週這個診次不排"),
-    ("悅~睿~",  "兩間院所輪替",   "單數週在晶悅、雙數週在晶睿(週班表裡共四組)"),
-    ("寶*",     "非每週固定",     "官網註明「詳情請聯繫院所」,需逐一確認"),
-    ("悅!",     "有附加條件",     "條件寫在該列最右邊的附註欄"),
+    ("悅",       "每週固定",      "每一週的這個診次都在晶悅"),
+    ("悅(隔)",   "隔週看診",      "單數週在晶悅,雙數週這個診次不排"),
+    ("悅/睿",    "兩間院所輪替",  "斜線前 = 單數週、斜線後 = 雙數週(全表共四組)"),
+    ("寶(不定)", "非每週固定",    "官網註明「詳情請聯繫院所」,需逐一向院所確認"),
+    ("悅(註)",   "有附加條件",    "條件寫在該列最右邊的附註欄"),
     ("OFF 特 病", "休假類",       "整個診次請假,寫法與醫師班表相同"),
 ]
 for i, (w, mean, ex) in enumerate(MARKS):
     r = MARK_R0 + 1 + i
     put(st, f"E{r}", w, font(10, True), CALC_FILL, CTR)
+    st.column_dimensions["E"].width = 11
     put(st, f"F{r}", mean, font(9), None, CTR)
     put(st, f"G{r}", ex, font(9), None, LEFT)
     st.merge_cells(f"G{r}:J{r}")
@@ -638,7 +670,7 @@ wk.freeze_panes = "C5"
 wk.column_dimensions["A"].width = 9
 wk.column_dimensions["B"].width = 10
 for i in range(18):
-    wk.column_dimensions[get_column_letter(WK_C0 + i)].width = 5.2
+    wk.column_dimensions[get_column_letter(WK_C0 + i)].width = 7.2
 wk.column_dimensions[get_column_letter(WK_C0 + 18)].width = 3
 wk.column_dimensions[get_column_letter(WK_C0 + 19)].width = 40
 put(wk, "A1", "醫師週班表(固定門診表 · 這是排月班的母表)", TITLE_F, border=False)
@@ -683,11 +715,9 @@ for i in range(N_DOC):
             hit = [(cl, fg) for (ww, tt, cl), fg in slots.items()
                    if ww == w + 1 and tt == sidx]
             if hit:
-                # 排序:非 ALT_B(單數週那組)在前、ALT_B(雙數週那組)在後。
-                # 這樣「前面的代碼 = 單數週、後面的 = 雙數週」才是通則,
-                # 「本月建議班表」的公式也才能靠位置判斷。
+                # 單數週那組在前、雙數週那組在後,「斜線前 = 單數週」才是通則
                 hit = sorted(hit, key=lambda x: ((nm, w + 1, x[0]) in ALT_B, x[0]))
-                cc.value = "".join(f"{cl}{fg}" for cl, fg in hit)
+                cc.value = wk_label(hit)
                 cc.fill = CLINIC_FILL.get(hit[0][0], CALC_FILL)
             cc.font, cc.alignment = font(8, True), CTR
             cc.border = DAYSEP if sidx == 0 else BOX
@@ -705,7 +735,7 @@ WK_USED = sorted({wk.cell(row=r, column=c).value
                   for r in range(WK_ROW0, WK_ROW1 + 1)
                   for c in range(WK_C0, WK_C0 + 18)
                   if wk.cell(row=r, column=c).value})
-_base = [c for c in CLINIC_CODES] + [c + "~" for c in CLINIC_CODES]
+_base = [c for c in CLINIC_CODES] + [f"{c}(隔)" for c in CLINIC_CODES]
 WK_CHOICES = (_base + [v for v in WK_USED
                        if v not in _base and v != "訓" and v not in DOC_LEAVE]
               + ["訓"] + DOC_LEAVE)
@@ -734,8 +764,8 @@ print(f"週班表下拉選項 {len(WK_CHOICES)} 項:{'、'.join(WK_CHOICES)}")
 
 NOTE0 = WK_ROW1 + 2
 for i, t in enumerate([
-  "※ 資料由官網五個門診表頁面直接解析產生,非人工轉錄。標記:~ = 隔週看診   "
-  "* = 官網註明並非每週固定,詳情請聯繫院所   格內兩個代碼 = 兩間院所輪替。",
+  "※ 資料由官網五個門診表頁面直接解析產生,非人工轉錄。寫法:悅(隔) = 隔週看診、"
+  "悅/睿 = 兩院輪替(斜線前為單數週)、寶(不定) = 官網註明非每週固定、悅(註) = 見附註欄。",
   "※ 資料格有下拉選單(常用值),但不強制——特殊組合直接打字也可以,不會被擋。",
   "※ 隔週的四組互換(劉立德週三、朱柏非週六、王泳泉週一、陳昺元週六)以固定基準日(2026/9/28 起)"
   "連續數週判定單雙週,跨月不會斷。哪一組先需要院所確認——確認後把基準日挪一週即可整體對齊。",
@@ -823,13 +853,16 @@ for i in range(N_DOC):
                  f'${DS_HCOL_L}{r},{L}${DS_H0}),"")')
             # ⚠ INDEX 指到空白儲存格會回傳數字 0(不是空字串),
             # 沒擋掉的話沒排班的格子會顯示 0。文字值與 0 永不相等,所以用 =0 判斷。
+            # 解析順序:悅/睿(輪替)→ 悅(隔)→ 其他帶括號的 → 原樣輸出
+            P = f'{L}${DS_H0+1}'
             cc.value = (
                 f'=IF({L}${DS_H0+2}="X","",'
                 f'IF({L}${DS_H0+2}<>"",{L}${DS_H0+2},'
                 f'IF({W}=0,"",'
-                f'IF(LEN({W})=4,MID({W},1+{L}${DS_H0+1}*2,1),'
-                f'IF(LEN({W})=2,IF(AND(RIGHT({W},1)="~",{L}${DS_H0+1}=1),"",LEFT({W},1)),'
-                f'{W})))))')
+                f'IF(MID({W},2,1)="/",MID({W},1+{P}*2,1),'
+                f'IF(MID({W},3,1)="隔",IF({P}=0,LEFT({W},1),""),'
+                f'IF(MID({W},2,1)="(",LEFT({W},1),'
+                f'{W}))))))')
             cc.font, cc.alignment = font(9, True), CTR
             cc.border = DAYSEP if sidx == 0 else BOX
 

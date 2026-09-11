@@ -185,8 +185,8 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
           <thead><tr><th>員工編號</th><th>姓名</th><th>職類</th><th>院所</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
           <tr><th></th><th></th><th></th><th></th><th>四</th><th>五</th><th class="we">六</th><th class="we">日</th><th>一</th></tr></thead>
           <tbody>
-            <tr><td class="fill">A001</td><td class="calc">張怡君</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">A</td><td class="fill">P</td><td class="fill we">A</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
-            <tr><td class="fill">A002</td><td class="calc">李宗翰</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">P</td><td class="fill">A</td><td class="fill we">P</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
+            <tr><td class="fill">A001</td><td class="calc">張怡君</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">早午</td><td class="fill">午晚</td><td class="fill we">全日</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
+            <tr><td class="fill">A002</td><td class="calc">李宗翰</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">午晚</td><td class="fill">早午</td><td class="fill we">午晚</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
           </tbody>
         </table></div>
         <div class="note">黃底 = 你填的 · 灰底 = 自動帶出 · 粉紅 = 這天還沒排</div>
@@ -233,9 +233,9 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
         <div class="scroll"><table>
           <thead><tr><th>日期</th><th>姓名</th><th>排班</th><th>應到</th><th>應退</th><th>實際上班</th><th>實際下班</th><th>出勤異常</th><th>加班</th></tr></thead>
           <tbody>
-            <tr><td>10/02</td><td>張怡君</td><td>A</td><td>09:00</td><td>18:00</td><td class="bad">09:18</td><td>18:04</td><td class="bad">遲到</td><td>–</td></tr>
-            <tr><td>10/05</td><td>蔡孟蓉</td><td>A</td><td>09:00</td><td>18:00</td><td>08:58</td><td class="ot">20:30</td><td>正常</td><td class="ot">2.50</td></tr>
-            <tr><td>10/08</td><td>王思婷</td><td>A</td><td>09:00</td><td>18:00</td><td class="bad">—</td><td class="bad">—</td><td class="bad">未打卡</td><td>–</td></tr>
+            <tr><td>10/02</td><td>張怡君</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">09:18</td><td>17:04</td><td class="bad">遲到</td><td>–</td></tr>
+            <tr><td>10/05</td><td>蔡孟蓉</td><td>早午</td><td>09:00</td><td>17:00</td><td>08:58</td><td class="ot">20:30</td><td>正常</td><td class="ot">3.50</td></tr>
+            <tr><td>10/08</td><td>王思婷</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">—</td><td class="bad">—</td><td class="bad">未打卡</td><td>–</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -272,14 +272,15 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
   <div class="scroll"><table class="plain">
     <thead><tr><th>上班</th><th>時間</th><th>休假</th><th>用在什麼時候</th></tr></thead>
     <tbody>
-      <tr><td><span class="code">A</span> 早班</td><td>09:00–18:00</td><td><span class="code">OFF</span> 排休</td><td>輪休,不扣假</td></tr>
-      <tr><td><span class="code">P</span> 晚班</td><td>12:30–21:30</td><td><span class="code">特</span> 特休</td><td>年資給的有薪假</td></tr>
-      <tr><td><span class="code">MD</span> 中班</td><td>11:00–20:00</td><td><span class="code">病</span> <span class="code">事</span> <span class="code">公</span></td><td>病假 / 事假 / 公假</td></tr>
-      <tr><td><span class="code">ADM</span> 行政班</td><td>09:00–18:00</td><td><span class="code">國</span> 國定假日</td><td>全院休診,通常已預先填好</td></tr>
-      <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td>依實際</td><td><span class="code">休</span> 休診</td><td>診所沒開,不是個人請假</td></tr>
+      <tr><td><span class="code">早</span> 早班</td><td>09:00–12:00</td><td><span class="code">OFF</span> 排休</td><td>輪休,不扣假</td></tr>
+      <tr><td><span class="code">午</span> 午班</td><td>14:00–17:00</td><td><span class="code">特</span> 特休</td><td>年資給的有薪假</td></tr>
+      <tr><td><span class="code">晚</span> 晚班</td><td>18:00–21:00</td><td><span class="code">病</span> <span class="code">事</span> <span class="code">公</span></td><td>病假 / 事假 / 公假</td></tr>
+      <tr><td><span class="code">早午</span> <span class="code">午晚</span> <span class="code">早晚</span></td><td>兩個診次</td><td><span class="code">國</span> 國定假日</td><td>全院休診,通常已預先填好</td></tr>
+      <tr><td><span class="code">全日</span> 早+午+晚</td><td>三個診次</td><td><span class="code">休</span> 休診</td><td>診所沒開,不是個人請假</td></tr>
+      <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td>依實際</td><td></td><td></td></tr>
     </tbody>
   </table></div>
-  <p style="margin-top:10px;font-size:13px;color:var(--muted)">班別時間目前是暫定值,確認後會更新。以「設定」分頁的內容為準。</p>
+  <p style="margin-top:10px;font-size:13px;color:var(--muted)">一天只做一個診次就填單一代碼,做兩個以上要填組合代碼(早午、午晚、早晚、全日)—— 一格只能填一個,不能寫「早 午」。完整版在「設定」分頁。</p>
 </section>
 
 <section>
