@@ -821,12 +821,15 @@ for i in range(N_DOC):
             L = get_column_letter(dcol(d, sidx))
             W = (f'IFERROR(INDEX(醫師週班表!$C${WK_ROW0}:$T${WK_ROW1},'
                  f'${DS_HCOL_L}{r},{L}${DS_H0}),"")')
+            # ⚠ INDEX 指到空白儲存格會回傳數字 0(不是空字串),
+            # 沒擋掉的話沒排班的格子會顯示 0。文字值與 0 永不相等,所以用 =0 判斷。
             cc.value = (
                 f'=IF({L}${DS_H0+2}="X","",'
                 f'IF({L}${DS_H0+2}<>"",{L}${DS_H0+2},'
+                f'IF({W}=0,"",'
                 f'IF(LEN({W})=4,MID({W},1+{L}${DS_H0+1}*2,1),'
                 f'IF(LEN({W})=2,IF(AND(RIGHT({W},1)="~",{L}${DS_H0+1}=1),"",LEFT({W},1)),'
-                f'{W}))))')
+                f'{W})))))')
             cc.font, cc.alignment = font(9, True), CTR
             cc.border = DAYSEP if sidx == 0 else BOX
 
@@ -1151,8 +1154,10 @@ for pi in range(N_ASST):
 "E": f'=IF($C{r}="","",助理班表!$D{srow})',
 "F": f'=IF($C{r}="","",助理班表!$C{srow})',
 "G": f'=IF($C{r}="","",助理班表!{scol}{srow})',
-"H": f'=IF($G{r}="","",IFERROR(INDEX({R_WC_IN},MATCH($G{r},{R_WC},0)),""))',
-"I": f'=IF($G{r}="","",IFERROR(INDEX({R_WC_OUT},MATCH($G{r},{R_WC},0)),""))',
+"H": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_IN},MATCH($G{r},{R_WC},0))=0,"",'
+      f'INDEX({R_WC_IN},MATCH($G{r},{R_WC},0))),""))'),
+"I": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_OUT},MATCH($G{r},{R_WC},0))=0,"",'
+      f'INDEX({R_WC_OUT},MATCH($G{r},{R_WC},0))),""))'),
 "J": (f'=IFERROR(INDEX(打卡匯入!$C${PUNCH_R0}:$C${PUNCH_R1},'
       f'MATCH($C{r}&"|"&DAY($A{r}),打卡匯入!$E${PUNCH_R0}:$E${PUNCH_R1},0)),"")'),
 "K": (f'=IFERROR(INDEX(打卡匯入!$D${PUNCH_R0}:$D${PUNCH_R1},'
