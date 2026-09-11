@@ -317,6 +317,15 @@ BLOCKS = [
   "請假也是填在診次格裡(特/病/事/公/國/OFF/休),因為醫師請假常常只請半天。\n"
   "所以醫師的月結一律以「診次」為單位,不是天數——請假 3 個診次就是請一天。\n"
   "五種院所代碼各有底色,一位醫師整月在五間之間怎麼跑,橫著看一列就知道。"),
+ ("醫師週班表的標記怎麼看",
+  "週班表是母表,要表示「這一週在 A 院、下一週在 B 院」,所以比醫師班表多幾種寫法:\n"
+  "  悅     每週固定在晶悅\n"
+  "  悅~    隔週在晶悅(單數週有、雙數週沒有)\n"
+  "  悅~睿~ 兩間輪替——單數週晶悅、雙數週晶睿,全表共四組\n"
+  "  寶*    官網註明非每週固定,需向院所確認\n"
+  "  悅!    有附加條件,寫在該列最右邊的附註欄\n"
+  "完整對照表在「設定」分頁的「二之二、醫師週班表的標記」。\n"
+  "醫師班表(月班表)不用這些標記,一格就是一個單純的代碼。"),
  ("出勤紀錄怎麼看",
   "一人一天一列,自動把助理班表與打卡對起來,判定五種狀態:\n"
   "正常、遲到、早退、未打卡、假日出勤。紅底 = 需處理;橘底 = 當天有加班。\n"
@@ -396,7 +405,8 @@ put(st, f"B{WC_R1+1}",
     "※ 有固定時段的代碼必須滿足「應退 − 應到 − 休息 = 排班工時」,否則出勤紀錄會算出不存在的加班。"
     "建置腳本會自動檢查。", font(9, color="808080"), None, LEFT, border=False)
 
-put(st, f"B{DC_R0-2}", "二、醫師診次代碼", font(11, True), border=False)
+put(st, f"B{DC_R0-2}", "二、醫師診次代碼(醫師班表用:一格填一個代碼)",
+    font(11, True), border=False)
 header_row(st, DC_R0-1, ["代碼","意義"])
 for i, (code, mean) in enumerate(DOC_CODES):
     put(st, f"B{DC_R0+i}", code, font(10, True),
@@ -404,6 +414,37 @@ for i, (code, mean) in enumerate(DOC_CODES):
     put(st, f"C{DC_R0+i}", mean, font(), None, LEFT)
 put(st, f"B{DC_R1+1}",
     "※ 醫師班表一格 = 一個診次。填院所代碼表示該診次在哪間看診,填休假代碼表示該診次請假。",
+    font(9, color="808080"), None, LEFT, border=False)
+put(st, f"B{DC_R1+2}",
+    "※ 「醫師週班表」除了上面這些代碼,還會用到右邊那幾種標記——那是母表,"
+    "要表示隔週與輪替,所以下拉選項比較多。",
+    font(9, color="808080"), None, LEFT, border=False)
+
+# ── 週班表的標記對照(放在診次代碼表右邊)──────────────────
+put(st, f"E{DC_R0-2}", "二之二、醫師週班表的標記(母表專用)", font(11, True), border=False)
+MARK_R0 = DC_R0 - 1
+for i, lab in enumerate(["寫法", "意思", "舉例說明"]):
+    c = st.cell(row=MARK_R0, column=5 + i, value=lab)
+    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
+MARKS = [
+    ("悅",      "每週固定",       "每一週的這個診次都在晶悅"),
+    ("悅~",     "隔週看診",       "單數週在晶悅,雙數週這個診次不排"),
+    ("悅~睿~",  "兩間院所輪替",   "單數週在晶悅、雙數週在晶睿(週班表裡共四組)"),
+    ("寶*",     "非每週固定",     "官網註明「詳情請聯繫院所」,需逐一確認"),
+    ("悅!",     "有附加條件",     "條件寫在該列最右邊的附註欄"),
+    ("OFF 特 病", "休假類",       "整個診次請假,寫法與醫師班表相同"),
+]
+for i, (w, mean, ex) in enumerate(MARKS):
+    r = MARK_R0 + 1 + i
+    put(st, f"E{r}", w, font(10, True), CALC_FILL, CTR)
+    put(st, f"F{r}", mean, font(9), None, CTR)
+    put(st, f"G{r}", ex, font(9), None, LEFT)
+    st.merge_cells(f"G{r}:J{r}")
+put(st, f"E{MARK_R0 + len(MARKS) + 1}",
+    "※ 單數/雙數週以計算參數區的「隔週基準日」起算,跨月跨年連續不會斷。",
+    font(9, color="808080"), None, LEFT, border=False)
+put(st, f"E{MARK_R0 + len(MARKS) + 2}",
+    "※ 週班表的資料格有下拉選單(來源在 AP 欄),但不強制;特殊組合直接打字也可以。",
     font(9, color="808080"), None, LEFT, border=False)
 
 put(st, "W4", f"六、{YEAR} 年國定假日(全院休診,班表自動填「國」)",
@@ -451,7 +492,8 @@ for i, w in enumerate(["日","一","二","三","四","五","六"]):
     put(st, f"N{6+i}", i+1, font(9), CALC_FILL, CTR)
     put(st, f"O{6+i}", w, font(9), CALC_FILL, CTR)
 
-put(st, f"B{PM_R0}", "三、計算參數(全體系一致)", font(11, True), border=False)
+# 標題要在表頭的上一列,否則會被 header_row 覆蓋掉
+put(st, f"B{PM_R0-1}", "三、計算參數(全體系一致)", font(11, True), border=False)
 header_row(st, PM_R0, ["參數","值","說明"], start_col=2)
 PARAMS = [("加班認定門檻(分)", 30, "超過排班工時多少分鐘才認定為加班。低於門檻視為正常收尾。"),
           ("加班計算單位(分)", 30, "認定為加班後,無條件捨去到此單位。填 1 表示逐分鐘計。"),
@@ -536,8 +578,11 @@ wk.column_dimensions[get_column_letter(WK_C0 + 18)].width = 3
 wk.column_dimensions[get_column_letter(WK_C0 + 19)].width = 40
 put(wk, "A1", "醫師週班表(固定門診表 · 這是排月班的母表)", TITLE_F, border=False)
 wk.merge_cells(start_row=1, start_column=1, end_row=1, end_column=WK_C0 + 17)
-put(wk, "A2", "資料來源:官網各院所門診表(自截圖轉錄,請核對)。改這裡不會自動改「醫師班表」,"
-    "月班表是照這張表產生出來的固定值。", font(9, color="808080"), None, LEFT, border=False)
+put(wk, "A2",
+    "資料來源:官網五間院所門診表頁面,由原始碼直接解析產生(231 筆逐格比對一致)。"
+    "格內寫法見「設定」分頁的「二之二、醫師週班表的標記」。"
+    "改這裡不會自動改「醫師班表」——月班表是照這張表產生出來的固定值。",
+    font(9, color="808080"), None, LEFT, border=False)
 for lab, col in (("員工編號", 1), ("姓名", 2)):
     c = wk.cell(row=3, column=col, value=lab)
     c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
@@ -597,7 +642,9 @@ WK_CHOICES = (_base + [v for v in WK_USED
               + ["訓"] + DOC_LEAVE)
 WK_CHOICES = list(dict.fromkeys(WK_CHOICES))
 WKC_R0 = 6
-put(st, f"AP{WKC_R0-1}", "週班表下拉(自動產生)", font(9, True), SUB_FILL, CTR)
+put(st, f"AP{WKC_R0-1}", "醫師週班表下拉選單來源(自動產生,勿刪)",
+    font(9, True), SUB_FILL, CTR)
+st.merge_cells(f"AP{WKC_R0-1}:AR{WKC_R0-1}")
 st.column_dimensions["AP"].width = 16
 for i, v in enumerate(WK_CHOICES):
     put(st, f"AP{WKC_R0+i}", v, font(9), CALC_FILL, CTR)
