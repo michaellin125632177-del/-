@@ -293,13 +293,12 @@ BLOCKS = [
   "醫師 → 醫師班表:一人一列,橫向 31 天 × 早/午/晚,格內填院所代碼(悅睿匯曜寶)。\n"
   "   一格只容得下一間院所,衝堂在結構上就不可能發生。\n"
   "助理與醫護長 → 助理班表:一人一列,橫向 31 天,格內填班別代碼(A/P/OFF/特…)。"),
- ("十個分頁怎麼分工",
+ ("九個分頁怎麼分工",
   "① 說明 ② 設定 — 總部維護,各院所勿動。\n"
   "③ 醫師週班表 — 官網門診表的固定週輪值,是排月班的母表。\n"
-  "④ 本月建議班表 — 把週班表即時展開成本月,唯讀參考,用來重新產生月班表。\n"
-  "⑤ 醫師班表 ⑥ 醫師月結 — 本月實際診次,已依週班表填好。\n"
-  "⑦ 助理班表 — 各院所醫護長填自己院所那幾列。\n"
-  "⑧ 打卡匯入 ⑨ 出勤紀錄 ⑩ 月結統計 — 助理與醫護長的法定出勤與月結。"),
+  "④ 醫師班表 ⑤ 醫師月結 — 本月實際診次,由週班表自動展開。\n"
+  "⑥ 助理班表 — 各院所醫護長填自己院所那幾列。\n"
+  "⑦ 打卡匯入 ⑧ 出勤紀錄 ⑨ 月結統計 — 助理與醫護長的法定出勤與月結。"),
  ("週班表與月班表的關係",
   "門診表是固定的每週輪值,所以月班表不必一格一格填——「醫師班表」已經照\n"
   "「醫師週班表」把整個月展開好了,直接改例外即可(請假就把該格改成假別代碼)。\n"
@@ -320,20 +319,19 @@ BLOCKS = [
   "請假也是填在診次格裡(特/病/事/公/國/OFF/休),因為醫師請假常常只請半天。\n"
   "所以醫師的月結一律以「診次」為單位,不是天數——請假 3 個診次就是請一天。\n"
   "五種院所代碼各有底色,一位醫師整月在五間之間怎麼跑,橫著看一列就知道。"),
- ("改了週班表,月結為什麼沒變",
-  "資料是這樣流的:\n"
-  "  醫師週班表 →(展開)→ 本月建議班表 →(你複製貼上)→ 醫師班表 →(公式)→ 醫師月結\n"
-  "「醫師月結」讀的是「醫師班表」,不是週班表。而「醫師班表」裡是固定值不是公式,\n"
-  "所以改週班表不會自動流下去——中間那一步要你手動貼一次。\n"
+ ("改班表哪裡會跟著變",
+  "資料是這樣流的,兩邊改都會立刻反映到月結:\n"
+  "  醫師週班表 →(公式)→ 醫師班表 →(公式)→ 醫師月結\n"
   "\n"
-  "要讓月結跟著變,三個步驟:\n"
-  "  1. 到「本月建議班表」——它會即時反映週班表的改動\n"
-  "  2. 選取 A9 到最右下角,複製\n"
-  "  3. 到「醫師班表」點 A6,右鍵「選擇性貼上」→ 選「值」\n"
-  "貼完再改個別例外(某人某天請假),月結就會跟著動了。\n"
+  "① 改「醫師週班表」= 改固定門診(某位醫師從此改成週三晚診)。\n"
+  "   醫師班表整個月的對應格子會立刻跟著變,月結也立刻變。\n"
+  "② 直接改「醫師班表」的格子 = 這個月的單次例外(某天請假、臨時調班)。\n"
+  "   月結一樣立刻變。\n"
   "\n"
-  "為什麼不讓醫師班表直接用公式?因為那樣你一改例外就會把公式洗掉,\n"
-  "而且公式在不重算的檢視器裡是空白的。用貼上值的方式,例外改了不會被蓋掉。"),
+  "⚠ 但②有個副作用:你打字覆蓋的那一格,原本的公式就沒了,\n"
+  "   從此不再跟著週班表走。那種格子會自動加上紅色外框提醒你。\n"
+  "   要讓它恢復連動,從左右鄰近沒被改過的格子複製一格貼回來即可。\n"
+  "   (旁邊的格子公式一樣,貼過來會自動對應到正確的日期與診次。)"),
  ("醫師週班表的標記怎麼看",
   "週班表是母表,要表示「這一週在 A 院、下一週在 B 院」,所以比醫師班表多幾種寫法:\n"
   "  悅     每週固定在晶悅\n"
@@ -602,8 +600,7 @@ wk.merge_cells(start_row=1, start_column=1, end_row=1, end_column=WK_C0 + 17)
 put(wk, "A2",
     "資料來源:官網五間院所門診表頁面,由原始碼直接解析產生(231 筆逐格比對一致)。"
     "格內寫法見「設定」分頁的「二之二、醫師週班表的標記」。"
-    "改這裡之後,「本月建議班表」會立刻跟著變;但「醫師班表」不會——"
-    "要把新的班套用過去,請看「本月建議班表」第 2 列的三步驟說明。",
+    "改這裡等於改固定門診:「醫師班表」整個月的對應格子會立刻跟著變,月結也會。",
     font(9, color="808080"), None, LEFT, border=False)
 for lab, col in (("員工編號", 1), ("姓名", 2)):
     c = wk.cell(row=3, column=col, value=lab)
@@ -705,115 +702,13 @@ dv_wk = DataValidation(type="list", formula1="設定!$Q$6:$Q$45", allow_blank=Tr
                        error="這個編號不在醫師名冊裡。確定要用請按「是」。")
 wk.add_data_validation(dv_wk); dv_wk.add(f"A{WK_ROW0}:A{WK_ROW1}")
 
-# ================================================================ 3.5 本月建議班表
-# 由「醫師週班表」即時展開成本月 31 天 × 3 診次的公式表。
-# 週班表或本期年月一改,這裡立刻跟著變;使用者複製→選擇性貼上「值」到
-# 「醫師班表」,就能自己重新產生月班表,不必回頭找我重跑程式。
-sg = wb.create_sheet("本月建議班表")
-sg.sheet_view.showGridLines = False
-SG_C0 = 5
-SG_ROW0 = 9
-SG_ROW1 = SG_ROW0 + N_DOC - 1
-sg.freeze_panes = "E9"
-for col, w in {"A": 9, "B": 10, "C": 15, "D": 11}.items():
-    sg.column_dimensions[col].width = w
-def sgcol(d, sidx):
-    return SG_C0 + (d - 1) * 3 + sidx
-for d in range(1, DAYS_IN_MONTH + 1):
-    for sidx in range(3):
-        sg.column_dimensions[get_column_letter(sgcol(d, sidx))].width = 3.4
-SG_LAST = sgcol(DAYS_IN_MONTH, 2)
-
-put(sg, "A1", "本月建議班表(由週班表自動展開 · 唯讀參考)", TITLE_F, border=False)
-sg.merge_cells(start_row=1, start_column=1, end_row=1, end_column=min(SG_LAST, 40))
-put(sg, "A2",
-    "改了「醫師週班表」或「設定」的本期年月,這一頁會立刻跟著變。"
-    "要套用到實際班表:選取 A9 到最右下角 → 複製 → 到「醫師班表」A6 → "
-    "右鍵「選擇性貼上」→ 選「值」。貼完再改個別例外(請假、調班)。",
-    font(9, color="A8433C"), None, LEFT, border=False)
-
-for lab, col in (("員工編號", 1), ("姓名", 2), ("專科", 3), ("職務", 4)):
-    c = sg.cell(row=3, column=col, value=lab)
-    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
-    sg.merge_cells(start_row=3, start_column=col, end_row=5, end_column=col)
-
-for d in range(1, DAYS_IN_MONTH + 1):
-    a = sgcol(d, 0)
-    c = sg.cell(row=3, column=a, value=f'=IF({d}>{DAYS_FX},"",{d})')
-    c.font, c.fill, c.alignment, c.border = HDR_F, HDR_FILL, CTR, BOX
-    sg.merge_cells(start_row=3, start_column=a, end_row=3, end_column=a + 2)
-    for sidx in range(3):
-        cc = sgcol(d, sidx); L = get_column_letter(cc)
-        w = sg.cell(row=4, column=cc)
-        w.value = (f'=IF({d}>{DAYS_FX},"",'
-                   f'INDEX({R_WEEK},WEEKDAY(DATE({SET_Y},{SET_M},{d}),1)))')
-        w.font, w.fill, w.alignment = font(8, True), SUB_FILL, CTR
-        w.border = DAYSEP if sidx == 0 else BOX
-        t = sg.cell(row=5, column=cc, value=SESSIONS[sidx])
-        t.font, t.fill, t.alignment = font(8), SUB_FILL, CTR
-        t.border = DAYSEP if sidx == 0 else BOX
-        # 第 6~8 列是運算用的隱藏輔助列
-        sg.cell(row=6, column=cc).value = (
-            f'=IF({d}>{DAYS_FX},1,(WEEKDAY(DATE({SET_Y},{SET_M},{d}),2)-1)*3+{sidx+1})')
-        sg.cell(row=7, column=cc).value = (
-            f'=IF({d}>{DAYS_FX},0,'
-            f'MOD(INT((DATE({SET_Y},{SET_M},{d})-{P_EPOCH})/7),2))')
-        sg.cell(row=8, column=cc).value = (
-            f'=IF({d}>{DAYS_FX},"X",'
-            f'IF(COUNTIF({R_HOL},DATE({SET_Y},{SET_M},{d}))>0,"國",'
-            f'IF(SUMPRODUCT(INDEX({R_OPEN},0,{L}$6))=0,"休","")))')
-for hr, lab in ((6, "↓輔助"), (7, "↓輔助"), (8, "↓輔助")):
-    put(sg, f"A{hr}", lab, font(8, color="BBBBBB"), None, CTR, border=False)
-    sg.row_dimensions[hr].hidden = True
-
-for i in range(N_DOC):
-    r = SG_ROW0 + i
-    wr = WK_ROW0 + i
-    sg.row_dimensions[r].height = 17
-    eid = DOCTORS[i][0] if i < len(DOCTORS) else None
-    a = sg.cell(row=r, column=1, value=eid)
-    a.font, a.fill, a.border, a.alignment = font(9), CALC_FILL, BOX, CTR
-    for col, ix in ((2, 0), (3, 2), (4, 3)):
-        c = sg.cell(row=r, column=col)
-        c.value = lookup(eid, ix, "")
-        c.font, c.fill, c.border, c.alignment = font(9), CALC_FILL, BOX, CTR
-        if col == 3: c.alignment = LEFT
-    for d in range(1, DAYS_IN_MONTH + 1):
-        for sidx in range(3):
-            cc = sgcol(d, sidx); L = get_column_letter(cc)
-            W = f'INDEX(醫師週班表!$C{wr}:$T{wr},{L}$6)'
-            cell = sg.cell(row=r, column=cc)
-            cell.value = (
-                f'=IF({L}$8="X","",'
-                f'IF({L}$8<>"",{L}$8,'
-                f'IF({W}="","",'
-                f'IF(LEN({W})=4,IF({L}$7=0,LEFT({W},1),MID({W},3,1)),'
-                f'IF(RIGHT({W},1)="~",IF({L}$7=0,LEFT({W},1),""),'
-                f'IF(OR(RIGHT({W},1)="*",RIGHT({W},1)="!"),LEFT({W},1),{W}))))))')
-            cell.font, cell.alignment = font(9, True), CTR
-            cell.border = DAYSEP if sidx == 0 else BOX
-            cell.fill = CALC_FILL
-
-SG0 = get_column_letter(SG_C0); SGL = get_column_letter(SG_LAST)
-SGRID = f"{SG0}{SG_ROW0}:{SGL}{SG_ROW1}"
-for code in CLINIC_CODES:
-    sg.conditional_formatting.add(SGRID, FormulaRule(
-        formula=[f'{SG0}{SG_ROW0}="{code}"'], fill=CLINIC_FILL[code], stopIfTrue=True))
-sg.conditional_formatting.add(SGRID, FormulaRule(
-    formula=[f'COUNTIF({R_DC},{SG0}{SG_ROW0})>0'], fill=LEAVE_FILL, stopIfTrue=True))
-sg.conditional_formatting.add(SGRID, FormulaRule(
-    formula=[f'OR({SG0}$4="六",{SG0}$4="日")'], fill=WKND_FILL))
-for i, t in enumerate([
-  "※ 這一頁全部是公式,不要直接編輯——改了也會被下次重算蓋掉。要改固定班請改「醫師週班表」。",
-  "※ 這一頁在不重算公式的檢視器裡會是空白的,用 Excel 或 Google 試算表開啟才看得到。",
-  "※ 單數週取前面那個代碼、雙數週取後面那個。單雙以「設定」的隔週基準日起算。",
-]):
-    put(sg, f"A{SG_ROW1+2+i}", t, font(9, color="808080"), None, LEFT, border=False)
-
 # ================================================================ 4. 醫師班表
 ds = wb.create_sheet("醫師班表")
 ds.sheet_view.showGridLines = False
 DS_C0 = 5                                   # E 欄起
+DS_H0 = 57                                  # 隱藏輔助列 57/58/59
+DS_HCOL = 99                                # 隱藏輔助欄 CU
+DS_HCOL_L = get_column_letter(DS_HCOL)
 DS_ROW0 = 6
 DS_ROW1 = DS_ROW0 + N_DOC - 1               # 45
 ds.freeze_panes = "E6"
@@ -870,16 +765,43 @@ for i in range(N_DOC):
         c.value = lookup(eid, ix, f'=IFERROR(INDEX({src},MATCH($A{r},{R_EID},0)),"")')
         c.font, c.fill, c.border, c.alignment = font(9), CALC_FILL, BOX, CTR
         if col == 3: c.alignment = LEFT
-    nm = DOCTORS[i][1] if i < len(DOCTORS) else None
-    month_vals = expand_month(nm, YEAR, MONTH, DAYS_IN_MONTH) if nm else None
+    # 輔助欄:這位醫師在「醫師週班表」的第幾列(用員工編號比對,不靠列位置硬綁)
+    hcell = ds.cell(row=r, column=DS_HCOL)
+    hcell.value = (f'=IFERROR(MATCH($A{r},醫師週班表!$A${WK_ROW0}:$A${WK_ROW1},0),0)')
+    hcell.font = font(8, color="BBBBBB")
     for d in range(1, DAYS_IN_MONTH+1):
         for sidx in range(3):
             cc = ds.cell(row=r, column=dcol(d, sidx))
-            if month_vals:
-                v = month_vals[(d-1)*3 + sidx]
-                if v: cc.value = v
+            L = get_column_letter(dcol(d, sidx))
+            W = (f'IFERROR(INDEX(醫師週班表!$C${WK_ROW0}:$T${WK_ROW1},'
+                 f'${DS_HCOL_L}{r},{L}${DS_H0}),"")')
+            cc.value = (
+                f'=IF({L}${DS_H0+2}="X","",'
+                f'IF({L}${DS_H0+2}<>"",{L}${DS_H0+2},'
+                f'IF(LEN({W})=4,MID({W},1+{L}${DS_H0+1}*2,1),'
+                f'IF(LEN({W})=2,IF(AND(RIGHT({W},1)="~",{L}${DS_H0+1}=1),"",LEFT({W},1)),'
+                f'{W}))))')
             cc.font, cc.alignment = font(9, True), CTR
             cc.border = DAYSEP if sidx == 0 else BOX
+
+# ── 隱藏的運算輔助列/欄 ───────────────────────────────
+# 第 57 列 = 週班表的第幾格(星期×診次)、58 列 = 單雙週、59 列 = 當日狀態
+for d in range(1, DAYS_IN_MONTH + 1):
+    for sidx in range(3):
+        cc = dcol(d, sidx); L = get_column_letter(cc)
+        ds.cell(row=DS_H0, column=cc).value = (
+            f'=IF({d}>{DAYS_FX},1,(WEEKDAY(DATE({SET_Y},{SET_M},{d}),2)-1)*3+{sidx+1})')
+        ds.cell(row=DS_H0+1, column=cc).value = (
+            f'=IF({d}>{DAYS_FX},0,'
+            f'MOD(INT((DATE({SET_Y},{SET_M},{d})-{P_EPOCH})/7),2))')
+        ds.cell(row=DS_H0+2, column=cc).value = (
+            f'=IF({d}>{DAYS_FX},"X",'
+            f'IF(COUNTIF({R_HOL},DATE({SET_Y},{SET_M},{d}))>0,"國",'
+            f'IF(SUMPRODUCT(INDEX({R_OPEN},0,{L}${DS_H0}))=0,"休","")))')
+for hr in range(DS_H0, DS_H0 + 3):
+    put(ds, f"A{hr}", "↓運算用,請勿刪", font(8, color="BBBBBB"), None, LEFT, border=False)
+    ds.row_dimensions[hr].hidden = True
+ds.column_dimensions[DS_HCOL_L].hidden = True
 
 TALLY0 = DS_ROW1 + 2                         # 47
 put(ds, f"A{TALLY0-1}", "各院所每診次醫師數(自動計算,0 表示該診次沒有醫師)",
@@ -908,10 +830,10 @@ for _i, _t in enumerate([
   "※ 本表已依「醫師週班表」把固定門診展開成本月的值,可以直接改。請假就把該格改成假別代碼。",
   "※ 姓名、專科、日期、星期都是實際文字不是公式,任何檢視器都看得到;"
   "底下的人力檢核列是公式,不重算的檢視器會空白。",
-  "※ 本表的格子是固定值不是公式,所以改「設定」的本期年月、或改「醫師週班表」,"
-  "這裡都不會自動變。要重新產生:到「本月建議班表」整段複製 → 回來 A6 選擇性貼上「值」。",
-  "※ 這樣設計是刻意的——貼上後你改的個別例外(請假、調班)不會在下次重算時被蓋掉,"
-  "而且姓名日期都是實際文字,任何檢視器都看得到。",
+  "※ 格子是公式,從「醫師週班表」自動展開。改週班表、改設定的本期年月,這裡都會立刻跟著變。",
+  "※ 要改單次例外(請假、臨時調班)直接在格子上打字即可,月結一樣立刻反映——"
+  "但那一格的公式會被蓋掉、不再跟著週班表走,所以會自動加上紅色外框提醒。"
+  "要恢復連動,從旁邊沒被改過的格子複製一格貼回來。",
 ], ):
     put(ds, f"A{TALLY0+len(CLINICS)+1+_i}", _t, font(9, color="808080"), None, LEFT, border=False)
 
@@ -938,6 +860,14 @@ ds.conditional_formatting.add(GRID, FormulaRule(
     formula=[f'OR({E0}$4="六",{E0}$4="日")'], fill=WKND_FILL))
 ds.conditional_formatting.add(f"{E0}4:{EL}5", FormulaRule(
     formula=[f'OR({E0}$4="六",{E0}$4="日")'], fill=WKND_FILL))
+# 手動覆蓋掉公式的格子加邊框標示,提醒該格已與週班表脫鉤
+ds.conditional_formatting.add(GRID, FormulaRule(
+    formula=[f'AND({E0}$4<>"",NOT(_xlfn.ISFORMULA({E0}{DS_ROW0})))'],
+    border=Border(left=Side(style="medium", color="C00000"),
+                  right=Side(style="medium", color="C00000"),
+                  top=Side(style="medium", color="C00000"),
+                  bottom=Side(style="medium", color="C00000"))))
+
 for k, code in enumerate(CLINIC_CODES):
     r = TALLY0 + k
     ds.conditional_formatting.add(f"{E0}{r}:{EL}{r}", FormulaRule(
@@ -977,7 +907,7 @@ for i in range(N_DOC):
         "K": f'={g}SUMPRODUCT(($E{r}:$I{r}>0)*1))',
         "L": f'={g}COUNTIF({rng},"訓"))',
         "T": f'={g}SUM($M{r}:$S{r}))',
-        "U": f'={g}{DAYS_FX}*3-COUNTA({rng}))',
+        "U": f'={g}{DAYS_FX}*3-COUNTIF({rng},"?*"))',
     }
     for k, c in enumerate(CLINIC_CODES):
         vals[get_column_letter(5+k)] = f'={g}COUNTIF({rng},"{c}"))'
@@ -1001,8 +931,7 @@ for k in range(4, 21):
     c.font, c.fill, c.border, c.alignment = font(10, True), SUB_FILL, BOX, CTR
 for i, t in enumerate([
   "※ 醫師以「診次」為單位,不是天數。請假 3 個診次等於請一天。",
-  "※ 本頁全部由「醫師班表」計算而來,不是由「醫師週班表」。改週班表後要先把新班"
-  "貼到醫師班表,這裡才會跟著變(做法見「本月建議班表」第 2 列)。",
+  "※ 本頁全部由「醫師班表」計算而來。改週班表或改醫師班表,這裡都會立刻跟著變。",
   "※ 服務院所數 = 本月實際有排診的院所家數,可用來看跨院負荷。",
   "※ 未排診次 = 當月總診次格數(天數 × 3)扣掉已填格數,不代表應該排滿。",
 ]):
