@@ -157,7 +157,7 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
 <header>
   <div class="eyebrow">日三牙醫體系 · 統一出勤表</div>
   <h1>出勤表怎麼填</h1>
-  <p class="sub">給各院所醫護長。你只需要顧兩件事:月底前排下個月的班,月初把打卡資料匯進來。醫師班表由總部排,不用你動。</p>
+  <p class="sub">給各院所醫護長與管理部。你只需要顧兩件事:月底前排下個月的班,月初把打卡資料匯進來。醫師班表由總部排,不用你動。</p>
   <div class="rules">
     <div class="rule"><b>只有黃底要填</b><span>灰底是公式自動算的,改到就壞了。</span></div>
     <div class="rule"><b>代碼一律下拉選</b><span>自己打字會拼錯,月結就對不起來。</span></div>
@@ -168,7 +168,7 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
 <main>
 
 <section>
-  <div class="hd"><h2>排下個月的班</h2><span class="when">每月 25 日前</span><span class="tab">分頁:醫護長班表</span></div>
+  <div class="hd"><h2>排下個月的班</h2><span class="when">每月 25 日前</span><span class="tab">分頁:醫護長與管理部班表</span></div>
   <div class="steps">
     <div class="step">
       <span class="n">1</span>
@@ -180,13 +180,14 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
       <h3>逐日選班別代碼</h3>
       <p>每一格代表一天。上班就選班別、休假就選假別,不要留空 —— 留空會變粉紅色,提醒你漏排。</p>
       <div class="mock">
-        <div class="bar">醫護長班表</div>
+        <div class="bar">醫護長與管理部班表</div>
         <div class="scroll"><table>
           <thead><tr><th>員工編號</th><th>姓名</th><th>職類</th><th>院所</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
           <tr><th></th><th></th><th></th><th></th><th>四</th><th>五</th><th class="we">六</th><th class="we">日</th><th>一</th></tr></thead>
           <tbody>
             <tr><td class="fill">N001</td><td class="calc">ivy</td><td class="calc">醫護長</td><td class="calc">晶悅</td><td class="fill">早午</td><td class="fill">午晚</td><td class="fill we">全日</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
             <tr><td class="fill">N002</td><td class="calc">文君</td><td class="calc">醫護長</td><td class="calc">晶睿·晶曜</td><td class="fill">午晚</td><td class="fill">早午</td><td class="fill we">午晚</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
+            <tr><td class="fill">M001</td><td class="calc">孟諭</td><td class="calc">管理部</td><td class="calc">總部</td><td class="fill">早午</td><td class="fill">早午</td><td class="fill we">早</td><td class="fill lv">休</td><td class="fill lv">OFF</td></tr>
           </tbody>
         </table></div>
         <div class="note">黃底 = 你填的 · 灰底 = 自動帶出 · 粉紅 = 這天還沒排</div>
@@ -195,7 +196,7 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
     <div class="step">
       <span class="n">3</span>
       <h3>看最底下你們院所那一列</h3>
-      <p>那是當天各院所有沒有醫護長在班。<strong>變紅代表掛 0</strong>,要調班。國定假日顯示「假」、週日顯示「休」,那是正常的,不用理。</p>
+      <p>那是當天各院所有沒有人在班。<strong>變紅代表掛 0</strong>,要調班。最後一列「總部」是管理部的,看法一樣。國定假日顯示「假」、週日顯示「休」,那是正常的,不用理。</p>
     </div>
     <div class="step">
       <span class="n">4</span>
@@ -272,15 +273,15 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
   <div class="scroll"><table class="plain">
     <thead><tr><th>上班</th><th>時間</th><th>休假</th><th>用在什麼時候</th></tr></thead>
     <tbody>
-      <tr><td><span class="code">早</span> 早班</td><td>09:00–12:00</td><td><span class="code">OFF</span> 排休</td><td>輪休,不扣假</td></tr>
-      <tr><td><span class="code">午</span> 午班</td><td>14:00–17:00</td><td><span class="code">特</span> 特休</td><td>年資給的有薪假</td></tr>
-      <tr><td><span class="code">晚</span> 晚班</td><td>18:00–21:00</td><td><span class="code">病</span> <span class="code">事</span> <span class="code">公</span></td><td>病假 / 事假 / 公假</td></tr>
+      <tr><td><span class="code">早</span> 早班</td><td>醫護長 09:00–12:00<br>管理部 08:30–12:00</td><td><span class="code">OFF</span> 排休</td><td>輪休,不扣假</td></tr>
+      <tr><td><span class="code">午</span> 午班</td><td>醫護長 14:00–17:00<br>管理部 13:30–17:00</td><td><span class="code">特</span> 特休</td><td>年資給的有薪假</td></tr>
+      <tr><td><span class="code">晚</span> 晚班</td><td>醫護長 18:00–21:00<br>管理部 17:30–21:00</td><td><span class="code">病</span> <span class="code">事</span> <span class="code">公</span></td><td>病假 / 事假 / 公假</td></tr>
       <tr><td><span class="code">早午</span> <span class="code">午晚</span> <span class="code">早晚</span></td><td>兩個診次</td><td><span class="code">國</span> 國定假日</td><td>全院休診,通常已預先填好</td></tr>
       <tr><td><span class="code">全日</span> 早+午+晚</td><td>三個診次</td><td><span class="code">休</span> 休診</td><td>診所沒開,不是個人請假</td></tr>
       <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td>依實際</td><td></td><td></td></tr>
     </tbody>
   </table></div>
-  <p style="margin-top:10px;font-size:13px;color:var(--muted)">一天只做一個診次就填單一代碼,做兩個以上要填組合代碼(早午、午晚、早晚、全日)—— 一格只能填一個,不能寫「早 午」。完整版在「設定」分頁。</p>
+  <p style="margin-top:10px;font-size:13px;color:var(--muted)">一天只做一個診次就填單一代碼,做兩個以上要填組合代碼(早午、午晚、早晚、全日)—— 一格只能填一個,不能寫「早 午」。<strong>代碼一樣,時間不一樣</strong>:管理部提早到開門、留到打烊,所以同一個「早」比醫護長早半小時。表會依你的職類自動套對的時段,你只管填代碼。完整版在「設定」分頁。</p>
 </section>
 
 <section>
