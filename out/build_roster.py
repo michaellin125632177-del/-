@@ -51,13 +51,15 @@ LEAVE_FILL= PatternFill("solid", fgColor="D9D9D9")
 ALERT_FILL= PatternFill("solid", fgColor="FF9999")
 GAP_FILL  = PatternFill("solid", fgColor="FCE4E4")
 OT_FILL   = PatternFill("solid", fgColor="FCE4D6")
+SUPP_FILL = PatternFill("solid", fgColor="C6E0B4")   # 助理班表的「支援他院」專用綠
 # 五間院所各自的底色,讓醫師整月動線一眼看得出來
 CLINIC_FILL = {
-    "悅": PatternFill("solid", fgColor="D9E7F5"),
-    "睿": PatternFill("solid", fgColor="DCEEDC"),
-    "匯": PatternFill("solid", fgColor="FBE6D4"),
-    "曜": PatternFill("solid", fgColor="E8DFF2"),
-    "寶": PatternFill("solid", fgColor="FBE3EC"),
+    "悅": PatternFill("solid", fgColor="FBE3EC"),   # 粉
+    "睿": PatternFill("solid", fgColor="D9E7F5"),   # 藍
+    "匯": PatternFill("solid", fgColor="DCEEDC"),   # 綠
+    "曜": PatternFill("solid", fgColor="E8DFF2"),   # 紫
+    # 寶貝牙的黃刻意比 IN_FILL(FFF2CC,「你要填的格子」)飽和,兩者不會混淆
+    "寶": PatternFill("solid", fgColor="FAE8A0"),   # 黃
 }
 
 thin = Side(style="thin", color="AAAAAA")
@@ -1111,7 +1113,7 @@ asx.conditional_formatting.add(AGRID, FormulaRule(
     formula=[f'AND({A0}$3<>"",$A{AS_ROW0}<>"",{A0}{AS_ROW0}="")'],
     fill=GAP_FILL, stopIfTrue=True))
 asx.conditional_formatting.add(AGRID, FormulaRule(
-    formula=[f'{A0}{AS_ROW0}="支"'], fill=CLINIC_FILL["睿"], stopIfTrue=True))
+    formula=[f'{A0}{AS_ROW0}="支"'], fill=SUPP_FILL, stopIfTrue=True))
 asx.conditional_formatting.add(AGRID, FormulaRule(
     formula=[f'COUNTIF({R_WC_L},{A0}{AS_ROW0})>0'], fill=LEAVE_FILL, stopIfTrue=True))
 asx.conditional_formatting.add(AGRID, FormulaRule(
