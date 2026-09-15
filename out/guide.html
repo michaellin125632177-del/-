@@ -157,7 +157,7 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
 <header>
   <div class="eyebrow">日三牙醫體系 · 統一出勤表</div>
   <h1>出勤表怎麼填</h1>
-  <p class="sub">給各院所醫護長。你只需要顧兩件事:月底前排下個月的助理班表,月初把打卡資料匯進來。醫師班表由總部排,不用你動。</p>
+  <p class="sub">給各院所醫護長。你只需要顧兩件事:月底前排下個月的班,月初把打卡資料匯進來。醫師班表由總部排,不用你動。</p>
   <div class="rules">
     <div class="rule"><b>只有黃底要填</b><span>灰底是公式自動算的,改到就壞了。</span></div>
     <div class="rule"><b>代碼一律下拉選</b><span>自己打字會拼錯,月結就對不起來。</span></div>
@@ -168,25 +168,25 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
 <main>
 
 <section>
-  <div class="hd"><h2>排下個月的班</h2><span class="when">每月 25 日前</span><span class="tab">分頁:助理班表</span></div>
+  <div class="hd"><h2>排下個月的班</h2><span class="when">每月 25 日前</span><span class="tab">分頁:醫護長班表</span></div>
   <div class="steps">
     <div class="step">
       <span class="n">1</span>
       <h3>A 欄選員工編號</h3>
-      <p>點格子會出現下拉選單。選好之後,姓名、職類、院所會自己跳出來 —— 那三欄是灰底,不用也不能填。只排你自己院所的人。</p>
+      <p>點格子會出現下拉選單。選好之後,姓名、職類、院所會自己跳出來 —— 那三欄是灰底,不用也不能填。你只需要填自己那一列。</p>
     </div>
     <div class="step">
       <span class="n">2</span>
       <h3>逐日選班別代碼</h3>
       <p>每一格代表一天。上班就選班別、休假就選假別,不要留空 —— 留空會變粉紅色,提醒你漏排。</p>
       <div class="mock">
-        <div class="bar">助理班表</div>
+        <div class="bar">醫護長班表</div>
         <div class="scroll"><table>
           <thead><tr><th>員工編號</th><th>姓名</th><th>職類</th><th>院所</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
           <tr><th></th><th></th><th></th><th></th><th>四</th><th>五</th><th class="we">六</th><th class="we">日</th><th>一</th></tr></thead>
           <tbody>
-            <tr><td class="fill">A001</td><td class="calc">張怡君</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">早午</td><td class="fill">午晚</td><td class="fill we">全日</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
-            <tr><td class="fill">A002</td><td class="calc">李宗翰</td><td class="calc">助理</td><td class="calc">晶悅</td><td class="fill">午晚</td><td class="fill">早午</td><td class="fill we">午晚</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
+            <tr><td class="fill">N001</td><td class="calc">ivy</td><td class="calc">醫護長</td><td class="calc">晶悅</td><td class="fill">早午</td><td class="fill">午晚</td><td class="fill we">全日</td><td class="fill lv">休</td><td class="fill lv">特</td></tr>
+            <tr><td class="fill">N002</td><td class="calc">文君</td><td class="calc">醫護長</td><td class="calc">晶睿·晶曜</td><td class="fill">午晚</td><td class="fill">早午</td><td class="fill we">午晚</td><td class="fill lv">休</td><td class="fill bad"></td></tr>
           </tbody>
         </table></div>
         <div class="note">黃底 = 你填的 · 灰底 = 自動帶出 · 粉紅 = 這天還沒排</div>
@@ -195,7 +195,7 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
     <div class="step">
       <span class="n">3</span>
       <h3>看最底下你們院所那一列</h3>
-      <p>那是當天在班人數。<strong>變紅代表低於 2 人</strong>,要調班。國定假日顯示「假」、週日顯示「休」,那是正常的,不用理。</p>
+      <p>那是當天各院所有沒有醫護長在班。<strong>變紅代表掛 0</strong>,要調班。國定假日顯示「假」、週日顯示「休」,那是正常的,不用理。</p>
     </div>
     <div class="step">
       <span class="n">4</span>
@@ -217,8 +217,8 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
         <div class="scroll"><table>
           <thead><tr><th>A 員工編號</th><th>B 日期</th><th>C 上班</th><th>D 下班</th><th>E 對照鍵</th><th>F 檢核</th></tr></thead>
           <tbody>
-            <tr><td class="fill">A001</td><td class="fill">2026/10/1</td><td class="fill">08:56</td><td class="fill">18:07</td><td class="calc">A001|1</td><td class="calc">OK</td></tr>
-            <tr><td class="fill">A009</td><td class="fill">2026/10/1</td><td class="fill">09:02</td><td class="fill">18:11</td><td class="calc">A009|1</td><td class="bad">⚠ 查無員編</td></tr>
+            <tr><td class="fill">N001</td><td class="fill">2026/10/1</td><td class="fill">08:56</td><td class="fill">18:07</td><td class="calc">N001|1</td><td class="calc">OK</td></tr>
+            <tr><td class="fill">N009</td><td class="fill">2026/10/1</td><td class="fill">09:02</td><td class="fill">18:11</td><td class="calc">N009|1</td><td class="bad">⚠ 查無員編</td></tr>
           </tbody>
         </table></div>
         <div class="note">F 欄出現「查無員編」或「重複打卡」要先修好,不然月結會少算</div>
@@ -233,9 +233,9 @@ footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
         <div class="scroll"><table>
           <thead><tr><th>日期</th><th>姓名</th><th>排班</th><th>應到</th><th>應退</th><th>實際上班</th><th>實際下班</th><th>出勤異常</th><th>加班</th></tr></thead>
           <tbody>
-            <tr><td>10/02</td><td>張怡君</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">09:18</td><td>17:04</td><td class="bad">遲到</td><td>–</td></tr>
-            <tr><td>10/05</td><td>蔡孟蓉</td><td>早午</td><td>09:00</td><td>17:00</td><td>08:58</td><td class="ot">20:30</td><td>正常</td><td class="ot">3.50</td></tr>
-            <tr><td>10/08</td><td>王思婷</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">—</td><td class="bad">—</td><td class="bad">未打卡</td><td>–</td></tr>
+            <tr><td>10/02</td><td>ivy</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">09:18</td><td>17:04</td><td class="bad">遲到</td><td>–</td></tr>
+            <tr><td>10/05</td><td>小玲</td><td>早午</td><td>09:00</td><td>17:00</td><td>08:58</td><td class="ot">20:30</td><td>正常</td><td class="ot">3.50</td></tr>
+            <tr><td>10/08</td><td>娜娜</td><td>早午</td><td>09:00</td><td>17:00</td><td class="bad">—</td><td class="bad">—</td><td class="bad">未打卡</td><td>–</td></tr>
           </tbody>
         </table></div>
       </div>

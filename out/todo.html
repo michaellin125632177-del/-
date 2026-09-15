@@ -116,7 +116,7 @@ footer{margin-top:50px; padding-top:16px; border-top:1px solid var(--line);
   <p class="sec-note">這幾件不需要誰批准,做完直接推進度。第一項是擋路的——門診表轉錯,整份月班表就是錯的。</p>
   <div class="list">
     <div class="item" data-id="a1"><i class="box"></i><div class="head"><span class="t">門診表已改由官網原始碼直接解析</span><span class="tag ok-tag">已解決</span></div><p class="d">五個門診表頁面的網頁檔已提供,週班表現在由 HTML 直接解析產生,不再有轉錄誤差(先前截圖轉錄的 231 筆中有 4 筆錯誤,已全數修正)。這項可以直接勾掉。</p></div>
-    <div class="item" data-id="a2"><i class="box"></i><div class="head"><span class="t">補齊人員名冊的到職日</span><span class="tag new">你可能沒想到</span></div><p class="d">特休天數依年資給,沒有到職日就算不出特休餘額,月結的特休欄永遠只能看「用掉幾天」不能看「還剩幾天」。醫師與助理都要。</p></div>
+    <div class="item" data-id="a2"><i class="box"></i><div class="head"><span class="t">補齊人員名冊的到職日</span><span class="tag new">你可能沒想到</span></div><p class="d">特休天數依年資給,沒有到職日就算不出特休餘額,月結的特休欄永遠只能看「用掉幾天」不能看「還剩幾天」。醫師與醫護長都要,四位醫護長的到職日目前全是空的。</p></div>
     <div class="item" data-id="a3"><i class="box"></i><div class="head"><span class="t">核對 2026 國定假日草稿</span><span class="tag blk">擋路</span></div><p class="d">已建好 21 天的草稿並接進班表(國定假日全院休診、自動填「國」、檢核列不會誤報)。<strong>但補假與調整放假的安排是我推的,務必跟行政院人事行政總處公告的「政府行政機關辦公日曆表」核對</strong>——法定紀念日日期可信度高,補假不一定。表在設定分頁 W 欄。</p></div>
     <div class="item" data-id="a4"><i class="box"></i><div class="head"><span class="t">拿一份打卡機匯出檔</span></div><p class="d">不用真實資料,一兩天的樣本就好。我要確認欄位順序、日期時間格式,以及是「一天一列」還是「逐筆刷卡」——後者要先併過才能匯入。</p></div>
     <div class="item" data-id="a5"><i class="box"></i><div class="head"><span class="t">盤點五間院所現在怎麼排班</span></div><p class="d">紙本、LINE 群、還是各自的 Excel?誰在排?這決定推行時的阻力在哪,也決定要不要保留舊做法並行一陣子。</p></div>
@@ -167,16 +167,16 @@ footer{margin-top:50px; padding-top:16px; border-top:1px solid var(--line);
   <div class="sec-head"><h2>行有餘力再做</h2><span class="count">上線之後</span></div>
   <p class="sec-note">這幾件不影響上線,但做起來上級會很有感——資料已經在表裡了,只是還沒拿來用。</p>
   <div class="list">
-    <div class="item" data-id="e1"><i class="box"></i><div class="head"><span class="t">各院所診次與人力月報</span></div><p class="d">五間院所每月的總診次、醫師人次、助理工時,做成一頁圖表。資料月結完就有了。</p></div>
+    <div class="item" data-id="e1"><i class="box"></i><div class="head"><span class="t">各院所診次與人力月報</span></div><p class="d">五間院所每月的總診次、醫師人次、醫護長工時,做成一頁圖表。資料月結完就有了。</p></div>
     <div class="item" data-id="e2"><i class="box"></i><div class="head"><span class="t">醫師跨院負荷分析</span></div><p class="d">誰跑最多間、誰的診次最滿、哪個時段全體系最吃緊。排班調整與人力招募都用得到。</p></div>
-    <div class="item" data-id="e3"><i class="box"></i><div class="head"><span class="t">助理排班公平性檢查</span></div><p class="d">晚班、週六班、國定假日班有沒有平均分配。這是助理最容易有怨言、也最少被量化的一件事。</p></div>
+    <div class="item" data-id="e3"><i class="box"></i><div class="head"><span class="t">醫護長請假時的代班備援</span><span class="tag new">你可能沒想到</span></div><p class="d">一間院所只有一位醫護長,她請假那天該院所就掛 0——班表底下的檢核列會變紅,但表本身給不出答案。文君一個人撐晶睿與晶曜,風險又更高一階。要先想好誰代班、代班的工時算哪一間,再把「支」(支援他院)代碼用起來。</p></div>
   </div>
 </section>
 
 </main>
 
 <footer>
-  依 2026 年 9 月的專案狀態整理。醫師側(週班表、醫師班表、醫師月結)已可使用;助理與醫護長側的四個分頁結構已建好,等名單。勾選狀態會存進這個頁面本身,任何有編輯權的人打勾,所有人看到的都是同一份進度。
+  依 2026 年 9 月的專案狀態整理。醫師側(週班表、醫師班表、醫師月結)已可使用;醫護長側四個分頁已接上 ivy、文君、小玲、娜娜四位,班表待各院所填。助理不在本表範圍。勾選狀態會存進這個頁面本身,任何有編輯權的人打勾,所有人看到的都是同一份進度。
 </footer>
 </div>
 
