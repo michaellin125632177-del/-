@@ -381,7 +381,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
         </tbody>
       </table>
     </div>
-    <div class="pending"><b>七位已建檔。</b>醫護長:N001 ivy(晶悅)、N002 文君(晶睿·晶曜,同一位兼管兩間)、N003 小玲(晶匯)、N004 娜娜(寶貝牙)。管理部:M001 孟諭、M002 怡雯、M003 小華,院所欄為「總部」。班表仍是空白的——代碼、下拉選單、條件式格式都已就緒,填上班別就能算。目前預留 12 列人員、打卡匯入 500 列,不夠再調。<b>七位的到職日都還沒給</b>,特休年資算不出來,請補。</div>
+    <div class="pending"><b>七位已建檔。</b>醫護長:N001 ivy(晶悅)、N002 文君(晶睿·晶曜,同一位兼管兩間)、N003 小玲(晶匯)、N004 娜娜(寶貝牙)。管理部:M001 孟諭、M002 怡雯、M003 小華,三位都在晶匯。班表仍是空白的——代碼、下拉選單、條件式格式都已就緒,填上班別就能算。目前預留 12 列人員、打卡匯入 500 列,不夠再調。<b>七位的到職日都還沒給</b>,特休年資算不出來,請補。</div>
   </div>
 </section>
 
@@ -405,23 +405,23 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>班別</th><th>醫護長</th><th class="num">工時</th><th>管理部</th><th class="num">工時</th></tr></thead>
+        <thead><tr><th>班別(醫護長與管理部共用)</th><th>時段</th><th class="num">休息(分)</th><th class="num">工時</th></tr></thead>
         <tbody>
-          <tr><td><span class="code">早</span> 早班</td><td class="code">09:00–12:00</td><td class="num">3.0</td><td class="code">08:30–12:00</td><td class="num">3.5</td></tr>
-          <tr><td><span class="code">午</span> 午班</td><td class="code">14:00–17:00</td><td class="num">3.0</td><td class="code">13:30–17:00</td><td class="num">3.5</td></tr>
-          <tr><td><span class="code">晚</span> 晚班</td><td class="code">18:00–21:00</td><td class="num">3.0</td><td class="code">17:30–21:00</td><td class="num">3.5</td></tr>
-          <tr class="grp"><td colspan="5">一天做兩個以上診次用組合代碼 · 工時已扣掉診次之間不算工時的空檔</td></tr>
-          <tr><td><span class="code">早午</span></td><td class="code">09:00–17:00</td><td class="num">6.0</td><td class="code">08:30–17:00</td><td class="num">7.0</td></tr>
-          <tr><td><span class="code">午晚</span></td><td class="code">14:00–21:00</td><td class="num">6.0</td><td class="code">13:30–21:00</td><td class="num">7.0</td></tr>
-          <tr><td><span class="code">早晚</span></td><td class="code">09:00–21:00</td><td class="num">6.0</td><td class="code">08:30–21:00</td><td class="num">7.0</td></tr>
-          <tr><td><span class="code">全日</span> 早+午+晚</td><td class="code">09:00–21:00</td><td class="num">9.0</td><td class="code">08:30–21:00</td><td class="num">10.5</td></tr>
-          <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td class="code">依實際</td><td class="num">6.0</td><td class="code">依實際</td><td class="num">7.0</td></tr>
-          <tr class="grp"><td colspan="5">休假類 · 不計出勤,排班工時 0</td></tr>
-          <tr><td><span class="code">OFF 特 病 事 公 國 休</span></td><td class="code">—</td><td class="num">0.0</td><td class="code">—</td><td class="num">0.0</td></tr>
+          <tr><td><span class="code">早</span> 早班</td><td class="code">09:00–12:00</td><td class="num">0</td><td class="num">3.0</td></tr>
+          <tr><td><span class="code">午</span> 午班</td><td class="code">14:00–17:00</td><td class="num">0</td><td class="num">3.0</td></tr>
+          <tr><td><span class="code">晚</span> 晚班</td><td class="code">18:00–21:00</td><td class="num">0</td><td class="num">3.0</td></tr>
+          <tr class="grp"><td colspan="4">一天做兩個以上診次用組合代碼 · 休息 = 診次之間不算工時的空檔</td></tr>
+          <tr><td><span class="code">早午</span></td><td class="code">09:00–17:00</td><td class="num">120</td><td class="num">6.0</td></tr>
+          <tr><td><span class="code">午晚</span></td><td class="code">14:00–21:00</td><td class="num">60</td><td class="num">6.0</td></tr>
+          <tr><td><span class="code">早晚</span></td><td class="code">09:00–21:00</td><td class="num">360</td><td class="num">6.0</td></tr>
+          <tr><td><span class="code">全日</span> 早+午+晚</td><td class="code">09:00–21:00</td><td class="num">180</td><td class="num">9.0</td></tr>
+          <tr><td><span class="code">支</span> 支援他院 · <span class="code">訓</span> 教育訓練</td><td class="code">依實際</td><td class="num">0</td><td class="num">6.0</td></tr>
+          <tr class="grp"><td colspan="4">休假類 · 不計出勤,排班工時 0</td></tr>
+          <tr><td><span class="code">OFF 特 病 事 公 國 休</span></td><td class="code">—</td><td class="num">0</td><td class="num">0.0</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="lede"><strong>代碼共用一套,時段依職類而分。</strong>醫護長跟診,依門診時段;管理部是辦公室班,提早到開門、留到打烊,同一個「早」比醫護長早半小時。設定分頁的「班別時段表」因此是 16 代碼 × 2 職類 = 32 列,出勤紀錄用「職類|代碼」當比對鍵查它——所以填表的人只管填代碼,時段會自動套對。一格一天,做兩個以上診次要用組合代碼(早午、午晚、早晚、全日)。有固定時段的代碼必須滿足「應退 − 應到 − 休息 = 排班工時」,否則出勤紀錄會算出不存在的加班——建置腳本會逐列檢查,不符就直接建置失敗。</p><p class="lede" style="color:var(--alert)"><strong>要注意:</strong>勞基法第 30 條的正常工時是每日 8 小時。醫護長「全日」排 9 小時、管理部「全日」排 10.5 小時,超出的部分本質上就是延長工時,但本表的加班是用「實際 − 排班」算的,排進去就不會被抓出來。「全日」不宜當成常態班別。</p>
+    <p class="lede">醫護長與管理部走同一套代碼、同一套時段——填表的人只要填代碼。一格一天,做兩個以上診次要用組合代碼(早午、午晚、早晚、全日)。有固定時段的代碼必須滿足「應退 − 應到 − 休息 = 排班工時」,否則出勤紀錄會算出不存在的加班——建置腳本會逐列檢查,不符就直接建置失敗。</p><p class="lede" style="color:var(--alert)"><strong>要注意:</strong>勞基法第 30 條的正常工時是每日 8 小時。「全日」排 9 小時,多出來的 1 小時本質上就是延長工時,但本表的加班是用「實際 − 排班」算的,排進去就不會被抓出來。「全日」不宜當成常態班別。</p>
   </div>
 </section>
 
@@ -460,13 +460,13 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     <div class="sheet"><div class="tab">醫師月結 <span class="pill auto">全自動</span></div>
       <p>21 欄,五間院所各自診次、總診次、服務院所數、休假診次。</p><div class="who">維護:不需手填</div></div>
     <div class="sheet"><div class="tab">醫護長與管理部班表 <span class="pill fill">手填</span></div>
-      <p>12 列 × 31 天,含院所欄。七位已建檔,各自只填自己那一列;文君一列涵蓋晶睿與晶曜。底下六列檢核當日在班人數:五間院所各一列,加「總部」一列給管理部。</p><div class="who">維護:各院所醫護長 · 管理部</div></div>
+      <p>12 列 × 31 天,含院所欄。七位已建檔,各自只填自己那一列;文君一列涵蓋晶睿與晶曜。底下六列檢核當日在班人數:五間院所各一列<strong>只數醫護長</strong>,管理部自己一列。</p><div class="who">維護:各院所醫護長 · 管理部</div></div>
     <div class="sheet"><div class="tab">打卡匯入 <span class="pill fill">整段貼上</span></div>
       <p>四欄:員工編號、日期、上班、下班。自動檢核查無員編與重複打卡。</p><div class="who">維護:各院所 · 每月初</div></div>
     <div class="sheet"><div class="tab">出勤紀錄 <span class="pill auto">自動</span></div>
-      <p>372 列的法定紀錄。判定五種出勤狀態並計算加班,應到/應退依該人職類查表。</p><div class="who">維護:公式自動 · 醫護長處理異常</div></div>
+      <p>372 列的法定紀錄。判定五種出勤狀態並計算加班。</p><div class="who">維護:公式自動 · 醫護長處理異常</div></div>
     <div class="sheet"><div class="tab">月結統計 <span class="pill auto">全自動</span></div>
-      <p>醫護長與管理部的 19 欄月結:工時、假別、加班、遲到早退未打卡次數。同一份班表、不同職類,工時會算出不同的數字。</p><div class="who">維護:送人資</div></div>
+      <p>醫護長與管理部的 19 欄月結:工時、假別、加班、遲到早退未打卡次數。</p><div class="who">維護:送人資</div></div>
   </div>
 </section>
 
@@ -479,7 +479,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     <div class="ask" style="border-left-color:var(--alert)"><i class="box"></i><div><b>三位醫師不在官網名單上</b><span>陳爵安(晶睿,每週 8 診次)、吳冠廷(晶匯,6)、楊孟庭(晶匯,4)只出現在門診表。已暫編 D025~D027,英文名與專科待補。是新進還是官網漏更新?</span></div></div>
     <div class="ask"><i class="box"></i><div><b>七位的到職日</b><span>醫護長四位與管理部三位都已建檔,但到職日全部空著,特休年資無從計算。另外文君掛在晶睿與晶曜兩間,是以一個員工編號、一份打卡紀錄處理——若實際上是分開計薪,要改成兩列。</span></div></div>
     <div class="ask"><i class="box"></i><div><b>官網星號註記的班</b><span>「並非每週固定,詳情請聯繫院所」共 9 處:晶悅週五午晚的翁崎紘,寶貝牙週二午診的黃榆鈞,以及寶貝牙週六早午診的黃育亭、黃榆鈞、黃婷愉。需向院所逐一確認。</span></div></div>
-    <div class="ask"><i class="box"></i><div><b>組合班別對不對</b><span>早/午/晚三診次與兩套時段(醫護長 09:00 起、管理部 08:30 起)已確認。但一格一天裝不下兩個診次,所以加了組合代碼(早午、午晚、早晚、全日)——這是推的,需要確認實際是不是這樣排。</span></div></div>
+    <div class="ask"><i class="box"></i><div><b>組合班別對不對</b><span>早/午/晚三診次(09:00–12:00、14:00–17:00、18:00–21:00)已確認,醫護長與管理部共用。但一格一天裝不下兩個診次,所以加了組合代碼(早午、午晚、早晚、全日)——這是推的,需要確認實際是不是這樣排。</span></div></div>
     <div class="ask"><i class="box"></i><div><b>員工編號用哪一套</b><span>目前暫編 D001~D027、N001~N004、M001~M003。若人事或打卡系統另有編號,應以那套為主鍵。</span></div></div>
     <div class="ask"><i class="box"></i><div><b>加班門檻與跨院成本分攤</b><span>加班門檻預設 30 分認定、30 分為單位,是慣例不是法規。另外某位醫師在三間看診,診次業績與人力成本算誰的?</span></div></div>
   </div>

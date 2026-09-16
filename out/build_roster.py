@@ -154,21 +154,20 @@ HOLIDAY_SET = {dt.date(YEAR, m, d): name for m, d, name, _mk in HOLIDAYS_2026
 
 # 工時制人員:醫護長 + 管理部。助理已移出本表範圍。
 # 文君兼管晶睿與晶曜——同一位、一個員工編號、一份打卡紀錄,不是兩個人。
-# 管理部不隸屬單一院所,院所欄寫「總部」;底下的各院所在班人數檢核是用院所名稱
-# 做包含比對,「總部」不含任何院所名,所以三位不會被算進任何一間的人力。
+# 管理部三位都在晶匯上班,院所欄就寫晶匯。但底下的各院所在班人數檢核只數醫護長:
+# 那一列問的是「這間院所今天有沒有醫護長」,管理部在不在都不能代替。
 NURSES = [
     ("N001", "ivy",  "醫護長", "晶悅",      "", ""),
     ("N002", "文君", "醫護長", "晶睿·晶曜", "", "兼管晶睿與晶曜"),
     ("N003", "小玲", "醫護長", "晶匯",      "", ""),
     ("N004", "娜娜", "醫護長", "寶貝牙",    "", ""),
-    ("M001", "孟諭", "管理部", "總部",      "", ""),
-    ("M002", "怡雯", "管理部", "總部",      "", ""),
-    ("M003", "小華", "管理部", "總部",      "", ""),
+    ("M001", "孟諭", "管理部", "晶匯",      "", ""),
+    ("M002", "怡雯", "管理部", "晶匯",      "", ""),
+    ("M003", "小華", "管理部", "晶匯",      "", ""),
 ]
 ASSISTANTS = NURSES
 
-# 班別代碼。代碼共用一套,但「早/午/晚」實際幾點到幾點依職類而定:
-#   醫護長跟診,依門診時段;管理部是辦公室班,提早到開門、留到打烊。
+# 班別代碼。醫護長與管理部共用同一套代碼與同一套時段。
 #   代碼,名稱,計出勤,類別
 STAFF_TYPES = ["醫護長", "管理部"]
 WORK_CODES = [
@@ -191,52 +190,36 @@ WORK_CODES = [
 ]
 N_WORK_CODE = 9                   # 上班類代碼數(早…訓),其餘為休假類
 
-# 職類 → 代碼 → (應到, 應退, 休息分, 排班工時)
+# 代碼 → (應到, 應退, 休息分, 排班工時)。醫護長與管理部共用同一套時段。
 # 「休息(分)」= 診次之間不算工時的空檔,滿足「應退 − 應到 − 休息 = 排班工時」。
 # 支/訓 沒有固定時段(依實際),但仍給排班工時,否則加班會從 0 起算。
+# 日後若某個職類要拆出自己的時段,把這張表改成 {職類: {代碼: ...}},
+# 設定分頁多一欄「職類」與一欄比對鍵、出勤紀錄的 MATCH 改用「職類|代碼」即可。
 SHIFT_TIME = {
-    # 早 09:00–12:00 / 午 14:00–17:00 / 晚 18:00–21:00
-    "醫護長": {
-        "早":   (T(9,0),   T(12,0),   0,  3.0),
-        "午":   (T(14,0),  T(17,0),   0,  3.0),
-        "晚":   (T(18,0),  T(21,0),   0,  3.0),
-        "早午": (T(9,0),   T(17,0),  120, 6.0),
-        "午晚": (T(14,0),  T(21,0),   60, 6.0),
-        "早晚": (T(9,0),   T(21,0),  360, 6.0),
-        "全日": (T(9,0),   T(21,0),  180, 9.0),
-        "支":   (None, None, 0, 6.0),
-        "訓":   (None, None, 0, 6.0),
-    },
-    # 早 08:30–12:00 / 午 13:30–17:00 / 晚 17:30–21:00
-    "管理部": {
-        "早":   (T(8,30),  T(12,0),   0,  3.5),
-        "午":   (T(13,30), T(17,0),   0,  3.5),
-        "晚":   (T(17,30), T(21,0),   0,  3.5),
-        "早午": (T(8,30),  T(17,0),   90, 7.0),
-        "午晚": (T(13,30), T(21,0),   30, 7.0),
-        "早晚": (T(8,30),  T(21,0),  330, 7.0),
-        "全日": (T(8,30),  T(21,0),  120, 10.5),
-        "支":   (None, None, 0, 7.0),
-        "訓":   (None, None, 0, 7.0),
-    },
+    "早":   (T(9,0),  T(12,0),   0, 3.0),
+    "午":   (T(14,0), T(17,0),   0, 3.0),
+    "晚":   (T(18,0), T(21,0),   0, 3.0),
+    "早午": (T(9,0),  T(17,0),  120, 6.0),
+    "午晚": (T(14,0), T(21,0),   60, 6.0),
+    "早晚": (T(9,0),  T(21,0),  360, 6.0),
+    "全日": (T(9,0),  T(21,0),  180, 9.0),
+    "支":   (None, None, 0, 6.0),
+    "訓":   (None, None, 0, 6.0),
 }
 
-# 設定分頁的班別時段表:一個代碼 × 一個職類 = 一列,碼相同者相鄰(上班類在前)。
-# 出勤紀錄用「職類|代碼」當比對鍵,所以同一個「早」對兩種職類可以有不同時段。
+# 設定分頁的班別代碼表:一個代碼一列。
 WC_TABLE = []
 for code, name, att, kind in WORK_CODES:
-    for jt in STAFF_TYPES:
-        tin, tout, rest, hrs = SHIFT_TIME[jt].get(code, (None, None, 0, 0.0))
-        WC_TABLE.append([f"{jt}|{code}", jt, code, name, tin, tout, rest, hrs,
-                         att, kind])
+    tin, tout, rest, hrs = SHIFT_TIME.get(code, (None, None, 0, 0.0))
+    WC_TABLE.append([code, name, tin, tout, rest, hrs, att, kind])
 
-for key, jt, code, name, tin, tout, rest, hrs, att, kind in WC_TABLE:
+for code, name, tin, tout, rest, hrs, att, kind in WC_TABLE:
     if tin and tout:                      # 工時定義一致性檢查
         span = (dt.datetime.combine(dt.date.min, tout)
                 - dt.datetime.combine(dt.date.min, tin)).seconds / 3600
-        assert abs(span - rest/60 - hrs) < 1e-9, f"{jt} 的「{code}」工時定義不一致"
+        assert abs(span - rest/60 - hrs) < 1e-9, f"代碼「{code}」工時定義不一致"
     if kind == "休假":
-        assert not tin and not tout and hrs == 0, f"{jt} 的「{code}」是休假卻有工時"
+        assert not tin and not tout and hrs == 0, f"代碼「{code}」是休假卻有工時"
 
 DOC_CODES = ([(c[0], f"{c[1]}牙醫") for c in CLINICS] +
              [("訓", "教育訓練 / 學會"), ("OFF", "排休"), ("特", "特休"),
@@ -264,9 +247,9 @@ def wk_label(hit):
 # ================================================================ 設定分頁座標
 SET_Y, SET_M = "設定!$C$2", "設定!$D$2"
 # 座標全部由上一區塊推算,增減代碼不會再壓到下面的區塊
-WC_R0    = 6                                    # 一、班別時段表:表頭 5、資料 6 起
-WC_R1    = WC_R0 + len(WC_TABLE) - 1            # 16 代碼 × 2 職類 = 32 列
-WC_WORK1 = WC_R0 + N_WORK_CODE * len(STAFF_TYPES) - 1   # 上班類最後一列
+WC_R0    = 6                                    # 一、班別代碼:表頭 5、資料 6 起
+WC_R1    = WC_R0 + len(WC_TABLE) - 1
+WC_WORK1 = WC_R0 + N_WORK_CODE - 1              # 上班類最後一列
 DC_R0    = WC_R1 + 7                            # 二、醫師診次代碼:標題 -2、表頭 -1
                                                 # (+1~+3 是班別時段表底下的三行註記)
 DC_R1    = DC_R0 + len(DOC_CODES) - 1
@@ -278,20 +261,15 @@ PP_R0    = CL_L1 + 3                            # 五、人員名冊
 PP_L0    = PP_R0 + 1
 PP_L1    = PP_L0 + 139
 
-# 班別時段表欄位:B 職類 C 代碼 D 名稱 E 應到 F 應退 G 休息 H 排班工時 I 計出勤
-#                J 類別 K 比對鍵(職類|代碼)
-# 代碼欄有重複(同一個「早」兩個職類各一列),所以凡是取時段/工時的查表都走比對鍵,
-# 凡是做分類判斷(是上班還是休假)才用代碼欄 —— 後者重複無所謂,COUNTIF>0 即可。
-R_WC_TYP = f"設定!$B${WC_R0}:$B${WC_R1}"
-R_WC     = f"設定!$C${WC_R0}:$C${WC_R1}"
-R_WC_W   = f"設定!$C${WC_R0}:$C${WC_WORK1}"
-R_WC_L   = f"設定!$C${WC_WORK1+1}:$C${WC_R1}"
-R_WC_IN  = f"設定!$E${WC_R0}:$E${WC_R1}"
-R_WC_OUT = f"設定!$F${WC_R0}:$F${WC_R1}"
-R_WC_RST = f"設定!$G${WC_R0}:$G${WC_R1}"
-R_WC_HRS = f"設定!$H${WC_R0}:$H${WC_R1}"
-R_WC_ATT = f"設定!$I${WC_R0}:$I${WC_R1}"
-R_WC_KEY = f"設定!$K${WC_R0}:$K${WC_R1}"
+# 班別代碼表欄位:B 代碼 C 名稱 D 應到 E 應退 F 休息 G 排班工時 H 計出勤 I 類別
+R_WC     = f"設定!$B${WC_R0}:$B${WC_R1}"
+R_WC_W   = f"設定!$B${WC_R0}:$B${WC_WORK1}"
+R_WC_L   = f"設定!$B${WC_WORK1+1}:$B${WC_R1}"
+R_WC_IN  = f"設定!$D${WC_R0}:$D${WC_R1}"
+R_WC_OUT = f"設定!$E${WC_R0}:$E${WC_R1}"
+R_WC_RST = f"設定!$F${WC_R0}:$F${WC_R1}"
+R_WC_HRS = f"設定!$G${WC_R0}:$G${WC_R1}"
+R_WC_ATT = f"設定!$H${WC_R0}:$H${WC_R1}"
 R_DC     = f"設定!$B${DC_R0}:$B${DC_R1}"
 P_OT_MIN  = f"設定!$C${PM_R0+1}"
 P_OT_UNIT = f"設定!$C${PM_R0+2}"
@@ -549,38 +527,33 @@ put(st, "D2", MONTH, font(10, True), IN_FILL, CTR, "0")
 put(st, "E2", "← 整份檔案的日期、星期都以這裡為準", font(9, color="808080"),
     None, LEFT, border=False)
 
-put(st, f"B{WC_R0-2}", "一、班別時段表(工時制:醫護長、管理部)", font(11, True),
+put(st, f"B{WC_R0-2}", "一、班別代碼(工時制:醫護長、管理部共用)", font(11, True),
     border=False)
-header_row(st, WC_R0-1, ["職類","代碼","名稱","應到","應退","休息(分)","排班工時",
-                         "計出勤","類別","比對鍵"])
+header_row(st, WC_R0-1, ["代碼","名稱","應到","應退","休息(分)","排班工時",
+                         "計出勤","類別"])
 for i, row in enumerate(WC_TABLE):
-    key, jt, code, name, tin, tout, rest, hrs, att, kind = row
-    # 顯示順序把比對鍵擺到最後一欄,免得它卡在最左邊讓人以為要填
-    for j, v in enumerate([jt, code, name, tin, tout, rest, hrs, att, kind, key]):
+    code, name, tin, tout, rest, hrs, att, kind = row
+    for j, v in enumerate(row):
         c = st.cell(row=WC_R0+i, column=2+j, value=v)
         c.font, c.border, c.alignment = font(), BOX, CTR
-        if j == 2: c.alignment = LEFT
-        if j in (3, 4): c.number_format = FMT_TIME
-        if j == 6: c.number_format = "0.0"
-        if j == 0: c.fill = SUB_FILL
-        if j == 9: c.font, c.fill = font(8, color="A0A0A0"), CALC_FILL
+        if j == 1: c.alignment = LEFT
+        if j in (2, 3): c.number_format = FMT_TIME
+        if j == 5: c.number_format = "0.0"
     if kind == "休假":
-        for j in range(1, 9):
+        for j in range(8):
             st.cell(row=WC_R0+i, column=2+j).fill = LEAVE_FILL
 put(st, f"B{WC_R1+1}",
-    "※ 同一個代碼、兩種職類,時段不同:醫護長跟診(早 09:00–12:00、午 14:00–17:00、"
-    "晚 18:00–21:00);管理部是辦公室班,提早到開門、留到打烊"
-    "(早 08:30–12:00、午 13:30–17:00、晚 17:30–21:00)。"
-    "出勤紀錄靠最右邊的「比對鍵」查這張表,那一欄請勿更動。",
+    "※ 醫護長與管理部用同一套代碼、同一套時段:早 09:00–12:00、午 14:00–17:00、"
+    "晚 18:00–21:00。填表的人只要填代碼。",
     font(9, color="808080"), None, LEFT, border=False)
 put(st, f"B{WC_R1+2}",
     "※ 有固定時段的代碼必須滿足「應退 − 應到 − 休息 = 排班工時」,否則出勤紀錄會算出不存在的加班。"
     "建置腳本會自動檢查。", font(9, color="808080"), None, LEFT, border=False)
 put(st, f"B{WC_R1+3}",
-    "※ 注意:勞基法第 30 條的正常工時是每日 8 小時。醫護長「全日」排 9 小時、"
-    "管理部「全日」排 10.5 小時,超出的部分本質上就是延長工時,但本表的加班是用"
-    "「實際 − 排班」算的,排進去就不會被抓出來。要按法規認定,請不要把「全日」"
-    "當成常態班別。", font(9, color="A8433C"), None, LEFT, border=False)
+    "※ 注意:勞基法第 30 條的正常工時是每日 8 小時。「全日」排 9 小時,多出來的"
+    "1 小時本質上就是延長工時,但本表的加班是用「實際 − 排班」算的,排進去就不會"
+    "被抓出來。要按法規認定,請不要把「全日」當成常態班別。",
+    font(9, color="A8433C"), None, LEFT, border=False)
 
 put(st, f"B{DC_R0-2}", "二、醫師診次代碼(醫師班表用:一格填一個代碼)",
     font(11, True), border=False)
@@ -1162,37 +1135,43 @@ for i in range(N_ASST):
         cc.font, cc.border, cc.alignment = font(9), BOX, CTR
 
 AS_TALLY = AS_ROW1 + 2
-# 五間院所各一列,再加「總部」一列給管理部——管理部的院所欄寫「總部」,
-# 不含任何院所名,五間那幾列一個也掃不到他們,不補這列就完全沒有檢核。
-TALLY_ROWS = [(code, short, CLINIC_FILL[code]) for code, short, *_r in CLINICS]
-TALLY_ROWS.append(("總", "總部", SUB_FILL))
+# 五間院所各一列,再加「管理部」一列。院所那五列只數醫護長:那一列問的是
+# 「這間院所今天有沒有醫護長」,管理部同樣在晶匯上班,但不能代替醫護長,
+# 混在一起數會讓「小玲請假、三位管理部在」看起來像有人顧,那正是要抓的狀況。
+# (short, 顯示標籤, 底色, 職類, 是否比對院所)
+TALLY_ROWS = [(short, f"{code} {short}", CLINIC_FILL[code], "醫護長", True)
+              for code, short, *_r in CLINICS]
+TALLY_ROWS.append(("", "管 管理部", SUB_FILL, "管理部", False))
 put(asx, f"A{AS_TALLY-1}", "當日在班人數(自動計算)", font(10, True), SUB_FILL, LEFT)
 asx.merge_cells(start_row=AS_TALLY-1, start_column=1, end_row=AS_TALLY-1, end_column=4)
-for k, (code, short, fill_) in enumerate(TALLY_ROWS):
+for k, (short, label, fill_, jobtype, by_clinic) in enumerate(TALLY_ROWS):
     r = AS_TALLY + k
-    put(asx, f"A{r}", f"{code} {short}", font(9, True), fill_, CTR)
+    put(asx, f"A{r}", label, font(9, True), fill_, CTR)
     asx.merge_cells(start_row=r, start_column=1, end_row=r, end_column=4)
     for c in range(AS_C0, AS_C1 + 1):
         L = get_column_letter(c)
         cell = asx.cell(row=r, column=c)
         d_ = c - AS_C0 + 1
+        # 院所欄可能寫成「晶睿·晶曜」(兼管兩間),所以用包含比對而非完全相等
+        clinic_term = (f'ISNUMBER(SEARCH("{short}",$D${AS_ROW0}:$D${AS_ROW1}))*'
+                       if by_clinic else "")
         cell.value = (f'=IF({L}$3="","",'
                       f'IF(COUNTIF({R_HOL},DATE({SET_Y},{SET_M},{d_}))>0,"假",'
                       f'IF({L}$4="日","休",'
-                      # 院所欄可能寫成「晶睿·晶曜」(兼管兩間),所以用包含比對而非完全相等
-                      f'SUMPRODUCT(ISNUMBER(SEARCH("{short}",'
-                      f'$D${AS_ROW0}:$D${AS_ROW1}))'
+                      f'SUMPRODUCT({clinic_term}'
+                      f'($C${AS_ROW0}:$C${AS_ROW1}="{jobtype}")'
                       f'*(COUNTIF({R_WC_W},{L}${AS_ROW0}:{L}${AS_ROW1})>0)))))')
         cell.font, cell.fill, cell.alignment, cell.border = (
             font(9, True), CALC_FILL, CTR, BOX)
         cell.number_format = FMT_CNT
 put(asx, f"A{AS_TALLY+len(TALLY_ROWS)+1}",
-    "※ 一間院所一位醫護長,所以檢核的是「當天有沒有人在」:掛 0 會變紅。"
-    "國定假日顯示「假」、週日顯示「休」,都不示警。文君兼管晶睿與晶曜,兩間都會算到她;"
-    "管理部的院所欄是「總部」,所以只出現在最後那列,不會被算進任何一間院所的人力。"
+    "※ 一間院所一位醫護長,所以檢核的是「當天有沒有醫護長在」:掛 0 會變紅。"
+    "國定假日顯示「假」、週日顯示「休」,都不示警。文君兼管晶睿與晶曜,兩間都會算到她。"
+    "管理部三位也在晶匯,但不列入晶匯那一列——他們代替不了醫護長,"
+    "混在一起數會讓「醫護長請假、管理部在」看起來像有人顧。他們自己在最後一列。"
     "門檻要調請改這幾列的條件式格式。", font(9, color="808080"), None, LEFT, border=False)
 
-# 設定的代碼欄一碼兩列(兩個職類),拿來當選單會出現重複項,所以用去重後的內嵌清單
+# 用內嵌清單而非跨分頁範圍:選單少一層相依,代碼表挪位置也不會壞
 _wc_inline = ",".join(c[0] for c in WORK_CODES)
 assert len(_wc_inline) <= 255, f"班別代碼清單過長({len(_wc_inline)} 字元)"
 dv_wc = DataValidation(type="list", formula1=f'"{_wc_inline}"', allow_blank=True,
@@ -1279,9 +1258,7 @@ for pi in range(N_ASST):
     for d in range(1, DAYS_IN_MONTH + 1):
         r = ATT_R0 + pi * DAYS_IN_MONTH + (d - 1)
         scol = get_column_letter(AS_C0 + d - 1)
-        # F 欄是職類、G 欄是排班代碼;兩者串起來才唯一決定時段與工時
-        KEY = f'$F{r}&"|"&$G{r}'
-        DUE = f'IFERROR(INDEX({R_WC_HRS},MATCH({KEY},{R_WC_KEY},0)),0)'
+        DUE = f'IFERROR(INDEX({R_WC_HRS},MATCH($G{r},{R_WC},0)),0)'
         fx = {
 "A": f'=IF(OR(醫護長與管理部班表!$A{srow}="",{d}>{DAYS_FX}),"",DATE({SET_Y},{SET_M},{d}))',
 "B": f'=IF($A{r}="","",INDEX({R_WEEK},WEEKDAY($A{r},1)))',
@@ -1290,15 +1267,15 @@ for pi in range(N_ASST):
 "E": f'=IF($C{r}="","",醫護長與管理部班表!$D{srow})',
 "F": f'=IF($C{r}="","",醫護長與管理部班表!$C{srow})',
 "G": f'=IF($C{r}="","",醫護長與管理部班表!{scol}{srow})',
-"H": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_IN},MATCH({KEY},{R_WC_KEY},0))=0,"",'
-      f'INDEX({R_WC_IN},MATCH({KEY},{R_WC_KEY},0))),""))'),
-"I": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_OUT},MATCH({KEY},{R_WC_KEY},0))=0,"",'
-      f'INDEX({R_WC_OUT},MATCH({KEY},{R_WC_KEY},0))),""))'),
+"H": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_IN},MATCH($G{r},{R_WC},0))=0,"",'
+      f'INDEX({R_WC_IN},MATCH($G{r},{R_WC},0))),""))'),
+"I": (f'=IF($G{r}="","",IFERROR(IF(INDEX({R_WC_OUT},MATCH($G{r},{R_WC},0))=0,"",'
+      f'INDEX({R_WC_OUT},MATCH($G{r},{R_WC},0))),""))'),
 "J": (f'=IFERROR(INDEX(打卡匯入!$C${PUNCH_R0}:$C${PUNCH_R1},'
       f'MATCH($C{r}&"|"&DAY($A{r}),打卡匯入!$E${PUNCH_R0}:$E${PUNCH_R1},0)),"")'),
 "K": (f'=IFERROR(INDEX(打卡匯入!$D${PUNCH_R0}:$D${PUNCH_R1},'
       f'MATCH($C{r}&"|"&DAY($A{r}),打卡匯入!$E${PUNCH_R0}:$E${PUNCH_R1},0)),"")'),
-"L": f'=IF(OR($J{r}="",$K{r}=""),"",IFERROR(INDEX({R_WC_RST},MATCH({KEY},{R_WC_KEY},0)),0))',
+"L": f'=IF(OR($J{r}="",$K{r}=""),"",IFERROR(INDEX({R_WC_RST},MATCH($G{r},{R_WC},0)),0))',
 "M": f'=IF(OR($J{r}="",$K{r}=""),"",ROUND(($K{r}-$J{r})*24-$L{r}/60,2))',
 "O": (f'=IF(OR($C{r}="",$H{r}="",$J{r}=""),0,'
       f'IF(ROUND(($J{r}-$H{r})*1440,0)>{P_GRACE},ROUND(($J{r}-$H{r})*1440,0),0))'),
@@ -1367,8 +1344,8 @@ for i in range(N_ASST):
 "B": f'={g}醫護長與管理部班表!$B{sr})',
 "C": f'={g}醫護長與管理部班表!$C{sr})',
 "D": f'={g}醫護長與管理部班表!$D{sr})',
-"E": f'={g}SUMPRODUCT(COUNTIF({rng},{R_WC}),({R_WC_TYP}=$C{r})*{R_WC_ATT}))',
-"F": f'={g}SUMPRODUCT(COUNTIF({rng},{R_WC}),({R_WC_TYP}=$C{r})*{R_WC_HRS}))',
+"E": f'={g}SUMPRODUCT(COUNTIF({rng},{R_WC}),{R_WC_ATT}))',
+"F": f'={g}SUMPRODUCT(COUNTIF({rng},{R_WC}),{R_WC_HRS}))',
 "G": f'={g}COUNTIF({rng},"OFF"))',
 "H": f'={g}COUNTIF({rng},"特"))',
 "I": f'={g}COUNTIF({rng},"病"))',
