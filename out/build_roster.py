@@ -1257,6 +1257,13 @@ for col, _, w in AT_COLS: at.column_dimensions[col].width = w
 put(at, "A1", title_of("出勤紀錄(法定紀錄:逐日記載至分鐘,保存 5 年)"), TITLE_F,
     IN_FILL if PENDING else None, LEFT, border=False)
 at.merge_cells("A1:S1")
+# 表頭每一欄都會有一個小箭頭,那是篩選鈕不是下拉選單——這一頁除了備註欄之外
+# 全是公式,沒有東西可選。會被誤認成選單,所以在旁邊直接講明。
+at.column_dimensions["U"].width = 2
+put(at, "V1", "↑ 表頭上的箭頭是「篩選」鈕,不是下拉選單。"
+    "這一頁只有最右邊的備註欄要手填,其餘都是公式自動算的。"
+    "處理異常請點「出勤異常」欄的箭頭,把「正常」取消勾選。",
+    font(9, color="808080"), None, LEFT, border=False)
 header_row(at, 2, [lab for _, lab, _ in AT_COLS], start_col=1, height=28)
 for pi in range(N_ASST):
     srow = AS_ROW0 + pi
