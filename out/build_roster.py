@@ -42,24 +42,37 @@ def font(sz=10, b=False, color="000000"):
 
 TITLE_F   = font(16, True)
 HDR_F     = font(10, True, "FFFFFF")
-HDR_FILL  = PatternFill("solid", fgColor="1F4E5F")
-SUB_FILL  = PatternFill("solid", fgColor="DCE6EC")
-IN_FILL   = PatternFill("solid", fgColor="FFF2CC")
-CALC_FILL = PatternFill("solid", fgColor="F2F2F2")
-WKND_FILL = PatternFill("solid", fgColor="DDEBF7")
-LEAVE_FILL= PatternFill("solid", fgColor="D9D9D9")
-ALERT_FILL= PatternFill("solid", fgColor="FF9999")
-GAP_FILL  = PatternFill("solid", fgColor="FCE4E4")
-OT_FILL   = PatternFill("solid", fgColor="FCE4D6")
-SUPP_FILL = PatternFill("solid", fgColor="C6E0B4")   # 醫護長與管理部班表的「支援他院」專用綠
+def fill(hex_):
+    """實心底色。fgColor 與 bgColor 兩個都填,是因為 Excel 讀這兩者的規則不一樣:
+
+    一般儲存格的實心底色看 fgColor,但條件式格式用的是「差異格式」(dxf),
+    Excel 在 dxf 裡讀的是 bgColor。openpyxl 只寫 fgColor,所以同一個 PatternFill
+    當一般底色會上色、當條件式格式卻是白的——本檔所有條件式格式的顏色
+    先前都沒有顯示,原因就在這裡。兩個都寫,兩種情況都吃得到。
+    """
+    # 另外補上 FF 的 alpha:openpyxl 收到 6 碼色碼會寫成 "00RRGGBB",
+    # 也就是完全透明。一般底色 Excel 會忽略這個 alpha,dxf 不見得。
+    argb = "FF" + hex_ if len(hex_) == 6 else hex_
+    return PatternFill("solid", start_color=argb, end_color=argb)
+
+HDR_FILL  = fill("1F4E5F")
+SUB_FILL  = fill("DCE6EC")
+IN_FILL   = fill("FFF2CC")
+CALC_FILL = fill("F2F2F2")
+WKND_FILL = fill("DDEBF7")
+LEAVE_FILL= fill("D9D9D9")
+ALERT_FILL= fill("FF9999")
+GAP_FILL  = fill("FCE4E4")
+OT_FILL   = fill("FCE4D6")
+SUPP_FILL = fill("C6E0B4")   # 醫護長與管理部班表的「支援他院」專用綠
 # 五間院所各自的底色,讓醫師整月動線一眼看得出來
 CLINIC_FILL = {
-    "悅": PatternFill("solid", fgColor="FBE3EC"),   # 粉
-    "睿": PatternFill("solid", fgColor="D9E7F5"),   # 藍
-    "匯": PatternFill("solid", fgColor="DCEEDC"),   # 綠
-    "曜": PatternFill("solid", fgColor="E8DFF2"),   # 紫
+    "悅": fill("FBE3EC"),   # 粉
+    "睿": fill("D9E7F5"),   # 藍
+    "匯": fill("DCEEDC"),   # 綠
+    "曜": fill("E8DFF2"),   # 紫
     # 寶貝牙的黃刻意比 IN_FILL(FFF2CC,「你要填的格子」)飽和,兩者不會混淆
-    "寶": PatternFill("solid", fgColor="FAE8A0"),   # 黃
+    "寶": fill("FAE8A0"),   # 黃
 }
 
 thin = Side(style="thin", color="AAAAAA")
