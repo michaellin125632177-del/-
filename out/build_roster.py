@@ -518,7 +518,7 @@ for h, body in BLOCKS:
 st = wb.create_sheet("設定")
 st.sheet_view.showGridLines = False
 for col, w in {"A":2,"B":11,"C":18,"D":9,"E":9,"F":10,"G":11,"H":8,"I":9,"J":9,
-               "K":2,"L":12,"M":2,"N":9,"O":8,"P":2,"Q":13,"R":2,"S":16,"T":2,"W":12,"X":26,"Y":8}.items():
+               "K":2,"L":12,"M":2,"N":9,"O":8,"P":2,"Q":13,"R":2,"S":16,"T":2,"W":14,"X":26,"Y":8}.items():
     st.column_dimensions[col].width = w
 put(st, "B1", "設定表(總部維護,各院所請勿修改)", TITLE_F, border=False)
 put(st, "B2", "本期年月", font(10, True), SUB_FILL, CTR)
@@ -857,7 +857,9 @@ def dcol(d, sidx):                           # 第 d 日、第 sidx 診次的欄
     return DS_C0 + (d-1)*3 + sidx
 for d in range(1, DAYS_IN_MONTH+1):
     for sidx in range(3):
-        ds.column_dimensions[get_column_letter(dcol(d, sidx))].width = 3.4
+        # 4.0 是為了「OFF」。3.4 剛好卡在邊界上(實測需 23px、可用 23px),
+        # 院所代碼是一個字沒問題,但 OFF 會被隔壁切掉。
+        ds.column_dimensions[get_column_letter(dcol(d, sidx))].width = 4.0
 LAST_C = dcol(DAYS_IN_MONTH, 2)
 
 put(ds, "A1", "醫師班表(診次制 · 一格 = 一個診次 · 已依週班表填好本月)", TITLE_F, border=False)
@@ -1095,7 +1097,9 @@ asx.freeze_panes = "E5"
 for col, w in {"A":9,"B":10,"C":9,"D":10}.items():
     asx.column_dimensions[col].width = w
 for c in range(AS_C0, AS_C1 + 1):
-    asx.column_dimensions[get_column_letter(c)].width = 4.4
+    # 5.6 是為了「早午」「午晚」「全日」這類兩個字的代碼。4.4 只夠一個字,
+    # 兩字會被右邊的格子切掉(隔壁有內容就不會溢出顯示)。
+    asx.column_dimensions[get_column_letter(c)].width = 5.6
 put(asx, "A1", title_of("醫護長與管理部班表(工時制)"), TITLE_F,
     IN_FILL if PENDING else None, LEFT, border=False)
 asx.merge_cells(start_row=1, start_column=1, end_row=1, end_column=AS_C1)
@@ -1209,7 +1213,8 @@ PUNCH_R1 = PUNCH_R0 + PUNCH_N - 1
 pc = wb.create_sheet("打卡匯入")
 pc.sheet_view.showGridLines = False
 pc.freeze_panes = "A3"
-for col, w in {"A":13,"B":13,"C":12,"D":12,"E":16,"F":16,"G":2,"H":76}.items():
+# B 是日期欄,留 14 才放得下「2026/10/10」這種兩位數月日
+for col, w in {"A":13,"B":14,"C":12,"D":12,"E":16,"F":16,"G":2,"H":76}.items():
     pc.column_dimensions[col].width = w
 put(pc, "A1", title_of("打卡匯入(把打卡機匯出的資料貼在下面四欄)"), TITLE_F,
     IN_FILL if PENDING else None, LEFT, border=False)
@@ -1242,7 +1247,7 @@ ATT_R1 = ATT_R0 + N_ASST * DAYS_IN_MONTH - 1
 at = wb.create_sheet("出勤紀錄")
 at.sheet_view.showGridLines = False
 at.freeze_panes = "E3"
-AT_COLS = [("A","日期",11), ("B","星期",6), ("C","員工編號",11), ("D","姓名",11),
+AT_COLS = [("A","日期",14), ("B","星期",6), ("C","員工編號",11), ("D","姓名",11),
            ("E","院所",10), ("F","職類",9), ("G","排班代碼",9), ("H","應到",8),
            ("I","應退",8), ("J","實際上班",10), ("K","實際下班",10),
            ("L","休息(分)",9), ("M","實際工時",10), ("N","出勤異常",11),
