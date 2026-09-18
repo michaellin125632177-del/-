@@ -1,0 +1,316 @@
+<title>班表看板上線手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --paper:#FCFCFA; --surface:#FFFFFF; --sunk:#F3F4F2;
+  --ink:#152A2C; --body:#33474A; --muted:#6E8083;
+  --line:#E0E2DD; --line-strong:#C6CBC5;
+  --petrol:#1F5A57; --petrol-soft:#E4EEEC;
+  --amber:#8A6310; --amber-soft:#FBEFCF;
+  --alert:#A8433C; --alert-soft:#FBDEDE;
+  --ok:#3F7A52; --ok-soft:#E2F0E6;
+  --serif:"Noto Serif TC", Georgia, "Songti TC", serif;
+  --sans:"Noto Sans TC", -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-soft:#3C2F16;
+  --alert:#E08B84; --alert-soft:#3E2320;
+  --ok:#7FBE92; --ok-soft:#1D3325;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1618; --surface:#161F21; --sunk:#1B2528;
+  --ink:#E7EDEB; --body:#BFCCCB; --muted:#8CA0A1;
+  --line:#263436; --line-strong:#3A4B4D;
+  --petrol:#68AFA6; --petrol-soft:#1B3230;
+  --amber:#DFA646; --amber-soft:#3C2F16;
+  --alert:#E08B84; --alert-soft:#3E2320;
+  --ok:#7FBE92; --ok-soft:#1D3325;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper); color:var(--body); font-family:var(--sans);
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;}
+h1,h2,h3{color:var(--ink); font-family:var(--serif); margin:0; text-wrap:balance;}
+h3{font-family:var(--sans)}
+p{margin:0}
+code{font-family:var(--mono); font-size:.9em; background:var(--sunk);
+  border:1px solid var(--line); border-radius:3px; padding:1px 5px; color:var(--ink);}
+:focus-visible{outline:2px solid var(--petrol); outline-offset:3px; border-radius:2px}
+
+.shell{max-width:880px; margin:0 auto; padding-inline:22px; padding-block:0 96px;}
+
+.masthead{padding-block:56px 28px; border-bottom:2px solid var(--ink);}
+.kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--petrol); margin-bottom:14px;}
+h1{font-size:clamp(29px,5.2vw,44px); line-height:1.18;}
+.standfirst{margin-top:16px; max-width:60ch; font-size:16.5px;}
+.standfirst strong{color:var(--ink); font-weight:700;}
+
+.answers{margin-top:26px; border-top:1px solid var(--line);}
+.ans{display:grid; gap:2px 16px; padding:11px 0; border-bottom:1px solid var(--line);}
+@media(min-width:620px){.ans{grid-template-columns:32px minmax(0,1fr) auto; align-items:baseline;}}
+.ans .n{font-family:var(--mono); font-size:12px; color:var(--petrol);}
+.ans b{color:var(--ink); font-weight:700; font-size:15px;}
+.ans .eff{font-size:12.5px; color:var(--muted); font-family:var(--mono);}
+.ans.open b{color:var(--amber)}
+
+main{padding-top:44px; display:flex; flex-direction:column; gap:54px;}
+.sec-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px;}
+h2{font-size:clamp(21px,2.7vw,26px); line-height:1.35;}
+.ref{font-family:var(--mono); font-size:11.5px; color:var(--petrol);
+  background:var(--petrol-soft); padding:2px 8px; border-radius:3px; white-space:nowrap;}
+.lede{max-width:64ch; margin-top:12px;}
+.sec-body{display:flex; flex-direction:column; gap:16px; margin-top:20px;}
+
+.steps{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
+.step{display:grid; gap:5px 18px; padding:18px 0; border-bottom:1px solid var(--line);}
+@media(min-width:660px){.step{grid-template-columns:30px minmax(0,1fr);}}
+.step .n{font-family:var(--mono); font-size:13px; color:#fff; background:var(--petrol);
+  width:24px; height:24px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-weight:500;}
+.step h3{font-size:16px; font-weight:900; line-height:1.5;}
+.step .d{grid-column:2; display:flex; flex-direction:column; gap:8px;}
+@media(max-width:659px){.step .d{grid-column:1}}
+.step p{max-width:60ch; font-size:14.5px;}
+.step ul{margin:0; padding-left:19px; display:flex; flex-direction:column; gap:4px;}
+.step li{font-size:14px; max-width:58ch;}
+
+.tip{background:var(--sunk); border:1px solid var(--line); border-left:3px solid var(--petrol);
+  border-radius:0 4px 4px 0; padding:11px 14px; font-size:13.5px; max-width:62ch;}
+.tip.warn{border-left-color:var(--amber); background:var(--amber-soft);}
+.tip.stop{border-left-color:var(--alert); background:var(--alert-soft);}
+.tip b{color:var(--ink)}
+
+.scroll{overflow-x:auto}
+.scroll > table{min-width:520px}
+table{border-collapse:collapse; width:100%; font-size:13.5px;}
+th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line);
+  vertical-align:top;}
+thead th{font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  border-bottom:1.5px solid var(--line-strong); white-space:nowrap;}
+tbody th{font-weight:700; color:var(--ink); white-space:nowrap;}
+
+.checks{display:flex; flex-direction:column; gap:7px;}
+.chk{display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 11px;
+  align-items:baseline; background:var(--surface); border:1px solid var(--line);
+  border-radius:5px; padding:10px 13px;}
+.chk .mark{color:var(--ok); font-weight:700; font-family:var(--mono); font-size:13px;}
+.chk b{color:var(--ink); font-size:14px}
+.chk p{grid-column:2; font-size:13px; color:var(--muted); max-width:58ch}
+
+.people{display:grid; gap:9px;}
+@media(min-width:620px){.people{grid-template-columns:1fr 1fr;}}
+.pcard{background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:13px 15px; display:flex; flex-direction:column; gap:4px;}
+.pcard b{color:var(--ink); font-size:14.5px}
+.pcard span{font-size:13px; color:var(--muted)}
+
+.cal{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
+.cw{display:grid; gap:3px 16px; padding:13px 0; border-bottom:1px solid var(--line);}
+@media(min-width:620px){.cw{grid-template-columns:132px minmax(0,1fr);}}
+.cw .when{font-family:var(--mono); font-size:12.5px; color:var(--petrol);}
+.cw b{color:var(--ink); font-size:14.5px}
+.cw p{font-size:13.5px; max-width:58ch}
+
+footer{margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--muted); max-width:66ch;}
+</style>
+
+<div class="shell">
+
+<header class="masthead">
+  <div class="kicker">日三牙醫體系 · 班表看板</div>
+  <h1>班表看板上線手冊</h1>
+  <p class="standfirst">上級回覆了五題中的四題,方向都確定了。剩下的不是決策,是<strong>照著做</strong> —— 一次性的設定約 30 分鐘,之後每月更新約 5 分鐘。</p>
+
+  <div class="answers">
+    <div class="ans"><span class="n">①</span><b>只給醫護長與主管看</b><span class="eff">→ 要設名單,不能公開網址</span></div>
+    <div class="ans"><span class="n">②</span><b>掛 Cloudflare Pages</b><span class="eff">→ 費用 0,下面有步驟</span></div>
+    <div class="ans"><span class="n">③</span><b>專人每月更新</b><span class="eff">→ 已做成按兩下就跑的檔案</span></div>
+    <div class="ans"><span class="n">④</span><b>出勤紀錄不上網</b><span class="eff">→ 已寫成每次都會跑的檢查</span></div>
+    <div class="ans open"><span class="n">⑤</span><b>真正的目標是什麼 —— 還沒回覆</b><span class="eff">→ 不擋上線,但別忘了問</span></div>
+  </div>
+</header>
+
+<main>
+
+<section id="privacy">
+  <div class="sec-head"><h2>先講第 ④ 題:這件事我沒有只用嘴巴保證</h2><span class="ref">每次產生都會跑</span></div>
+  <p class="lede">「出勤紀錄不要放上網」如果只是一句承諾,哪天有人手滑加了一個欄位就破功了。所以我把它寫成<strong>一支每次產生看板都會跑的檢查</strong>,六項全過才算數。這是剛才對現在要上線的檔案跑出來的結果:</p>
+  <div class="sec-body">
+    <div class="checks">
+      <div class="chk"><span class="mark">✓</span><b>頁面文字不含敏感字眼</b>
+        <p>打卡、遲到、早退、加班、到職、特休、病假、事假、薪資、身分證 —— 16 個字眼逐一掃過,0 個出現。</p></div>
+      <div class="chk"><span class="mark">✓</span><b>資料結構沒有多餘欄位</b>
+        <p>頁面只載得動預先允許的那幾個欄位,多一個就會被抓出來。醫師資料只有編號、姓名、專科、職務、服務院所。</p></div>
+      <div class="chk"><span class="mark">✓</span><b>班表格子只可能是院所代碼</b>
+        <p>悅睿匯曜寶、國、休、空白 —— 其他值一律視為異常。混進時間或數字會被擋下。</p></div>
+      <div class="chk"><span class="mark">✓</span><b>沒有診次時間以外的時間字串</b>
+        <p>整份資料裡出現的每一個 <code>HH:MM</code> 都必須是五間院所的看診時段,其餘一律不合格。</p></div>
+      <div class="chk"><span class="mark">✓</span><b>工時制七位不在頁面上</b>
+        <p>ivy、文君、小玲、娜娜、孟諭、怡雯、小華 —— 醫護長與管理部完全不出現在對外頁面。</p></div>
+      <div class="chk"><span class="mark">✓</span><b>實際載的內容</b>
+        <p>27 位醫師 × 31 天的班表,外加五間院所的電話與地址。沒有任何一筆出勤或個資。</p></div>
+    </div>
+    <p class="tip"><b>意思是:</b>就算哪天網址不小心外流,外面的人看到的是「哪位醫師哪天在哪間看診」—— 這些官網門診表本來就公開了。真正敏感的東西留在 Excel,從來沒有離開過。</p>
+  </div>
+</section>
+
+<section id="setup">
+  <div class="sec-head"><h2>一次性設定</h2><span class="ref">約 30 分鐘 · 只做一次</span></div>
+  <p class="lede">不需要寫程式,也不需要裝任何東西 —— 全程在瀏覽器裡點。建議由小編自己做,因為之後要加減名單的人是你。</p>
+
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <div class="d">
+        <h3>註冊 Cloudflare 帳號</h3>
+        <p>到 <code>dash.cloudflare.com</code> 用公司信箱註冊。免費方案就夠,不用填信用卡。</p>
+        <p class="tip warn"><b>建議用公司的共用信箱</b>,不要用個人信箱。人員異動時帳號才不會跟著走掉 —— 這是很多小團隊事後最麻煩的一件事。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">2</span>
+      <div class="d">
+        <h3>建立 Pages 專案,把檔案拖進去</h3>
+        <ul>
+          <li>左邊選單找 <b>Workers &amp; Pages</b> → <b>Create</b> → 選 <b>Pages</b> 這個分頁 → <b>Upload assets</b>(直接上傳,不要選連 Git)。</li>
+          <li>專案名稱建議 <code>gemray-roster</code>。這會決定網址長什麼樣。</li>
+          <li>把 <code>班表看板.html</code> <b>改名成 <code>index.html</code></b> 再拖進去。改名是為了讓網址不用帶檔名。</li>
+          <li>按 <b>Deploy</b>。大約十幾秒就會給你一個 <code>xxx.pages.dev</code> 的網址。</li>
+        </ul>
+        <p class="tip"><b>先自己用手機開開看。</b>這時候它還是公開的,任何拿到網址的人都看得到 —— 所以下一步別跳過。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">3</span>
+      <div class="d">
+        <h3>設定「誰可以看」</h3>
+        <p>這是第 ① 題的答案落地的地方。在 Cloudflare 的 <b>Zero Trust</b> 區域設定 <b>Access</b>,規則設成「只有名單上的信箱能進」。</p>
+        <ul>
+          <li>Zero Trust → <b>Access</b> → <b>Applications</b> → <b>Add an application</b> → 選 <b>Self-hosted</b>。</li>
+          <li>網域填第 2 步拿到的 <code>xxx.pages.dev</code>。</li>
+          <li>規則選 <b>Emails</b>,把下面那份名單一個一個加進去。</li>
+        </ul>
+        <p>設好之後,任何人開這個網址都會先被要求輸入信箱、收一封驗證信,通過才看得到班表。不在名單上的人連不進去。</p>
+        <p class="tip warn"><b>兩件要留意的事。</b>Cloudflare 的免費方案有使用者人數上限(目前的方案是 50 人,我們大約 10 人,綽綽有餘),但條款會變,設定當下請看一眼畫面上的說明。另外 Cloudflare 的介面改版頻繁,選單名稱可能跟上面寫的不完全一樣 —— 認關鍵字 <b>Access</b>、<b>Application</b>、<b>Emails</b> 就找得到。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">4</span>
+      <div class="d">
+        <h3>(可選)換成自家網址</h3>
+        <p>如果官網廠商願意配合,可以把網址換成 <code>roster.gemray.tw</code>,比 <code>xxx.pages.dev</code> 好記也比較正式。這要請廠商加一筆 DNS 設定,Cloudflare 那邊在 Pages 專案的 <b>Custom domains</b> 加上去。</p>
+        <p class="tip"><b>不急。</b>先用 <code>pages.dev</code> 的網址跑完晶悅的試辦,確定這東西真的有人用,再去麻煩廠商。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="who">
+  <div class="sec-head"><h2>名單:誰要加進去</h2></div>
+  <p class="lede">上級說「只給醫護長跟主管看」。依目前的名冊,對應到這些人 —— 請跟上級確認一次,尤其是主管那一欄到底包含誰。</p>
+  <div class="sec-body">
+    <div class="people">
+      <div class="pcard"><b>醫護長 4 位</b><span>ivy(晶悅)、文君(晶睿·晶曜)、小玲(晶匯)、娜娜(寶貝牙)</span></div>
+      <div class="pcard"><b>院長 5 位</b><span>林智俊、温健成、陳昺元、劉立德、黃育亭</span></div>
+      <div class="pcard"><b>管理部 3 位</b><span>孟諭、怡雯、小華 —— 要不要納入請上級決定</span></div>
+      <div class="pcard"><b>小編</b><span>你自己。負責維護名單與每月更新的人一定要有。</span></div>
+    </div>
+    <p class="tip stop"><b>要收集的是公司信箱,不是姓名。</b>Access 是靠信箱認人的。如果體系沒有配發公司信箱,那就得用個人信箱 —— 可以動,但人離職時務必記得從名單移除,否則他回家還是打得開。這件事建議一併寫進離職流程。</p>
+  </div>
+</section>
+
+<section id="monthly">
+  <div class="sec-head"><h2>每月更新</h2><span class="ref">約 5 分鐘 · 專人做</span></div>
+  <p class="lede">第 ③ 題說會有專人每月更新。原本這一步要在終端機打指令 —— 對非技術背景的人不合理,所以我把它包成<strong>按兩下就跑的檔案</strong>。</p>
+
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <div class="d">
+        <h3>總部把下個月的班表排定</h3>
+        <p>照現在的流程:每月 25 日前各院所交班表,總部彙整、鎖表。看板是從定案的資料產生的,沒定案就先別更新。</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <div class="d">
+        <h3>按兩下「更新看板」</h3>
+        <p>Mac 用 <code>更新看板.command</code>,Windows 用 <code>更新看板.bat</code>。會問要產生哪一個月,輸入像 <code>2026-11</code> 這樣的格式,按 Enter。</p>
+        <p>它會自動做三件事:產生該月的 Excel、產生醫師版、產生看板網頁。跑完會告訴你要上傳哪一個檔案。</p>
+        <p class="tip warn"><b>第一次執行會慢一點</b>,因為要裝一個叫 openpyxl 的套件,它會自己處理。如果畫面說找不到 Python,照畫面上的網址裝一次就好,以後都不用再裝。</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <div class="d">
+        <h3>把檔案拖上 Cloudflare</h3>
+        <p>到 Pages 專案頁面 → <b>Create deployment</b> → 把 <code>班表看板.html</code> 改名成 <code>index.html</code> 拖進去 → Deploy。</p>
+        <p class="tip"><b>舊版本不會消失。</b>Cloudflare 會保留每一次的部署紀錄,傳錯了可以在畫面上把舊的那次設回正式版,不用重做。</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">4</span>
+      <div class="d">
+        <h3>自己開一次確認</h3>
+        <p>用手機開網址,看三件事:期間對不對、今天那頁有沒有人、有沒有紅色的「沒有醫師　要調班」。三十秒就檢查完。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="watch">
+  <div class="sec-head"><h2>換月之外,還有三件事要留意</h2></div>
+  <div class="cal">
+    <div class="cw">
+      <span class="when">2027 年之前</span>
+      <div>
+        <b>國定假日只做到 2026 年底</b>
+        <p>目前的假日表是 2026 年的草稿。跨到 2027 年之前,要把人事行政總處公告的辦公日曆表更新進去,否則新年度的班表會把國定假日排成上班日。這件事要找我(或接手的人)改資料,不是專人按兩下就能解決的。</p>
+      </div>
+    </div>
+    <div class="cw">
+      <span class="when">有人來或走</span>
+      <div>
+        <b>醫師異動要改名單</b>
+        <p>新醫師報到、離職、或固定門診時段改了,要改的是體系的班表資料,不是網頁。改完重跑一次就會全部跟著更新 —— 包含 Excel 和看板。</p>
+      </div>
+    </div>
+    <div class="cw">
+      <span class="when">一直都要</span>
+      <div>
+        <b>官網門診表要同步</b>
+        <p>看板改了、官網門診表沒改,病人會照著官網跑一趟卻沒醫師。建議把「班表定案 → 更新官網 → 更新看板」當成同一個流程的三個步驟,不要當成三件事。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="q5">
+  <div class="sec-head"><h2>還有第 ⑤ 題</h2><span class="ref">不擋上線</span></div>
+  <p class="lede">上級還沒回的那一題是:<strong>「網頁版」是不是其實想要線上打卡與請假簽核?</strong></p>
+  <div class="sec-body">
+    <p class="tip warn">這題不影響現在上線,但值得在試辦期間找機會問清楚。如果上級的目標一直都是打卡與簽核,那接下來該做的是<b>比價現成的 HR 系統</b>,而不是把這個唯讀看板一路加功能加成人事系統 —— 後者會走成一個沒有人維護得起的東西。現在這個看板無論如何都不白做:它證明了資料是通的,也讓大家先習慣在手機上看班表。</p>
+    <p class="lede">另外,<b>34 人的到職日</b>還是全部空白。這件事從八月拖到現在,沒有它就算不出特休年資。趁這次回報上線進度,可以一起要回來。</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  依 2026 年 9 月的專案狀態撰寫。Cloudflare 的介面與免費方案條款會隨時間改變,步驟中的選單名稱以實際畫面為準,費用與人數上限請於設定當下確認。看板本身不含任何出勤紀錄與個人資料,該項每次產生時自動檢查。
+</footer>
+
+</div>

@@ -27,8 +27,17 @@ STAFF_SHEETS = ["醫護長與管理部班表", "打卡匯入", "出勤紀錄", "
 OUT = ("/home/user/-/out/日三牙醫體系_統一出勤表.xlsx" if WITH_ASSISTANT
        else "/home/user/-/out/日三牙醫體系_統一出勤表_醫師版.xlsx")
 
-YEAR, MONTH = 2026, 10
-DAYS_IN_MONTH = 31
+# 本期年月。換月不必改程式:
+#     GEMRAY_PERIOD=2026-11 python3 build_roster.py
+# 沒給就用下面的預設值。天數一律由月份推算——寫死 31 會讓 11 月多出一天。
+import os as _os, calendar as _cal
+_p = _os.environ.get("GEMRAY_PERIOD", "2026-10").strip()
+try:
+    YEAR, MONTH = (int(x) for x in _p.replace("/", "-").split("-")[:2])
+except ValueError:
+    raise SystemExit(f"GEMRAY_PERIOD 格式應為 YYYY-MM,收到:{_p!r}")
+assert 1 <= MONTH <= 12, f"月份不合法:{MONTH}"
+DAYS_IN_MONTH = _cal.monthrange(YEAR, MONTH)[1]
 SESSIONS = ["早", "午", "晚"]
 
 N_DOC   = 40      # 醫師班表列數(24 位 + 保留)
