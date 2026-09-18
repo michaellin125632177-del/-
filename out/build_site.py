@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """班表看板(階段一:唯讀)。從 build_roster.py 的同一批資料產生一頁式靜態網站。
 
-    python3 build_site.py            # 產生 班表看板.html
+    python3 build_site.py
+
+涵蓋範圍:從「今天所在的月份」到「國定假日資料的最後一個月」,一次全部產生。
+不是只做一個月——只做一個月的話,月初就得有人重新產生並上傳,而「沒人更新」
+是這個專案最可能的死法。假日資料到哪裡,看板就做到哪裡,到期會自己提醒。
+起始月可用 GEMRAY_SITE_FROM=2026-10 覆寫。
 
 為什麼要「模擬 Excel 的公式」而不是直接呼叫 build_roster.expand_month:
 Excel 的醫師班表是公式驅動的——格子讀醫師週班表的標記(悅、悅(隔)、悅/睿),
@@ -10,9 +15,10 @@ Excel 的醫師班表是公式驅動的——格子讀醫師週班表的標記(�
 網站若用它,就成了第二個真相來源——正是路線圖裡列為風險的「兩份資料分叉」。
 
 所以這裡照著公式那條路走:wk_label 產生標記 → 依單雙週解析 → 得到院所。
-產生後再用 expand_month 獨立核對一次,兩套實作全數相符才寫檔。
+產生後再用 expand_month 獨立核對一次,每一個月、每一格都相符才寫檔。
 """
-import importlib.util, sys, io, json, contextlib, pathlib, datetime as dt
+import importlib.util, sys, io, os, json, calendar, contextlib, pathlib
+import datetime as dt
 
 # 一律以腳本自己所在的資料夾為準,不寫死絕對路徑——這支要在別人的電腦上跑。
 HERE    = pathlib.Path(__file__).resolve().parent
@@ -78,54 +84,83 @@ def cell_value(name, date, sidx):
         return W[0]
     return W
 
-DAYS = []
-for d in range(1, NDAYS + 1):
-    date = dt.date(YEAR, MONTH, d)
-    DAYS.append({"d": d, "wd": date.weekday() + 1,
-                 "w": WEEK_CH[date.weekday()],
-                 "hol": br.HOLIDAY_SET.get(date, "")})
+# ---------------------------------------------------------------- 涵蓋哪幾個月
+# 假日資料有到哪一年,就只能做到那一年。跨過去等於把國定假日排成上班日,
+# 所以寧可少做一個月,也不要默默產生錯的班表。
+HOL_YEAR = max(d.year for d in br.HOLIDAY_SET) if br.HOLIDAY_SET else YEAR
+_today = dt.date.today()
+_from = os.environ.get("GEMRAY_SITE_FROM", "").strip()
+if _from:
+    _fy, _fm = (int(x) for x in _from.replace("/", "-").split("-")[:2])
+else:                                   # 預設從「今天所在的月份」開始
+    _fy, _fm = (_today.year, _today.month) if _today.year <= HOL_YEAR else (HOL_YEAR, 1)
 
-# 醫師 × 日 × 診次 → 院所代碼 / 國 / 休 / ""
-DOCM = {}
-for eid, nm, eng, spec, duty, teams in DOCTORS:
-    DOCM[nm] = [[cell_value(nm, dt.date(YEAR, MONTH, d), s) for s in range(3)]
-                for d in range(1, NDAYS + 1)]
+MONTHS = []
+_y, _m = _fy, _fm
+while (_y, _m) <= (HOL_YEAR, 12):
+    MONTHS.append((_y, _m, calendar.monthrange(_y, _m)[1]))
+    _y, _m = (_y + 1, 1) if _m == 12 else (_y, _m + 1)
+if not MONTHS:
+    raise SystemExit(
+        f"沒有可產生的月份:起始 {_fy}/{_fm},但假日資料只到 {HOL_YEAR} 年底。\n"
+        f"請先把 {HOL_YEAR+1} 年的國定假日加進 weekly.py 的 HOLIDAYS_2026,再重跑。")
+
+WEEK_CH = "一二三四五六日"
+
+# 所有月份串成一條連續的日子。跨月的那一週才不會被切成兩半——
+# 10/29(四)到 11/4(三)是同一週,使用者不該為了看完整一週而切換月份。
+DAYS, RANGES = [], []
+for y, m, nd in MONTHS:
+    lo = len(DAYS)
+    for d in range(1, nd + 1):
+        date = dt.date(y, m, d)
+        DAYS.append({"y": y, "m": m, "d": d, "wd": date.weekday() + 1,
+                     "w": WEEK_CH[date.weekday()],
+                     "hol": br.HOLIDAY_SET.get(date, "")})
+    RANGES.append({"y": y, "m": m, "from": lo, "to": len(DAYS) - 1})
+
+N = len(DAYS)
+DOCM = {nm: [[cell_value(nm, dt.date(x["y"], x["m"], x["d"]), s_)
+              for s_ in range(3)] for x in DAYS]
+        for _e, nm, *_r in DOCTORS}
 
 # ---------------------------------------------------------------- 獨立核對
-# expand_month 是另一套實作。兩者全數相符,才敢說網站與 Excel 是同一份班表。
-mismatch = []
-for eid, nm, *_r in DOCTORS:
-    flat = br.expand_month(nm, YEAR, MONTH, NDAYS)
-    for d in range(NDAYS):
-        for s in range(3):
-            a, b = DOCM[nm][d][s], flat[d * 3 + s]
-            if a != b:
-                mismatch.append((nm, d + 1, SESSIONS[s], a, b))
-print(f"與 expand_month 逐格核對:{len(DOCTORS)*NDAYS*3} 格,不符 {len(mismatch)}")
-for m in mismatch[:8]:
-    print("   ✗", m)
+# expand_month 是另一套實作。逐月、逐格比對,全數相符才敢說網站與 Excel 同源。
+mismatch, checked = [], 0
+for rg, (y, m, nd) in zip(RANGES, MONTHS):
+    for _e, nm, *_r in DOCTORS:
+        flat = br.expand_month(nm, y, m, nd)
+        for k in range(nd):
+            for s_ in range(3):
+                checked += 1
+                a, b = DOCM[nm][rg["from"] + k][s_], flat[k * 3 + s_]
+                if a != b:
+                    mismatch.append((f"{y}/{m}", nm, k + 1, SESSIONS[s_], a, b))
+print(f"涵蓋 {len(MONTHS)} 個月({MONTHS[0][0]}/{MONTHS[0][1]}–{MONTHS[-1][0]}/{MONTHS[-1][1]})"
+      f",共 {N} 天")
+print(f"與 expand_month 逐格核對:{checked} 格,不符 {len(mismatch)}")
+for _x in mismatch[:8]:
+    print("   ✗", _x)
 assert not mismatch, "兩套展開邏輯不一致,先查清楚再產網站"
 
 # 院所 × 日 × 診次 → 在診醫師
-GRID = {c[0]: [[[] for _ in range(3)] for _ in range(NDAYS)] for c in CLINICS}
-for eid, nm, *_r in DOCTORS:
-    for d in range(NDAYS):
-        for s in range(3):
-            v = DOCM[nm][d][s]
+GRID = {c[0]: [[[] for _ in range(3)] for _ in range(N)] for c in CLINICS}
+for _e, nm, *_r in DOCTORS:
+    for i in range(N):
+        for s_ in range(3):
+            v = DOCM[nm][i][s_]
             if v in GRID:
-                GRID[v][d][s].append(nm)
+                GRID[v][i][s_].append(nm)
 
 OPENFLAG = {c[0]: [[1 if (w, t) in br.OPEN[c[0]] else 0 for t in range(3)]
                    for w in range(1, 8)] for c in CLINICS}
 
 DATA = {
-    "year": YEAR, "month": MONTH, "ndays": NDAYS,
     "built": dt.date.today().isoformat(),
     "sessions": SESSIONS,
-    "week": list(WEEK_CH),
+    "months": RANGES,
     "clinics": [{"code": c[0], "short": c[1], "full": c[2], "head": c[3],
                  "tel": c[4], "addr": c[5],
-                 "bg": CLINIC_HEX[c[0]], "ink": CLINIC_INK[c[0]],
                  "time": wk.SESSION_TIME[c[0]],
                  "open": OPENFLAG[c[0]]} for c in CLINICS],
     "doctors": [{"eid": e, "name": n, "spec": sp, "duty": du, "teams": tm}
@@ -193,6 +228,16 @@ h1{font-size:19px; letter-spacing:.01em}
 .banner{margin-top:10px; background:var(--petrol-soft); border:1px solid var(--line);
   border-left:3px solid var(--petrol); border-radius:0 4px 4px 0; padding:9px 13px;
   font-size:13px; color:var(--ink);}
+
+/* 月份切換 */
+.months{display:flex; gap:6px; overflow-x:auto; padding-block:10px 2px;}
+.months button{background:var(--surface); border:1px solid var(--line-strong);
+  color:var(--body); padding:5px 14px; border-radius:7px; white-space:nowrap;
+  font-size:14px; font-weight:700; font-variant-numeric:tabular-nums;}
+.months button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
+  color:var(--paper);}
+.months button .sub{display:block; font-size:10px; font-weight:400; opacity:.7;
+  font-family:var(--mono);}
 
 /* tabs */
 nav.tabs{position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
@@ -332,6 +377,8 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
   <div class="banner" id="banner" hidden></div>
 </header>
 
+<div class="months" id="months"></div>
+
 <nav class="tabs" role="tablist">
   <button role="tab" id="tab-today" aria-selected="true">今天</button>
   <button role="tab" id="tab-week" aria-selected="false">本週</button>
@@ -382,29 +429,70 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
   var CL = {}; D.clinics.forEach(function(c){ CL[c.code] = c; });
   var HEADS = {};
   D.doctors.forEach(function(d){ if(d.duty){ HEADS[d.name] = d.duty; } });
+  var LAST = D.days.length - 1;
 
-  var state = { view:"today", clinic:"all", day:0, doc:D.doctors[0].name };
+  var state = { view:"today", clinic:"all", mi:0, day:0, doc:D.doctors[0].name };
 
-  function pad(n){ return (n<10?"0":"") + n; }
-  function dstr(i){ return D.month + "/" + D.days[i].d; }
   function isOpen(c, i, s){ return CL[c].open[D.days[i].wd - 1][s] === 1; }
+  function monthOf(i){
+    for (var k = 0; k < D.months.length; k++) {
+      if (i >= D.months[k].from && i <= D.months[k].to) return k;
+    }
+    return 0;
+  }
+  function mLabel(m){
+    var multiYear = D.months[0].y !== D.months[D.months.length - 1].y;
+    return multiYear ? (m.y + "/" + m.m) : (m.m + " 月");
+  }
 
-  /* ---- 期間與今天 ---- */
-  document.getElementById("period").textContent = D.year + " 年 " + D.month + " 月";
+  /* ---- 今天在不在範圍內 ---- */
   document.getElementById("built").textContent = "更新 " + D.built;
   var now = new Date();
   var todayIdx = -1;
-  if (now.getFullYear() === D.year && (now.getMonth()+1) === D.month) {
-    todayIdx = now.getDate() - 1;
-    if (todayIdx >= D.ndays) todayIdx = -1;
+  for (var t = 0; t <= LAST; t++) {
+    var dd = D.days[t];
+    if (dd.y === now.getFullYear() && dd.m === now.getMonth() + 1 && dd.d === now.getDate()) {
+      todayIdx = t; break;
+    }
   }
-  state.day = todayIdx >= 0 ? todayIdx : 0;
-  if (todayIdx < 0) {
+  if (todayIdx >= 0) {
+    state.day = todayIdx;
+  } else {
+    // 今天不在涵蓋範圍 = 這份看板過期了(或還沒到)。這是要提醒的事,不是小字。
+    var first = D.months[0], last = D.months[D.months.length - 1];
     var b = document.getElementById("banner");
     b.hidden = false;
-    b.textContent = "這份看板是 " + D.year + " 年 " + D.month + " 月的班表。今天是 "
-      + (now.getMonth()+1) + "/" + now.getDate() + "，不在這個月份裡，所以從 "
-      + D.month + "/1 開始顯示。";
+    b.textContent = "這份看板涵蓋 " + first.y + " 年 " + first.m + " 月到 "
+      + last.y + " 年 " + last.m + " 月。今天是 " + (now.getMonth()+1) + "/" + now.getDate()
+      + "，不在範圍內 —— 可能需要重新產生。";
+    state.day = 0;
+  }
+  state.mi = monthOf(state.day);
+
+  /* ---- 月份切換 ---- */
+  var mBox = document.getElementById("months");
+  function mkMonths(){
+    mBox.innerHTML = "";
+    D.months.forEach(function(m, k){
+      var btn = document.createElement("button");
+      btn.textContent = mLabel(m);
+      btn.setAttribute("aria-pressed", state.mi === k ? "true" : "false");
+      if (todayIdx >= 0 && todayIdx >= m.from && todayIdx <= m.to) {
+        var s2 = document.createElement("span");
+        s2.className = "sub"; s2.textContent = "本月";
+        btn.appendChild(s2);
+      }
+      btn.addEventListener("click", function(){
+        state.mi = k;
+        // 切到含今天的月份就停在今天,否則停在該月 1 號
+        state.day = (todayIdx >= 0 && todayIdx >= m.from && todayIdx <= m.to)
+          ? todayIdx : m.from;
+        mkMonths(); render();
+      });
+      mBox.appendChild(btn);
+    });
+    var m = D.months[state.mi];
+    document.getElementById("period").textContent = m.y + " 年 " + m.m + " 月";
   }
 
   /* ---- 院所篩選 ---- */
@@ -413,19 +501,16 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     fil.innerHTML = "";
     var opts = [{code:"all", short:"全部"}].concat(D.clinics);
     opts.forEach(function(c){
-      var b = document.createElement("button");
-      b.textContent = c.short;
-      b.setAttribute("aria-pressed", state.clinic === c.code ? "true" : "false");
-      if (c.code !== "all") {
-        b.dataset.c = c.code;
-        if (state.clinic === c.code) {
-          b.style.background = "var(--c-" + c.code + ")";
-          b.style.color = "var(--i-" + c.code + ")";
-          b.style.borderColor = "var(--i-" + c.code + ")";
-        }
+      var b2 = document.createElement("button");
+      b2.textContent = c.short;
+      b2.setAttribute("aria-pressed", state.clinic === c.code ? "true" : "false");
+      if (c.code !== "all" && state.clinic === c.code) {
+        b2.style.background = "var(--c-" + c.code + ")";
+        b2.style.color = "var(--i-" + c.code + ")";
+        b2.style.borderColor = "var(--i-" + c.code + ")";
       }
-      b.addEventListener("click", function(){ state.clinic = c.code; mkFilter(); render(); });
-      fil.appendChild(b);
+      b2.addEventListener("click", function(){ state.clinic = c.code; mkFilter(); render(); });
+      fil.appendChild(b2);
     });
   }
   function shownClinics(){
@@ -438,7 +523,7 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     var lab = document.getElementById("dlabel");
     lab.innerHTML = "";
     var bb = document.createElement("b");
-    bb.textContent = D.month + " 月 " + dy.d + " 日";
+    bb.textContent = dy.m + " 月 " + dy.d + " 日";
     var sp = document.createElement("span");
     sp.textContent = "星期" + dy.w + (i === todayIdx ? "　· 今天" : "");
     lab.appendChild(bb); lab.appendChild(sp);
@@ -448,19 +533,19 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
       lab.appendChild(document.createElement("br")); lab.appendChild(h);
     }
     document.getElementById("prev").disabled = (i === 0);
-    document.getElementById("next").disabled = (i === D.ndays - 1);
+    document.getElementById("next").disabled = (i === LAST);
 
     var box = document.getElementById("todayCards");
     box.innerHTML = "";
     shownClinics().forEach(function(c){
       var card = document.createElement("div"); card.className = "card";
-      var h = document.createElement("div"); h.className = "card-h";
+      var h2 = document.createElement("div"); h2.className = "card-h";
       var dot = document.createElement("i"); dot.className = "dot";
       dot.style.background = "var(--c-" + c.code + ")";
       var nm = document.createElement("b"); nm.textContent = c.short;
       var tel = document.createElement("span"); tel.className = "tel"; tel.textContent = c.tel;
-      h.appendChild(dot); h.appendChild(nm); h.appendChild(tel);
-      card.appendChild(h);
+      h2.appendChild(dot); h2.appendChild(nm); h2.appendChild(tel);
+      card.appendChild(h2);
       for (var s = 0; s < 3; s++) {
         var row = document.createElement("div"); row.className = "sess";
         var l = document.createElement("div"); l.className = "lab";
@@ -479,10 +564,10 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
             who.innerHTML = '<span class="empty bad">沒有醫師　要調班</span>';
           } else {
             list.forEach(function(n){
-              var t = document.createElement("span");
-              t.className = "nm" + (HEADS[n] ? " head" : "");
-              t.textContent = n;
-              who.appendChild(t);
+              var tg = document.createElement("span");
+              tg.className = "nm" + (HEADS[n] ? " head" : "");
+              tg.textContent = n;
+              who.appendChild(tg);
             });
           }
         }
@@ -493,60 +578,6 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     });
   }
 
-  /* ---- 表格(本週 / 整月共用) ---- */
-  function gridTable(from, to){
-    var wrap = document.createElement("div"); wrap.className = "scroll";
-    var t = document.createElement("table");
-    var thead = document.createElement("thead");
-    var r1 = document.createElement("tr");
-    r1.appendChild(th("院所 / 診次", true));
-    for (var i = from; i <= to; i++) {
-      var h = th(D.days[i].d + " (" + D.days[i].w + ")");
-      h.colSpan = 3;
-      if (i === todayIdx) h.className = "today";
-      r1.appendChild(h);
-    }
-    thead.appendChild(r1);
-    var r2 = document.createElement("tr"); r2.className = "ssrow";
-    r2.appendChild(th(""));
-    for (var i2 = from; i2 <= to; i2++) {
-      for (var s = 0; s < 3; s++) r2.appendChild(th(D.sessions[s]));
-    }
-    thead.appendChild(r2);
-    t.appendChild(thead);
-
-    var tb = document.createElement("tbody");
-    shownClinics().forEach(function(c){
-      var tr = document.createElement("tr");
-      var rh = document.createElement("th"); rh.textContent = c.short;
-      rh.style.background = "var(--c-" + c.code + ")";
-      rh.style.color = "var(--i-" + c.code + ")";
-      tr.appendChild(rh);
-      for (var i3 = from; i3 <= to; i3++) {
-        for (var s2 = 0; s2 < 3; s2++) {
-          var td = document.createElement("td");
-          if (D.days[i3].hol) { td.className = "hol"; td.textContent = "假"; }
-          else if (!isOpen(c.code, i3, s2)) { td.className = "off"; td.textContent = "休"; }
-          else {
-            var list = D.grid[c.code][i3][s2];
-            if (!list.length) { td.className = "gap"; td.textContent = "—"; }
-            else {
-              var w = document.createElement("div"); w.className = "who";
-              list.forEach(function(n){
-                var sp = document.createElement("span"); sp.textContent = n; w.appendChild(sp);
-              });
-              td.appendChild(w);
-            }
-          }
-          tr.appendChild(td);
-        }
-      }
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb);
-    wrap.appendChild(t);
-    return wrap;
-  }
   function th(txt, left){
     var e = document.createElement("th");
     e.textContent = txt;
@@ -554,6 +585,7 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     return e;
   }
 
+  /* ---- 本週:一間院所一張卡、日期直排 ---- */
   function weekCard(c, from, to){
     var wrap = document.createElement("div"); wrap.className = "wk";
     var h = document.createElement("div"); h.className = "card-h";
@@ -573,7 +605,8 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     for (var i = from; i <= to; i++) {
       var tr = document.createElement("tr");
       var rh = document.createElement("th");
-      rh.textContent = D.days[i].d + " " + D.days[i].w;
+      // 跨月的那一週,日期要帶月份,不然 31 接 1 會看不懂
+      rh.textContent = (D.days[i].d === 1 ? D.days[i].m + "/1" : D.days[i].d) + " " + D.days[i].w;
       if (i === todayIdx) rh.className = "today";
       tr.appendChild(rh);
       for (var s2 = 0; s2 < 3; s2++) {
@@ -596,25 +629,77 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
   }
 
   function renderWeek(){
-    // 日期直排、診次橫排:七天一間院所剛好放得進手機,不必橫向滑
+    // 從選定日往前找到週一,往後六天——不受月份邊界限制
     var i = state.day;
     var from = Math.max(0, i - (D.days[i].wd - 1));
-    var to = Math.min(D.ndays - 1, from + 6);
+    var to = Math.min(LAST, from + 6);
     var box = document.getElementById("weekWrap");
     box.innerHTML = "";
     var cap = document.createElement("p");
     cap.className = "note"; cap.style.marginTop = "12px";
-    cap.textContent = D.month + "/" + D.days[from].d + " – " + D.month + "/" + D.days[to].d;
+    cap.textContent = D.days[from].m + "/" + D.days[from].d + " – "
+      + D.days[to].m + "/" + D.days[to].d;
     box.appendChild(cap);
     shownClinics().forEach(function(c){ box.appendChild(weekCard(c, from, to)); });
   }
+
+  /* ---- 整月:選定月份的大表 ---- */
   function renderMonth(){
+    var m = D.months[state.mi];
+    var wrap = document.createElement("div"); wrap.className = "scroll";
+    var t = document.createElement("table");
+    var thead = document.createElement("thead");
+    var r1 = document.createElement("tr");
+    r1.appendChild(th("院所 / 診次", true));
+    for (var i = m.from; i <= m.to; i++) {
+      var hh = th(D.days[i].d + " (" + D.days[i].w + ")");
+      hh.colSpan = 3;
+      if (i === todayIdx) hh.className = "today";
+      r1.appendChild(hh);
+    }
+    thead.appendChild(r1);
+    var r2 = document.createElement("tr"); r2.className = "ssrow";
+    r2.appendChild(th(""));
+    for (var i2 = m.from; i2 <= m.to; i2++) {
+      for (var s = 0; s < 3; s++) r2.appendChild(th(D.sessions[s]));
+    }
+    thead.appendChild(r2);
+    t.appendChild(thead);
+
+    var tb = document.createElement("tbody");
+    shownClinics().forEach(function(c){
+      var tr = document.createElement("tr");
+      var rh = document.createElement("th"); rh.textContent = c.short;
+      rh.style.background = "var(--c-" + c.code + ")";
+      rh.style.color = "var(--i-" + c.code + ")";
+      tr.appendChild(rh);
+      for (var i3 = m.from; i3 <= m.to; i3++) {
+        for (var s2 = 0; s2 < 3; s2++) {
+          var td = document.createElement("td");
+          if (D.days[i3].hol) { td.className = "hol"; td.textContent = "假"; }
+          else if (!isOpen(c.code, i3, s2)) { td.className = "off"; td.textContent = "休"; }
+          else {
+            var list = D.grid[c.code][i3][s2];
+            if (!list.length) { td.className = "gap"; td.textContent = "—"; }
+            else {
+              var w = document.createElement("div"); w.className = "who";
+              list.forEach(function(n){
+                var sp = document.createElement("span"); sp.textContent = n; w.appendChild(sp);
+              });
+              td.appendChild(w);
+            }
+          }
+          tr.appendChild(td);
+        }
+      }
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
     var box = document.getElementById("monthWrap");
-    box.innerHTML = "";
-    box.appendChild(gridTable(0, D.ndays - 1));
+    box.innerHTML = ""; box.appendChild(wrap);
   }
 
-  /* ---- 找醫師 ---- */
+  /* ---- 找醫師:選定月份 ---- */
   var sel = document.getElementById("docsel");
   D.doctors.forEach(function(d){
     var o = document.createElement("option");
@@ -624,62 +709,6 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
   });
   sel.addEventListener("change", function(){ state.doc = sel.value; renderDoc(); });
 
-  function renderDoc(){
-    var d = D.doctors.filter(function(x){ return x.name === state.doc; })[0];
-    var meta = document.getElementById("docmeta");
-    meta.innerHTML = "";
-    if (d.duty) meta.appendChild(tag(d.duty, true));
-    d.teams.forEach(function(tn){
-      var code = D.clinics.filter(function(c){ return c.short === tn; })[0].code;
-      meta.appendChild(tag(tn, false, code));
-    });
-    if (d.spec) {
-      var s = document.createElement("span"); s.className = "t"; s.textContent = d.spec;
-      meta.appendChild(s);
-    }
-
-    var m = D.docm[d.name], per = {}, total = 0, days = 0;
-    for (var i = 0; i < D.ndays; i++) {
-      var any = false;
-      for (var s2 = 0; s2 < 3; s2++) {
-        var v = m[i][s2];
-        if (CL[v]) { per[v] = (per[v] || 0) + 1; total++; any = true; }
-      }
-      if (any) days++;
-    }
-    var tal = document.getElementById("doctally");
-    tal.innerHTML = "";
-    tal.appendChild(tile("總診次", total));
-    tal.appendChild(tile("上班天數", days));
-    D.clinics.forEach(function(c){
-      if (per[c.code]) tal.appendChild(tile(c.short, per[c.code], c.code));
-    });
-
-    var box = document.getElementById("docdays");
-    box.innerHTML = "";
-    for (var i2 = 0; i2 < D.ndays; i2++) {
-      var row = [];
-      for (var s3 = 0; s3 < 3; s3++) if (CL[m[i2][s3]]) row.push([s3, m[i2][s3]]);
-      if (!row.length) continue;
-      var el = document.createElement("div"); el.className = "dd";
-      var dn = document.createElement("span"); dn.className = "dnum";
-      dn.textContent = D.days[i2].d + " (" + D.days[i2].w + ")";
-      var ss = document.createElement("div"); ss.className = "ss";
-      row.forEach(function(p){
-        var b = document.createElement("span");
-        b.className = "pillc";
-        b.style.background = "var(--c-" + p[1] + ")";
-        b.style.color = "var(--i-" + p[1] + ")";
-        b.textContent = D.sessions[p[0]] + "　" + CL[p[1]].short;
-        ss.appendChild(b);
-      });
-      el.appendChild(dn); el.appendChild(ss);
-      box.appendChild(el);
-    }
-    if (!box.children.length) {
-      box.innerHTML = '<p class="note">這個月沒有排診。</p>';
-    }
-  }
   function tag(txt, strong, code){
     var e = document.createElement("span");
     e.className = "pillc";
@@ -697,6 +726,64 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
     return e;
   }
 
+  function renderDoc(){
+    var d = D.doctors.filter(function(x){ return x.name === state.doc; })[0];
+    var m = D.months[state.mi];
+    var meta = document.getElementById("docmeta");
+    meta.innerHTML = "";
+    if (d.duty) meta.appendChild(tag(d.duty, true));
+    d.teams.forEach(function(tn){
+      var code = D.clinics.filter(function(c){ return c.short === tn; })[0].code;
+      meta.appendChild(tag(tn, false, code));
+    });
+    if (d.spec) {
+      var sspec = document.createElement("span"); sspec.className = "t"; sspec.textContent = d.spec;
+      meta.appendChild(sspec);
+    }
+
+    var mm = D.docm[d.name], per = {}, total = 0, days = 0;
+    for (var i = m.from; i <= m.to; i++) {
+      var any = false;
+      for (var s2 = 0; s2 < 3; s2++) {
+        var v = mm[i][s2];
+        if (CL[v]) { per[v] = (per[v] || 0) + 1; total++; any = true; }
+      }
+      if (any) days++;
+    }
+    var tal = document.getElementById("doctally");
+    tal.innerHTML = "";
+    tal.appendChild(tile(m.m + " 月診次", total));
+    tal.appendChild(tile("上班天數", days));
+    D.clinics.forEach(function(c){
+      if (per[c.code]) tal.appendChild(tile(c.short, per[c.code], c.code));
+    });
+
+    var box = document.getElementById("docdays");
+    box.innerHTML = "";
+    for (var i2 = m.from; i2 <= m.to; i2++) {
+      var row = [];
+      for (var s3 = 0; s3 < 3; s3++) if (CL[mm[i2][s3]]) row.push([s3, mm[i2][s3]]);
+      if (!row.length) continue;
+      var el = document.createElement("div"); el.className = "dd";
+      var dn = document.createElement("span"); dn.className = "dnum";
+      dn.textContent = D.days[i2].d + " (" + D.days[i2].w + ")";
+      var ss = document.createElement("div"); ss.className = "ss";
+      row.forEach(function(pr){
+        var b = document.createElement("span");
+        b.className = "pillc";
+        b.style.background = "var(--c-" + pr[1] + ")";
+        b.style.color = "var(--i-" + pr[1] + ")";
+        b.textContent = D.sessions[pr[0]] + "　" + CL[pr[1]].short;
+        ss.appendChild(b);
+      });
+      el.appendChild(dn); el.appendChild(ss);
+      box.appendChild(el);
+    }
+    if (!box.children.length) {
+      box.innerHTML = '<p class="note">這個月沒有排診。</p>';
+    }
+  }
+
   /* ---- 切換 ---- */
   var TABS = ["today","week","month","doc"];
   TABS.forEach(function(v){
@@ -704,12 +791,16 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
       state.view = v; render();
     });
   });
-  document.getElementById("prev").addEventListener("click", function(){
-    if (state.day > 0) { state.day--; render(); }
-  });
-  document.getElementById("next").addEventListener("click", function(){
-    if (state.day < D.ndays - 1) { state.day++; render(); }
-  });
+  function stepDay(delta){
+    var n = state.day + delta;
+    if (n < 0 || n > LAST) return;
+    state.day = n;
+    var k = monthOf(n);
+    if (k !== state.mi) { state.mi = k; mkMonths(); }   // 跨月時月份列跟著動
+    render();
+  }
+  document.getElementById("prev").addEventListener("click", function(){ stepDay(-1); });
+  document.getElementById("next").addEventListener("click", function(){ stepDay(1); });
 
   function render(){
     TABS.forEach(function(v){
@@ -733,9 +824,10 @@ footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line);
   } catch(e) {}
 
   document.getElementById("foot").textContent =
-    "資料來源:gemray.tw 五間院所門診表,經體系班表系統展開為本月。本看板唯讀,"
+    "資料來源:gemray.tw 五間院所門診表,經體系班表系統展開。本看板唯讀,"
     + "要調整班表請改 Excel 主檔後重新產生。國定假日為草稿,以人事行政總處公告為準。";
 
+  mkMonths();
   mkFilter();
   renderDoc();
   render();
@@ -770,12 +862,11 @@ with io.open(PREVIEW, "w", encoding="utf-8") as f:
     f.write(body)
 page = SHELL
 
-_docs_with_shift = sum(1 for d in DOCM.values()
-                       if any(v in GRID for row in d for v in row))
-_gaps = sum(1 for c in GRID for i in range(NDAYS) for s in range(3)
-            if not DAYS[i]["hol"] and OPENFLAG[c][DAYS[i]["wd"] - 1][s]
-            and not GRID[c][i][s])
+_gaps = sum(1 for c in GRID for i in range(N) for s_ in range(3)
+            if not DAYS[i]["hol"] and OPENFLAG[c][DAYS[i]["wd"] - 1][s_]
+            and not GRID[c][i][s_])
 print(f"saved: {OUT}  ({len(page)/1024:.0f} KB)")
 print(f"saved: {PREVIEW}")
-print(f"{YEAR}/{MONTH} · {NDAYS} 天 · 醫師 {len(DOCTORS)} 位(本月有排診 {_docs_with_shift} 位)")
-print(f"有開診但沒醫師的診次:{_gaps} 個")
+print(f"醫師 {len(DOCTORS)} 位 · 有開診但沒醫師的診次:{_gaps} 個")
+if _gaps:
+    print("   ↑ 這些診次會在看板上標紅,提醒要調班")

@@ -16,8 +16,7 @@ hits = [w for w in BANNED if w in page]
 print(f"一、頁面文字含敏感字眼:{len(hits)}" + (f"  {hits}" if hits else " ✓"))
 
 # 二、資料結構只能有這些鍵
-ALLOWED_TOP = {"year","month","ndays","built","sessions","week","clinics",
-               "doctors","days","grid","docm"}
+ALLOWED_TOP = {"built","sessions","months","clinics","doctors","days","grid","docm"}
 extra = set(D) - ALLOWED_TOP
 print(f"二、資料多出未預期的欄位:{len(extra)}" + (f"  {extra}" if extra else " ✓"))
 
@@ -46,5 +45,7 @@ STAFF = ["ivy", "文君", "小玲", "娜娜", "孟諭", "怡雯", "小華"]
 inpage = [n for n in STAFF if n in page]
 print(f"六、工時制人員出現在頁面:{len(inpage)}" + (f"  {inpage}" if inpage else " ✓"))
 
-print(f"\n頁面實際載的是:{len(D['doctors'])} 位醫師 × {D['ndays']} 天的班表,"
+_m = D["months"]
+print(f"\n頁面實際載的是:{len(D['doctors'])} 位醫師 × {len(D['days'])} 天"
+      f"({_m[0]['y']}/{_m[0]['m']}–{_m[-1]['y']}/{_m[-1]['m']})的班表,"
       f"外加院所電話地址。沒有任何一筆出勤或個資。")
