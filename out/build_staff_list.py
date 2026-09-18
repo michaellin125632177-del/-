@@ -11,15 +11,17 @@
 所以不重算公式的檢視器也看得到數字,Excel 開啟時仍會重算一次。
 """
 import importlib.util, sys, io, contextlib, re, shutil, zipfile, datetime as dt
+import pathlib as _pathlib
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-OUT = "/home/user/-/out/日三牙醫體系_員工名冊.xlsx"
+HERE = _pathlib.Path(__file__).resolve().parent
+OUT = str(HERE / "日三牙醫體系_員工名冊.xlsx")
 F = "微軟正黑體"
 
 # ---------------------------------------------------------------- 讀資料
-_spec = importlib.util.spec_from_file_location("br", "/home/user/-/out/build_roster.py")
+_spec = importlib.util.spec_from_file_location("br", str(HERE / "build_roster.py"))
 _br = importlib.util.module_from_spec(_spec)
 _argv, sys.argv = sys.argv, ["build_roster.py"]
 with contextlib.redirect_stdout(io.StringIO()):

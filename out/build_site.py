@@ -12,18 +12,24 @@ Excel 的醫師班表是公式驅動的——格子讀醫師週班表的標記(�
 所以這裡照著公式那條路走:wk_label 產生標記 → 依單雙週解析 → 得到院所。
 產生後再用 expand_month 獨立核對一次,兩套實作全數相符才寫檔。
 """
-import importlib.util, sys, io, json, contextlib, datetime as dt, html
+import importlib.util, sys, io, json, contextlib, pathlib, datetime as dt
 
-OUT     = "/home/user/-/out/班表看板.html"          # 對外託管用(完整文件)
-PREVIEW = "/home/user/-/out/班表看板_預覽.html"      # Artifact 預覽用(只有內容)
+# 一律以腳本自己所在的資料夾為準,不寫死絕對路徑——這支要在別人的電腦上跑。
+HERE    = pathlib.Path(__file__).resolve().parent
+# Cloudflare Pages 要的首頁檔名是 index.html。與其叫人手動改名(很容易忘),
+# 直接產生一個現成的資料夾,整個拖上去就好。
+UPDIR   = HERE / "上傳這個資料夾"
+OUT     = str(UPDIR / "index.html")              # 對外託管用(完整文件)
+PREVIEW = str(HERE / "班表看板_預覽.html")        # Artifact 預覽用(只有內容)
 
 # ---------------------------------------------------------------- 讀資料
-_spec = importlib.util.spec_from_file_location("br", "/home/user/-/out/build_roster.py")
+_spec = importlib.util.spec_from_file_location("br", str(HERE / "build_roster.py"))
 br = importlib.util.module_from_spec(_spec)
 _argv, sys.argv = sys.argv, ["build_roster.py"]
 with contextlib.redirect_stdout(io.StringIO()):
     _spec.loader.exec_module(br)
 sys.argv = _argv
+sys.path.insert(0, str(HERE))
 import weekly as wk
 
 YEAR, MONTH, NDAYS = br.YEAR, br.MONTH, br.DAYS_IN_MONTH
@@ -757,6 +763,7 @@ padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}
 </body>
 </html>
 """)
+UPDIR.mkdir(exist_ok=True)
 with io.open(OUT, "w", encoding="utf-8") as f:
     f.write(SHELL)
 with io.open(PREVIEW, "w", encoding="utf-8") as f:

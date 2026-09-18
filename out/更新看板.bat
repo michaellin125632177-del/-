@@ -47,11 +47,12 @@ python build_site.py                   || goto :fail
 
 echo.
 echo ===============================================
-echo   完成。要上傳的是這個檔案：
-echo   %cd%\班表看板.html
+echo   完成。要上傳的是這個資料夾：
+echo   %cd%\上傳這個資料夾
 echo.
 echo   下一步：到 Cloudflare Pages 的專案頁面，
-echo   用 Create deployment 把上面那個檔案拖進去。
+echo   用 Create deployment 把整個資料夾拖進去。
+echo   不用改檔名，裡面已經是 index.html 了。
 echo ===============================================
 echo.
 pause

@@ -43,11 +43,12 @@ python3 build_site.py                 || { echo; echo "看板產生失敗，請�
 
 echo
 echo "==============================================="
-echo "  完成。要上傳的是這個檔案："
-echo "  $(pwd)/班表看板.html"
+echo "  完成。要上傳的是這個資料夾："
+echo "  $(pwd)/上傳這個資料夾"
 echo
 echo "  下一步：到 Cloudflare Pages 的專案頁面，"
-echo "  用「Create deployment」把上面那個檔案拖進去。"
+echo "  用「Create deployment」把整個資料夾拖進去。"
+echo "  不用改檔名，裡面已經是 index.html 了。"
 echo "==============================================="
 echo
 read -r -p "按 Enter 關閉…" _

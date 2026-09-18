@@ -8,7 +8,8 @@
   醫護長與管理部走「工時制」——班表 + 打卡 + 逐日出勤紀錄。本表不含助理。
 """
 import datetime as dt
-import sys, os
+import sys
+import pathlib as _pathlib, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from weekly import (W as WEEKLY_RAW, SESSION_TIME, NOTES, SPEC as WEB_SPEC,
                     HOLIDAYS_2026)
@@ -24,8 +25,10 @@ F = "微軟正黑體"
 # 四頁互相牽連,只拔其中一頁會讓其餘變成 #REF!,所以要拔就是整組拔。
 WITH_ASSISTANT = "--no-assistant" not in sys.argv
 STAFF_SHEETS = ["醫護長與管理部班表", "打卡匯入", "出勤紀錄", "月結統計"]
-OUT = ("/home/user/-/out/日三牙醫體系_統一出勤表.xlsx" if WITH_ASSISTANT
-       else "/home/user/-/out/日三牙醫體系_統一出勤表_醫師版.xlsx")
+# 輸出放在腳本自己所在的資料夾,不寫死絕對路徑——這支要在別人的電腦上跑。
+HERE = _pathlib.Path(__file__).resolve().parent
+OUT = str(HERE / ("日三牙醫體系_統一出勤表.xlsx" if WITH_ASSISTANT
+                  else "日三牙醫體系_統一出勤表_醫師版.xlsx"))
 
 # 本期年月。換月不必改程式:
 #     GEMRAY_PERIOD=2026-11 python3 build_roster.py

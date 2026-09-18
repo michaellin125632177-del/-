@@ -185,7 +185,7 @@ footer{margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
         <ul>
           <li>左邊選單找 <b>Workers &amp; Pages</b> → <b>Create</b> → 選 <b>Pages</b> 這個分頁 → <b>Upload assets</b>(直接上傳,不要選連 Git)。</li>
           <li>專案名稱建議 <code>gemray-roster</code>。這會決定網址長什麼樣。</li>
-          <li>把 <code>班表看板.html</code> <b>改名成 <code>index.html</code></b> 再拖進去。改名是為了讓網址不用帶檔名。</li>
+          <li>把<b>「上傳這個資料夾」整個拖進去</b>。裡面已經是 <code>index.html</code>,不用改任何檔名。</li>
           <li>按 <b>Deploy</b>。大約十幾秒就會給你一個 <code>xxx.pages.dev</code> 的網址。</li>
         </ul>
         <p class="tip"><b>先自己用手機開開看。</b>這時候它還是公開的,任何拿到網址的人都看得到 —— 所以下一步別跳過。</p>
@@ -249,7 +249,7 @@ footer{margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
       <div class="d">
         <h3>按兩下「更新看板」</h3>
         <p>Mac 用 <code>更新看板.command</code>,Windows 用 <code>更新看板.bat</code>。會問要產生哪一個月,輸入像 <code>2026-11</code> 這樣的格式,按 Enter。</p>
-        <p>它會自動做三件事:產生該月的 Excel、產生醫師版、產生看板網頁。跑完會告訴你要上傳哪一個檔案。</p>
+        <p>它會自動做三件事:產生該月的 Excel、產生醫師版、產生看板網頁,並把要上傳的東西整理成一個<b>「上傳這個資料夾」</b>。跑完畫面會告訴你它在哪裡。</p>
         <p class="tip warn"><b>第一次執行會慢一點</b>,因為要裝一個叫 openpyxl 的套件,它會自己處理。如果畫面說找不到 Python,照畫面上的網址裝一次就好,以後都不用再裝。</p>
       </div>
     </div>
@@ -257,7 +257,7 @@ footer{margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
       <span class="n">3</span>
       <div class="d">
         <h3>把檔案拖上 Cloudflare</h3>
-        <p>到 Pages 專案頁面 → <b>Create deployment</b> → 把 <code>班表看板.html</code> 改名成 <code>index.html</code> 拖進去 → Deploy。</p>
+        <p>到 Pages 專案頁面 → <b>Create deployment</b> → 把<b>「上傳這個資料夾」整個拖進去</b> → Deploy。不用改檔名。</p>
         <p class="tip"><b>舊版本不會消失。</b>Cloudflare 會保留每一次的部署紀錄,傳錯了可以在畫面上把舊的那次設回正式版,不用重做。</p>
       </div>
     </div>
